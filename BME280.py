@@ -1,5 +1,7 @@
 import smbus
 
+##############データシートを見ながら読むように！！！！！！！！#################
+
 #補正用
 t_fine = 0.0
 
@@ -20,7 +22,7 @@ def init_bme280():
 #補正データ読み込み
 def read_compensate():
     #温度補正データ読み込み
-    dat_t = i2c.read_i2c_block_data(address, 0x88, 0x6) #0x88(calibデータレジスタ)から0x6つまり6バイト(1byteは8bit)読み出し,　行列形式(A, B, C, D)
+    dat_t = i2c.read_i2c_block_data(address, 0x88, 0x6) #0x88(calibデータレジスタ)から0x6つまり6バイト(1byteは8bit)読み出し,　行列形式(A, B, C, D, E, F)
 
     #digTは温度補正係数リストとして作成
     digT.append((dat_t[1] << 8) | dat_t[0])             #先ほどのdat_t行列の0番目と1番目の要素を合体, dat_t[1]に0を8個後ろから付け足し、dat_t[0]と足し合わせる
@@ -33,10 +35,10 @@ def read_compensate():
             digT[i] -= 65536
     
     #気圧補正データ読み込み
-    dat_p = i2c.read_i2c_block_data(address, 0x8E, 0x12)   #
+    dat_p = i2c.read_i2c_block_data(address, 0x8E, 0x12)   #0x8E(Pressure_calibデータレジスタ)から0x6つまり6バイト(1byteは8bit)読み出し,　行列形式(A, B, C, D)
     
-    digP.append((dat_p[1] << 8) | dat_p[0])
-    digP.append((dat_p[3] << 8) | dat_p[2])
+    digP.append((dat_p[1] << 8) | dat_p[0])                #同様
+    digP.append((dat_p[3] << 8) | dat_p[2])                 
     digP.append((dat_p[5] << 8) | dat_p[4])
     digP.append((dat_p[7] << 8) | dat_p[6])
     digP.append((dat_p[9] << 8) | dat_p[8])
@@ -45,16 +47,16 @@ def read_compensate():
     digP.append((dat_p[15] << 8) | dat_p[14])
     digP.append((dat_p[17] << 8) | dat_p[16])
     
-    #極性判断
+    #極性判断(さっきと同じ)
     for i in range(1, 8):
         if digP[i] >= 32768:
             digP[i] -= 65536
     
     #湿度補正データ読み込み
-    dh = i2c.read_byte_data(address, 0xA1)
+    dh = i2c.read_byte_data(address, 0xA1)                     #0xA1つまり温度補正係数8bit読み込み
     digH.append(dh)
-    dat_h = i2c.read_i2c_block_data(address, 0xE1, 0x08)
-    digH.append((dat_h[1] << 8) | dat_h[0])
+    dat_h = i2c.read_i2c_block_data(address, 0xE1, 0x08)       #0xE1(Humidity_calibデータレジスタ)から0x8つまり8バイト(1byteは8bit)読み出し,　行列形式(A, B, C, D, E, F, G, H)
+    digH.append((dat_h[1] << 8) | dat_h[0])                    #同様
     digH.append(dat_h[2])
     digH.append((dat_h[3] << 4) | (0x0F & dat_h[4]))
     digH.append((dat_h[5] << 4) | ((dat_h[4] >> 4) & 0x0F))
@@ -75,7 +77,7 @@ def read_compensate():
 def read_data():
     
     #データ読み込み
-    dat = i2c.read_i2c_block_data(address, 0xF7, 0x08)
+    dat = i2c.read_i2c_block_data(address, 0xF7, 0x08)          #0xF7から8byte分の読みだし、データシートP25参照、8byte分→press_msbからhum_lsbの8つ分なのですべてのデータの読み出しができる
     
     #データ変換
     dat_p = (dat[0] << 16 | dat[1] << 8 | dat[2]) >> 4
