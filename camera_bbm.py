@@ -13,7 +13,7 @@ picam2.start()
 time.sleep(2)  # カメラの準備が整うまで少し待つ
 
 # 保存先パス
-image_path = "/home/simulation/captured_image.jpg"
+image_path = "/home/pi/captured_image.jpg"
 
 # 撮影して保存
 picam2.capture_file(image_path)
