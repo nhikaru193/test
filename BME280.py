@@ -9,30 +9,31 @@ digH = []
 
 #I2C設定
 i2c = smbus.SMBus(1)
-address = 0x76
+address = 0x76                                        #5番端子をgndであるので、0x76
 
 #BME280の設定
 def init_bme280():
-    ret = i2c.write_byte_data(address, 0xF2, 0x01)    #ctrl_hum
-    ret = i2c.write_byte_data(address, 0xF4, 0x27)    #ctrl_meas
-    ret = i2c.write_byte_data(address, 0xF5, 0xA0)    #config
+    ret = i2c.write_byte_data(address, 0xF2, 0x01)    #ctrl_hum, オーバーサンプリング0x01(1)回
+    ret = i2c.write_byte_data(address, 0xF4, 0x27)    #ctrl_meas, 0x27は2進数で00100111, 001→温度1回測定, 001→気圧1回測定, 11→通常モード
+    ret = i2c.write_byte_data(address, 0xF5, 0xA0)    #config, 0xA0は二進数で10100000, 101→t_sb;スタンバイ時間1000 ms, 000→フィルターオフ, 00→spiインターフェイスオフ, データシート要参照
 
 #補正データ読み込み
 def read_compensate():
     #温度補正データ読み込み
-    dat_t = i2c.read_i2c_block_data(address, 0x88, 0x6)
+    dat_t = i2c.read_i2c_block_data(address, 0x88, 0x6) #0x88(calibデータレジスタ)から0x6つまり6バイト(1byteは8bit)読み出し,　行列形式(A, B, C, D)
+
+    #digTは温度補正係数リストとして作成
+    digT.append((dat_t[1] << 8) | dat_t[0])             #先ほどのdat_t行列の0番目と1番目の要素を合体, dat_t[1]に0を8個後ろから付け足し、dat_t[0]と足し合わせる
+    digT.append((dat_t[3] << 8) | dat_t[2])             #同様
+    digT.append((dat_t[5] << 8) | dat_t[4])             #同様
     
-    digT.append((dat_t[1] << 8) | dat_t[0])
-    digT.append((dat_t[3] << 8) | dat_t[2])
-    digT.append((dat_t[5] << 8) | dat_t[4])
-    
-    #極性判断
-    for i in range(1, 2):
+    #極性判断(2の15乗;15bitが絶対値部分, のこりの1bitで符号判定;0→-、1→＋)
+    for i in range(1, 2):                               
         if digT[i] >= 32768:
             digT[i] -= 65536
     
     #気圧補正データ読み込み
-    dat_p = i2c.read_i2c_block_data(address, 0x8E, 0x12)
+    dat_p = i2c.read_i2c_block_data(address, 0x8E, 0x12)   #
     
     digP.append((dat_p[1] << 8) | dat_p[0])
     digP.append((dat_p[3] << 8) | dat_p[2])
