@@ -112,7 +112,8 @@ for bc in black_contours:
     if area < min_black_area:
         continue
     valid_black_regions.append(bc)
- 
+
+height, widts = img.shape[:2]
 # 3分割の幅設定
 grid_cols = 3
 block_w = width // grid_cols
