@@ -41,7 +41,7 @@ def classify_shape(contour):
     return shape, approx
 
 # ----- 撮影 -----
-camera = PiCamera()
+camera = PiCamera2()
 camera.resolution = (640, 480)
 camera.start_preview()
 sleep(2)
