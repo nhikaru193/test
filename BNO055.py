@@ -8,11 +8,11 @@ class BNO055:
 	BNO055_ID 		 			= 0xA0        #chipIDであり、BNO055に固有の値
 
 	# Power mode settings
-	POWER_MODE_NORMAL   				= 0X00        #標準稼働状態normal:0x00をPOWER
-	POWER_MODE_LOWPOWER 				= 0X01
-	POWER_MODE_SUSPEND  				= 0X02
+	POWER_MODE_NORMAL   				= 0X00        #標準稼働状態normal:0x00をPOWER_MODE_NORMALに割り当てる、注意！！データシートのp55において、大量に書いてある0x00は電源リセット時などにおける初期値であり、pms, omsの意味合いはないということに注意
+	POWER_MODE_LOWPOWER 				= 0X01        #低電力稼働状態normal:0x01をPOWER_MODE_LOWPOWERに割り当てる
+	POWER_MODE_SUSPEND  				= 0X02        #稼働停止状態normal:0x02をPOWER_MODE_SUSPENDに割り当てる
 
-	# Operation mode settings
+	# Operation mode settings(# Power mode settingsとは別のレジスタが使われるため、数字の重複が可能である。例えば、0x00はpmsでは標準稼働状態であり、omsではconfigモード)
 	OPERATION_MODE_CONFIG 				= 0X00        #configモード、有効にすると出力データはすべて0になる→書き込み可能なレジスタマップのすべてのエントリを変更できる(センサのオフセット値(無入力状態での実際値とのずれ)などの変更が可能)
 	OPERATION_MODE_ACCONLY 				= 0X01        #加速度のみ有効化
 	OPERATION_MODE_MAGONLY 				= 0X02        #地磁気のみ有効化
@@ -28,7 +28,7 @@ class BNO055:
 	OPERATION_MODE_NDOF 				= 0X0C        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正あり
 
 	# Output vector type
-	VECTOR_ACCELEROMETER 				= 0x08
+	VECTOR_ACCELEROMETER 				= 0x08        #
 	VECTOR_MAGNETOMETER  				= 0x0E
 	VECTOR_GYROSCOPE     				= 0x14
 	VECTOR_EULER         				= 0x1A
