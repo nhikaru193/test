@@ -38,81 +38,82 @@ class BNO055:
 	# REGISTER DEFINITION START(BNO055にはページレジスタという概念がある。簡単に言うと0x00;データ取得のレジスタ群が存在するページ0, 0x01;設定・チューニング用のレジスタ群が存在するページ1)
 	BNO055_PAGE_ID_ADDR 				= 0X07        #ページIDレジスタに対応。ページ1を使いたいときにはbus.write_byte_data(BNO055_ADDRESS, BNO055_PAGE_ID_ADDR, 0x01)と入力する
 
+	#識別子の割り当て(おもにデバッグや確認として使われる)
 	BNO055_CHIP_ID_ADDR 				= 0x00        #chip id 機器に固有の番号
-	BNO055_ACCEL_REV_ID_ADDR 			= 0x01
-	BNO055_MAG_REV_ID_ADDR 				= 0x02
-	BNO055_GYRO_REV_ID_ADDR 			= 0x03
-	BNO055_SW_REV_ID_LSB_ADDR 			= 0x04
-	BNO055_SW_REV_ID_MSB_ADDR 			= 0x05
-	BNO055_BL_REV_ID_ADDR 				= 0X06
+	BNO055_ACCEL_REV_ID_ADDR 			= 0x01        #加速度センサの識別子(chip id)
+	BNO055_MAG_REV_ID_ADDR 				= 0x02        #地磁気センサの識別子(chip id) 
+	BNO055_GYRO_REV_ID_ADDR 			= 0x03        #ジャイロセンサの識別子(chip id)
+	BNO055_SW_REV_ID_LSB_ADDR 			= 0x04        #ソフトウェアの識別子下位バイト(chip id)    主にソフトウェアのバージョンを示し、更新が必要かどうかの確認になる
+	BNO055_SW_REV_ID_MSB_ADDR 			= 0x05        #ソフトウェアの識別子上位バイト(chip id)　　上と同じ
+	BNO055_BL_REV_ID_ADDR 				= 0X06        #加速度センサの識別子(chip id)
 
-	# Accel data register 
-	BNO055_ACCEL_DATA_X_LSB_ADDR 			= 0X08
-	BNO055_ACCEL_DATA_X_MSB_ADDR 			= 0X09
-	BNO055_ACCEL_DATA_Y_LSB_ADDR 			= 0X0A
-	BNO055_ACCEL_DATA_Y_MSB_ADDR 			= 0X0B
-	BNO055_ACCEL_DATA_Z_LSB_ADDR 			= 0X0C
-	BNO055_ACCEL_DATA_Z_MSB_ADDR 			= 0X0D
+	# Accel data register (加速度データ定義)
+	BNO055_ACCEL_DATA_X_LSB_ADDR 			= 0X08        #x軸加速度データ下位8bit(1byte)   ovtの1行目と同じ値であるが、用途が違う。先ほどのVECTOR_ACCCEROMETERではx, y, z軸の加速度データの先頭に位置することを利用し、read_vector(VECTOR_ACCELEROMETER)というような関数が6byteで読むように定義されていれば、加速度データを一気に読み取れる
+	BNO055_ACCEL_DATA_X_MSB_ADDR 			= 0X09        #x軸加速度データ上位8bit(1byte)
+	BNO055_ACCEL_DATA_Y_LSB_ADDR 			= 0X0A        #y軸加速度データ下位8bit(1byte)
+	BNO055_ACCEL_DATA_Y_MSB_ADDR 			= 0X0B        #y軸加速度データ上位8bit(1byte)
+	BNO055_ACCEL_DATA_Z_LSB_ADDR 			= 0X0C        #z軸加速度データ下位8bit(1byte)
+	BNO055_ACCEL_DATA_Z_MSB_ADDR 			= 0X0D        #z軸加速度データ上位8bit(1byte)
 
-	# Mag data register 
-	BNO055_MAG_DATA_X_LSB_ADDR 			= 0X0E
-	BNO055_MAG_DATA_X_MSB_ADDR 			= 0X0F
-	BNO055_MAG_DATA_Y_LSB_ADDR 			= 0X10
-	BNO055_MAG_DATA_Y_MSB_ADDR 			= 0X11
-	BNO055_MAG_DATA_Z_LSB_ADDR 			= 0X12
-	BNO055_MAG_DATA_Z_MSB_ADDR			= 0X13
+	# Mag data register（地磁気データ定義）
+	BNO055_MAG_DATA_X_LSB_ADDR 			= 0X0E        #x軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_X_MSB_ADDR 			= 0X0F        #x軸加速度データ上位8bit(1byte)
+	BNO055_MAG_DATA_Y_LSB_ADDR 			= 0X10        #y軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_Y_MSB_ADDR 			= 0X11        #y軸地磁気データ上位8bit(1byte)
+	BNO055_MAG_DATA_Z_LSB_ADDR 			= 0X12        #z軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_Z_MSB_ADDR			= 0X13        #z軸地磁気データ上位8bit(1byte)
 
-	# Gyro data registers 
-	BNO055_GYRO_DATA_X_LSB_ADDR 			= 0X14
-	BNO055_GYRO_DATA_X_MSB_ADDR 			= 0X15
-	BNO055_GYRO_DATA_Y_LSB_ADDR 			= 0X16
-	BNO055_GYRO_DATA_Y_MSB_ADDR 			= 0X17
-	BNO055_GYRO_DATA_Z_LSB_ADDR 			= 0X18
-	BNO055_GYRO_DATA_Z_MSB_ADDR 			= 0X19
+	# Gyro data registers (ジャイロデータ定義)
+	BNO055_GYRO_DATA_X_LSB_ADDR 			= 0X14        #同様
+	BNO055_GYRO_DATA_X_MSB_ADDR 			= 0X15        #同様
+	BNO055_GYRO_DATA_Y_LSB_ADDR 			= 0X16        #同様
+	BNO055_GYRO_DATA_Y_MSB_ADDR 			= 0X17        #同様
+	BNO055_GYRO_DATA_Z_LSB_ADDR 			= 0X18        #同様
+	BNO055_GYRO_DATA_Z_MSB_ADDR 			= 0X19        #同様
 	
-	# Euler data registers 
-	BNO055_EULER_H_LSB_ADDR 			= 0X1A
-	BNO055_EULER_H_MSB_ADDR 			= 0X1B
-	BNO055_EULER_R_LSB_ADDR 			= 0X1C
-	BNO055_EULER_R_MSB_ADDR 			= 0X1D
-	BNO055_EULER_P_LSB_ADDR 			= 0X1E
-	BNO055_EULER_P_MSB_ADDR 			= 0X1F
+	# Euler data registers (方位データ定義)
+	BNO055_EULER_H_LSB_ADDR 			= 0X1A        #同様
+	BNO055_EULER_H_MSB_ADDR 			= 0X1B        #同様
+	BNO055_EULER_R_LSB_ADDR 			= 0X1C        #同様
+	BNO055_EULER_R_MSB_ADDR 			= 0X1D        #同様
+	BNO055_EULER_P_LSB_ADDR 			= 0X1E        #同様
+	BNO055_EULER_P_MSB_ADDR 			= 0X1F        #同様
 
-	# Quaternion data registers 
-	BNO055_QUATERNION_DATA_W_LSB_ADDR 		= 0X20
-	BNO055_QUATERNION_DATA_W_MSB_ADDR 		= 0X21
-	BNO055_QUATERNION_DATA_X_LSB_ADDR 		= 0X22
-	BNO055_QUATERNION_DATA_X_MSB_ADDR 		= 0X23
-	BNO055_QUATERNION_DATA_Y_LSB_ADDR 		= 0X24
-	BNO055_QUATERNION_DATA_Y_MSB_ADDR 		= 0X25
-	BNO055_QUATERNION_DATA_Z_LSB_ADDR 		= 0X26
-	BNO055_QUATERNION_DATA_Z_MSB_ADDR 		= 0X27
+	# Quaternion data registers (姿勢に関するデータ定義)
+	BNO055_QUATERNION_DATA_W_LSB_ADDR 		= 0X20        #同様(この関数は(w, x, y, z)で表すためほかのものより定義2行長めです)
+	BNO055_QUATERNION_DATA_W_MSB_ADDR 		= 0X21        #同様
+	BNO055_QUATERNION_DATA_X_LSB_ADDR 		= 0X22        #同様
+	BNO055_QUATERNION_DATA_X_MSB_ADDR 		= 0X23        #同様
+	BNO055_QUATERNION_DATA_Y_LSB_ADDR 		= 0X24        #同様
+	BNO055_QUATERNION_DATA_Y_MSB_ADDR 		= 0X25        #同様
+	BNO055_QUATERNION_DATA_Z_LSB_ADDR 		= 0X26        #同様
+	BNO055_QUATERNION_DATA_Z_MSB_ADDR 		= 0X27        #同様
 
-	# Linear acceleration data registers 
-	BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR 		= 0X28
-	BNO055_LINEAR_ACCEL_DATA_X_MSB_ADDR 		= 0X29
-	BNO055_LINEAR_ACCEL_DATA_Y_LSB_ADDR	 	= 0X2A
-	BNO055_LINEAR_ACCEL_DATA_Y_MSB_ADDR		= 0X2B
-	BNO055_LINEAR_ACCEL_DATA_Z_LSB_ADDR		= 0X2C
-	BNO055_LINEAR_ACCEL_DATA_Z_MSB_ADDR		= 0X2D
+	# Linear acceleration data registers (線形加速度データ定義)
+	BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR 		= 0X28        #同様
+	BNO055_LINEAR_ACCEL_DATA_X_MSB_ADDR 		= 0X29        #同様
+	BNO055_LINEAR_ACCEL_DATA_Y_LSB_ADDR	 	= 0X2A        #同様
+	BNO055_LINEAR_ACCEL_DATA_Y_MSB_ADDR		= 0X2B        #同様
+	BNO055_LINEAR_ACCEL_DATA_Z_LSB_ADDR		= 0X2C        #同様
+	BNO055_LINEAR_ACCEL_DATA_Z_MSB_ADDR		= 0X2D        #同様
 
-	# Gravity data registers 
-	BNO055_GRAVITY_DATA_X_LSB_ADDR 			= 0X2E
-	BNO055_GRAVITY_DATA_X_MSB_ADDR	 		= 0X2F
-	BNO055_GRAVITY_DATA_Y_LSB_ADDR 			= 0X30
-	BNO055_GRAVITY_DATA_Y_MSB_ADDR 			= 0X31
-	BNO055_GRAVITY_DATA_Z_LSB_ADDR 			= 0X32
-	BNO055_GRAVITY_DATA_Z_MSB_ADDR 			= 0X33
+	# Gravity data registers (重力加速度データ定義)
+	BNO055_GRAVITY_DATA_X_LSB_ADDR 			= 0X2E        #同様
+	BNO055_GRAVITY_DATA_X_MSB_ADDR	 		= 0X2F        #同様
+	BNO055_GRAVITY_DATA_Y_LSB_ADDR 			= 0X30        #同様
+	BNO055_GRAVITY_DATA_Y_MSB_ADDR 			= 0X31        #同様
+	BNO055_GRAVITY_DATA_Z_LSB_ADDR 			= 0X32        #同様
+	BNO055_GRAVITY_DATA_Z_MSB_ADDR 			= 0X33        #同様
 
-	# Temperature data register 
-	BNO055_TEMP_ADDR 				= 0X34
+	# Temperature data register (温度データ定義)
+	BNO055_TEMP_ADDR 				= 0X34        #同様
 
 	# Status registers 
-	BNO055_CALIB_STAT_ADDR 				= 0X35
-	BNO055_SELFTEST_RESULT_ADDR	 		= 0X36
-	BNO055_INTR_STAT_ADDR 				= 0X37
+	BNO055_CALIB_STAT_ADDR 				= 0X35        #このバイトは2bitの塊ごとに計四つのステータスが格納されている。0x35;(システムcalib状態, ジャイロcalib状態, 加速度calib状態, 地磁気calib状態)　00;未キャリブレーション, 11;完全キャリブレーション
+	BNO055_SELFTEST_RESULT_ADDR	 		= 0X36        #self-test用の関数。機器を呼び出すイメージ。このbyteの構成は(予約済み4bit, マイコン1bit, ジャイロ1bit, 地磁気1bit , 加速度1bit)であり、0;失敗、1;成功
+	BNO055_INTR_STAT_ADDR 				= 0X37        #interrupt（割り込み）検知　構成は(加速度no motion 1bit, 加速度any motion 1bit, 加速度high-g 1bit, ジャイロdata ready 1bit, ジャイロhigh rate 1bit, ジャイロany motion 1bit, 地磁気data ready 1bit, 加速度/bsx 1bit)　(1(7),)で長時間動きがない
 
-	BNO055_SYS_CLK_STAT_ADDR 			= 0X38
+	BNO055_SYS_CLK_STAT_ADDR 			= 0X38        #クロック（時計）が設定されているか　構成は(予約済み7bit, 時計状態1bit) 0;設定可能　1;設定不可(内部or外部機器により設定済み)
 	BNO055_SYS_STAT_ADDR 				= 0X39
 	BNO055_SYS_ERR_ADDR 				= 0X3A
 
