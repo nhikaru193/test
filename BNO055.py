@@ -27,18 +27,18 @@ class BNO055:
 	OPERATION_MODE_NDOF_FMC_OFF 			= 0X0B        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正なし
 	OPERATION_MODE_NDOF 				= 0X0C        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正あり
 
-	# Output vector type
-	VECTOR_ACCELEROMETER 				= 0x08        #
-	VECTOR_MAGNETOMETER  				= 0x0E
-	VECTOR_GYROSCOPE     				= 0x14
-	VECTOR_EULER         				= 0x1A
-	VECTOR_LINEARACCEL   				= 0x28
-	VECTOR_GRAVITY       				= 0x2E
+	# Output vector type(データシートp60以降参考、測定を開始すると、以下に示したbyteにデータが格納されると考えてよい)
+	VECTOR_ACCELEROMETER 				= 0x08        #x軸加速度データ下位8bit(1byte),(重力含む)
+	VECTOR_MAGNETOMETER  				= 0x0E        #x軸地磁気データ下位8bit(1byte)
+	VECTOR_GYROSCOPE     				= 0x14        #x軸ジャイロデータ下位8bit(1byte)
+	VECTOR_EULER         				= 0x1A        #方位データ下位8bit(1byte)
+	VECTOR_LINEARACCEL   				= 0x28        #x軸線形加速度データ下位8bit(1byte), 重力を含まない純粋な動きの加速度
+	VECTOR_GRAVITY       				= 0x2E        #x軸重力データ下位8bit(1byte),(センサにとっての軸であるため、z軸だけに重力が働くとは考えられない）
 
-	# REGISTER DEFINITION START
-	BNO055_PAGE_ID_ADDR 				= 0X07
+	# REGISTER DEFINITION START(BNO055にはページレジスタという概念がある。簡単に言うと0x00;データ取得のレジスタ群が存在するページ0, 0x01;設定・チューニング用のレジスタ群が存在するページ1)
+	BNO055_PAGE_ID_ADDR 				= 0X07        #ページIDレジスタに対応。ページ1を使いたいときにはbus.write_byte_data(BNO055_ADDRESS, BNO055_PAGE_ID_ADDR, 0x01)と入力する
 
-	BNO055_CHIP_ID_ADDR 				= 0x00
+	BNO055_CHIP_ID_ADDR 				= 0x00        #chip id 機器に固有の番号
 	BNO055_ACCEL_REV_ID_ADDR 			= 0x01
 	BNO055_MAG_REV_ID_ADDR 				= 0x02
 	BNO055_GYRO_REV_ID_ADDR 			= 0x03
