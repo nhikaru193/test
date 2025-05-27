@@ -3,29 +3,29 @@ import time
 import struct
 
 class BNO055:
-	BNO055_ADDRESS_A 				= 0x28
-	BNO055_ADDRESS_B 				= 0x29
-	BNO055_ID 		 			= 0xA0
+	BNO055_ADDRESS_A 				= 0x28        #代替i2cアドレス
+	BNO055_ADDRESS_B 				= 0x29        #デフォルトi2cアドレス, 先のアドレスも含め二つのアドレスがあることでハードウェア的な余裕がある(2つのハードを接続できる？)
+	BNO055_ID 		 			= 0xA0        #chipIDであり、BNO055に固有の値
 
 	# Power mode settings
-	POWER_MODE_NORMAL   				= 0X00
+	POWER_MODE_NORMAL   				= 0X00        #標準稼働状態normal:0x00をPOWER
 	POWER_MODE_LOWPOWER 				= 0X01
 	POWER_MODE_SUSPEND  				= 0X02
 
 	# Operation mode settings
-	OPERATION_MODE_CONFIG 				= 0X00
-	OPERATION_MODE_ACCONLY 				= 0X01
-	OPERATION_MODE_MAGONLY 				= 0X02
-	OPERATION_MODE_GYRONLY 				= 0X03
-	OPERATION_MODE_ACCMAG 				= 0X04
-	OPERATION_MODE_ACCGYRO 				= 0X05
-	OPERATION_MODE_MAGGYRO 				= 0X06
-	OPERATION_MODE_AMG 				= 0X07
-	OPERATION_MODE_IMUPLUS 				= 0X08
-	OPERATION_MODE_COMPASS 				= 0X09
-	OPERATION_MODE_M4G 				= 0X0A
-	OPERATION_MODE_NDOF_FMC_OFF 			= 0X0B
-	OPERATION_MODE_NDOF 				= 0X0C
+	OPERATION_MODE_CONFIG 				= 0X00        #configモード、有効にすると出力データはすべて0になる→書き込み可能なレジスタマップのすべてのエントリを変更できる(センサのオフセット値(無入力状態での実際値とのずれ)などの変更が可能)
+	OPERATION_MODE_ACCONLY 				= 0X01        #加速度のみ有効化
+	OPERATION_MODE_MAGONLY 				= 0X02        #地磁気のみ有効化
+	OPERATION_MODE_GYRONLY 				= 0X03        #ジャイロのみ有効化
+	OPERATION_MODE_ACCMAG 				= 0X04        #加速度・地磁気を有効化
+	OPERATION_MODE_ACCGYRO 				= 0X05        #加速度・ジャイロを有効化
+	OPERATION_MODE_MAGGYRO 				= 0X06        #地磁気・ジャイロを有効化
+	OPERATION_MODE_AMG 				= 0X07        #加速度・地磁気・ジャイロを有効化
+	OPERATION_MODE_IMUPLUS 				= 0X08        #加速度・ジャイロの組み合わせ
+	OPERATION_MODE_COMPASS 				= 0X09        #地磁気による方位の測定
+	OPERATION_MODE_M4G 				= 0X0A        #回転の検出にジャイロでなく、地磁気を使用
+	OPERATION_MODE_NDOF_FMC_OFF 			= 0X0B        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正なし
+	OPERATION_MODE_NDOF 				= 0X0C        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正あり
 
 	# Output vector type
 	VECTOR_ACCELEROMETER 				= 0x08
