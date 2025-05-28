@@ -155,6 +155,6 @@ init_bme280()
 read_compensate()
 
 #測定データ読み込み 
- while True:
+while True:
         read_data()
         time.sleep(0.01)  # 0.01秒待機
