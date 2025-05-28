@@ -1,0 +1,295 @@
+import smbus
+import time
+import struct
+
+class BNO055:
+	BNO055_ADDRESS_A 				= 0x28        #代替i2cアドレス
+	BNO055_ADDRESS_B 				= 0x29        #デフォルトi2cアドレス, 先のアドレスも含め二つのアドレスがあることでハードウェア的な余裕がある(2つのハードを接続できる？)
+	BNO055_ID 		 			= 0xA0        #chipIDであり、BNO055に固有の値
+
+	# Power mode settings
+	POWER_MODE_NORMAL   				= 0X00        #標準稼働状態normal:0x00をPOWER_MODE_NORMALに割り当てる、注意！！データシートのp55において、大量に書いてある0x00は電源リセット時などにおける初期値であり、pms, omsの意味合いはないということに注意
+	POWER_MODE_LOWPOWER 				= 0X01        #低電力稼働状態normal:0x01をPOWER_MODE_LOWPOWERに割り当てる
+	POWER_MODE_SUSPEND  				= 0X02        #稼働停止状態normal:0x02をPOWER_MODE_SUSPENDに割り当てる
+
+	# Operation mode settings(# Power mode settingsとは別のレジスタが使われるため、数字の重複が可能である。例えば、0x00はpmsでは標準稼働状態であり、omsではconfigモード)
+	OPERATION_MODE_CONFIG 				= 0X00        #configモード、有効にすると出力データはすべて0になる→書き込み可能なレジスタマップのすべてのエントリを変更できる(センサのオフセット値(無入力状態での実際値とのずれ)などの変更が可能)
+	OPERATION_MODE_ACCONLY 				= 0X01        #加速度のみ有効化
+	OPERATION_MODE_MAGONLY 				= 0X02        #地磁気のみ有効化
+	OPERATION_MODE_GYRONLY 				= 0X03        #ジャイロのみ有効化
+	OPERATION_MODE_ACCMAG 				= 0X04        #加速度・地磁気を有効化
+	OPERATION_MODE_ACCGYRO 				= 0X05        #加速度・ジャイロを有効化
+	OPERATION_MODE_MAGGYRO 				= 0X06        #地磁気・ジャイロを有効化
+	OPERATION_MODE_AMG 				= 0X07        #加速度・地磁気・ジャイロを有効化
+	OPERATION_MODE_IMUPLUS 				= 0X08        #加速度・ジャイロの組み合わせ
+	OPERATION_MODE_COMPASS 				= 0X09        #地磁気による方位の測定
+	OPERATION_MODE_M4G 				= 0X0A        #回転の検出にジャイロでなく、地磁気を使用
+	OPERATION_MODE_NDOF_FMC_OFF 			= 0X0B        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正なし
+	OPERATION_MODE_NDOF 				= 0X0C        #加速度・地磁気・ジャイロの組み合わせ、地磁気の校正あり
+
+	# Output vector type(データシートp60以降参考、測定を開始すると、以下に示したbyteにデータが格納されると考えてよい)
+	VECTOR_ACCELEROMETER 				= 0x08        #x軸加速度データ下位8bit(1byte),(重力含む)
+	VECTOR_MAGNETOMETER  				= 0x0E        #x軸地磁気データ下位8bit(1byte)
+	VECTOR_GYROSCOPE     				= 0x14        #x軸ジャイロデータ下位8bit(1byte)
+	VECTOR_EULER         				= 0x1A        #方位データ下位8bit(1byte)
+	VECTOR_LINEARACCEL   				= 0x28        #x軸線形加速度データ下位8bit(1byte), 重力を含まない純粋な動きの加速度
+	VECTOR_GRAVITY       				= 0x2E        #x軸重力データ下位8bit(1byte),(センサにとっての軸であるため、z軸だけに重力が働くとは考えられない）
+
+	# REGISTER DEFINITION START(BNO055にはページレジスタという概念がある。簡単に言うと0x00;データ取得のレジスタ群が存在するページ0, 0x01;設定・チューニング用のレジスタ群が存在するページ1)
+	BNO055_PAGE_ID_ADDR 				= 0X07        #ページIDレジスタに対応。ページ1を使いたいときにはbus.write_byte_data(BNO055_ADDRESS, BNO055_PAGE_ID_ADDR, 0x01)と入力する
+
+	#識別子の割り当て(おもにデバッグや確認として使われる)
+	BNO055_CHIP_ID_ADDR 				= 0x00        #chip id 機器に固有の番号
+	BNO055_ACCEL_REV_ID_ADDR 			= 0x01        #加速度センサの識別子(chip id)
+	BNO055_MAG_REV_ID_ADDR 				= 0x02        #地磁気センサの識別子(chip id) 
+	BNO055_GYRO_REV_ID_ADDR 			= 0x03        #ジャイロセンサの識別子(chip id)
+	BNO055_SW_REV_ID_LSB_ADDR 			= 0x04        #ソフトウェアの識別子下位バイト(chip id)    主にソフトウェアのバージョンを示し、更新が必要かどうかの確認になる
+	BNO055_SW_REV_ID_MSB_ADDR 			= 0x05        #ソフトウェアの識別子上位バイト(chip id)　　上と同じ
+	BNO055_BL_REV_ID_ADDR 				= 0X06        #加速度センサの識別子(chip id)
+
+	# Accel data register (加速度データ定義)
+	BNO055_ACCEL_DATA_X_LSB_ADDR 			= 0X08        #x軸加速度データ下位8bit(1byte)   ovtの1行目と同じ値であるが、用途が違う。先ほどのVECTOR_ACCCEROMETERではx, y, z軸の加速度データの先頭に位置することを利用し、read_vector(VECTOR_ACCELEROMETER)というような関数が6byteで読むように定義されていれば、加速度データを一気に読み取れる
+	BNO055_ACCEL_DATA_X_MSB_ADDR 			= 0X09        #x軸加速度データ上位8bit(1byte)
+	BNO055_ACCEL_DATA_Y_LSB_ADDR 			= 0X0A        #y軸加速度データ下位8bit(1byte)
+	BNO055_ACCEL_DATA_Y_MSB_ADDR 			= 0X0B        #y軸加速度データ上位8bit(1byte)
+	BNO055_ACCEL_DATA_Z_LSB_ADDR 			= 0X0C        #z軸加速度データ下位8bit(1byte)
+	BNO055_ACCEL_DATA_Z_MSB_ADDR 			= 0X0D        #z軸加速度データ上位8bit(1byte)
+
+	# Mag data register（地磁気データ定義）
+	BNO055_MAG_DATA_X_LSB_ADDR 			= 0X0E        #x軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_X_MSB_ADDR 			= 0X0F        #x軸加速度データ上位8bit(1byte)
+	BNO055_MAG_DATA_Y_LSB_ADDR 			= 0X10        #y軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_Y_MSB_ADDR 			= 0X11        #y軸地磁気データ上位8bit(1byte)
+	BNO055_MAG_DATA_Z_LSB_ADDR 			= 0X12        #z軸地磁気データ下位8bit(1byte)
+	BNO055_MAG_DATA_Z_MSB_ADDR			= 0X13        #z軸地磁気データ上位8bit(1byte)
+
+	# Gyro data registers (ジャイロデータ定義)
+	BNO055_GYRO_DATA_X_LSB_ADDR 			= 0X14        #同様
+	BNO055_GYRO_DATA_X_MSB_ADDR 			= 0X15        #同様
+	BNO055_GYRO_DATA_Y_LSB_ADDR 			= 0X16        #同様
+	BNO055_GYRO_DATA_Y_MSB_ADDR 			= 0X17        #同様
+	BNO055_GYRO_DATA_Z_LSB_ADDR 			= 0X18        #同様
+	BNO055_GYRO_DATA_Z_MSB_ADDR 			= 0X19        #同様
+	
+	# Euler data registers (方位データ定義)
+	BNO055_EULER_H_LSB_ADDR 			= 0X1A        #同様
+	BNO055_EULER_H_MSB_ADDR 			= 0X1B        #同様
+	BNO055_EULER_R_LSB_ADDR 			= 0X1C        #同様
+	BNO055_EULER_R_MSB_ADDR 			= 0X1D        #同様
+	BNO055_EULER_P_LSB_ADDR 			= 0X1E        #同様
+	BNO055_EULER_P_MSB_ADDR 			= 0X1F        #同様
+
+	# Quaternion data registers (姿勢に関するデータ定義)
+	BNO055_QUATERNION_DATA_W_LSB_ADDR 		= 0X20        #同様(この関数は(w, x, y, z)で表すためほかのものより定義2行長めです)
+	BNO055_QUATERNION_DATA_W_MSB_ADDR 		= 0X21        #同様
+	BNO055_QUATERNION_DATA_X_LSB_ADDR 		= 0X22        #同様
+	BNO055_QUATERNION_DATA_X_MSB_ADDR 		= 0X23        #同様
+	BNO055_QUATERNION_DATA_Y_LSB_ADDR 		= 0X24        #同様
+	BNO055_QUATERNION_DATA_Y_MSB_ADDR 		= 0X25        #同様
+	BNO055_QUATERNION_DATA_Z_LSB_ADDR 		= 0X26        #同様
+	BNO055_QUATERNION_DATA_Z_MSB_ADDR 		= 0X27        #同様
+
+	# Linear acceleration data registers (線形加速度データ定義)
+	BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR 		= 0X28        #同様
+	BNO055_LINEAR_ACCEL_DATA_X_MSB_ADDR 		= 0X29        #同様
+	BNO055_LINEAR_ACCEL_DATA_Y_LSB_ADDR	 	= 0X2A        #同様
+	BNO055_LINEAR_ACCEL_DATA_Y_MSB_ADDR		= 0X2B        #同様
+	BNO055_LINEAR_ACCEL_DATA_Z_LSB_ADDR		= 0X2C        #同様
+	BNO055_LINEAR_ACCEL_DATA_Z_MSB_ADDR		= 0X2D        #同様
+
+	# Gravity data registers (重力加速度データ定義)
+	BNO055_GRAVITY_DATA_X_LSB_ADDR 			= 0X2E        #同様
+	BNO055_GRAVITY_DATA_X_MSB_ADDR	 		= 0X2F        #同様
+	BNO055_GRAVITY_DATA_Y_LSB_ADDR 			= 0X30        #同様
+	BNO055_GRAVITY_DATA_Y_MSB_ADDR 			= 0X31        #同様
+	BNO055_GRAVITY_DATA_Z_LSB_ADDR 			= 0X32        #同様
+	BNO055_GRAVITY_DATA_Z_MSB_ADDR 			= 0X33        #同様
+
+	# Temperature data register (温度データ定義)
+	BNO055_TEMP_ADDR 				= 0X34        #同様
+
+	# Status registers 
+	BNO055_CALIB_STAT_ADDR 				= 0X35        #このバイトは2bitの塊ごとに計四つのステータスが格納されている。0x35;(システムcalib状態, ジャイロcalib状態, 加速度calib状態, 地磁気calib状態)　00;未キャリブレーション, 11;完全キャリブレーション
+	BNO055_SELFTEST_RESULT_ADDR	 		= 0X36        #self-test用の関数。機器を呼び出すイメージ。このbyteの構成は(予約済み4bit, マイコン1bit, ジャイロ1bit, 地磁気1bit , 加速度1bit)であり、0;失敗、1;成功
+	BNO055_INTR_STAT_ADDR 				= 0X37        #interrupt（割り込み）検知　構成は(加速度no motion 1bit, 加速度any motion 1bit, 加速度high-g 1bit, ジャイロdata ready 1bit, ジャイロhigh rate 1bit, ジャイロany motion 1bit, 地磁気data ready 1bit, 加速度/bsx 1bit)　(1(7),)で長時間動きがない
+
+	BNO055_SYS_CLK_STAT_ADDR 			= 0X38        #クロック（時計）が設定されているか　構成は(予約済み7bit, 時計状態1bit) 0;設定可能　1;設定不可(内部or外部機器により設定済み)
+	BNO055_SYS_STAT_ADDR 				= 0X39
+	BNO055_SYS_ERR_ADDR 				= 0X3A
+
+	# Unit selection register 
+	BNO055_UNIT_SEL_ADDR 				= 0X3B
+	BNO055_DATA_SELECT_ADDR 			= 0X3C
+
+	# Mode registers 
+	BNO055_OPR_MODE_ADDR 				= 0X3D
+	BNO055_PWR_MODE_ADDR 				= 0X3E
+
+	BNO055_SYS_TRIGGER_ADDR 			= 0X3F
+	BNO055_TEMP_SOURCE_ADDR 			= 0X40
+
+	# Axis remap registers 
+	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41
+	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42
+
+	# SIC registers 
+	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43
+	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44
+	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45
+	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46
+	BNO055_SIC_MATRIX_2_LSB_ADDR 			= 0X47
+	BNO055_SIC_MATRIX_2_MSB_ADDR 			= 0X48
+	BNO055_SIC_MATRIX_3_LSB_ADDR 			= 0X49
+	BNO055_SIC_MATRIX_3_MSB_ADDR 			= 0X4A
+	BNO055_SIC_MATRIX_4_LSB_ADDR 			= 0X4B
+	BNO055_SIC_MATRIX_4_MSB_ADDR 			= 0X4C
+	BNO055_SIC_MATRIX_5_LSB_ADDR 			= 0X4D
+	BNO055_SIC_MATRIX_5_MSB_ADDR 			= 0X4E
+	BNO055_SIC_MATRIX_6_LSB_ADDR 			= 0X4F
+	BNO055_SIC_MATRIX_6_MSB_ADDR 			= 0X50
+	BNO055_SIC_MATRIX_7_LSB_ADDR 			= 0X51
+	BNO055_SIC_MATRIX_7_MSB_ADDR 			= 0X52
+	BNO055_SIC_MATRIX_8_LSB_ADDR 			= 0X53
+	BNO055_SIC_MATRIX_8_MSB_ADDR 			= 0X54
+	
+	# Accelerometer Offset registers	 
+	ACCEL_OFFSET_X_LSB_ADDR 			= 0X55
+	ACCEL_OFFSET_X_MSB_ADDR 			= 0X56
+	ACCEL_OFFSET_Y_LSB_ADDR 			= 0X57
+	ACCEL_OFFSET_Y_MSB_ADDR 			= 0X58
+	ACCEL_OFFSET_Z_LSB_ADDR 			= 0X59
+	ACCEL_OFFSET_Z_MSB_ADDR 			= 0X5A
+
+	# Magnetometer Offset registers 
+	MAG_OFFSET_X_LSB_ADDR 				= 0X5B
+	MAG_OFFSET_X_MSB_ADDR 				= 0X5C
+	MAG_OFFSET_Y_LSB_ADDR 				= 0X5D
+	MAG_OFFSET_Y_MSB_ADDR 				= 0X5E
+	MAG_OFFSET_Z_LSB_ADDR 				= 0X5F
+	MAG_OFFSET_Z_MSB_ADDR 				= 0X60
+
+	# Gyroscope Offset registers
+	GYRO_OFFSET_X_LSB_ADDR 				= 0X61
+	GYRO_OFFSET_X_MSB_ADDR 				= 0X62
+	GYRO_OFFSET_Y_LSB_ADDR 				= 0X63
+	GYRO_OFFSET_Y_MSB_ADDR 				= 0X64
+	GYRO_OFFSET_Z_LSB_ADDR 				= 0X65
+	GYRO_OFFSET_Z_MSB_ADDR 				= 0X66
+
+	# Radius registers 
+	ACCEL_RADIUS_LSB_ADDR 				= 0X67
+	ACCEL_RADIUS_MSB_ADDR 				= 0X68
+	MAG_RADIUS_LSB_ADDR 				= 0X69
+	MAG_RADIUS_MSB_ADDR 				= 0X6A
+
+	# REGISTER DEFINITION END
+
+
+	def __init__(self, sensorId=-1, address=0x28):
+		self._sensorId = sensorId
+		self._address = address
+		self._mode = BNO055.OPERATION_MODE_NDOF
+
+
+	def begin(self, mode=None):
+		if mode is None: mode = BNO055.OPERATION_MODE_NDOF
+		# Open I2C bus
+		self._bus = smbus.SMBus(1)
+
+		# Make sure we have the right device
+		if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
+			time.sleep(1)	# Wait for the device to boot up
+			if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
+				return False
+
+		# Switch to config mode
+		self.setMode(BNO055.OPERATION_MODE_CONFIG)
+
+		# Trigger a reset and wait for the device to boot up again
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x20])
+		time.sleep(1)
+		while self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
+			time.sleep(0.01)
+		time.sleep(0.05)
+
+		# Set to normal power mode
+		self.writeBytes(BNO055.BNO055_PWR_MODE_ADDR, [BNO055.POWER_MODE_NORMAL])
+		time.sleep(0.01)
+
+		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0])
+		time.sleep(0.01)
+
+		# Set the requested mode
+		self.setMode(mode)
+		time.sleep(0.02)
+
+		return True
+
+	def setMode(self, mode):
+		self._mode = mode
+		self.writeBytes(BNO055.BNO055_OPR_MODE_ADDR, [self._mode])
+		time.sleep(0.03)
+
+	def setExternalCrystalUse(self, useExternalCrystal = True):
+		prevMode = self._mode
+		self.setMode(BNO055.OPERATION_MODE_CONFIG)
+		time.sleep(0.025)
+		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x80] if useExternalCrystal else [0])
+		time.sleep(0.01)
+		self.setMode(prevMode)
+		time.sleep(0.02)
+
+	def getSystemStatus(self):
+		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
+		(sys_stat, sys_err) = self.readBytes(BNO055.BNO055_SYS_STAT_ADDR, 2)
+		self_test = self.readBytes(BNO055.BNO055_SELFTEST_RESULT_ADDR)[0]
+		return (sys_stat, self_test, sys_err)
+
+	def getRevInfo(self):
+		(accel_rev, mag_rev, gyro_rev) = self.readBytes(BNO055.BNO055_ACCEL_REV_ID_ADDR, 3)
+		sw_rev = self.readBytes(BNO055.BNO055_SW_REV_ID_LSB_ADDR, 2)
+		sw_rev = sw_rev[0] | sw_rev[1] << 8
+		bl_rev = self.readBytes(BNO055.BNO055_BL_REV_ID_ADDR)[0]
+		return (accel_rev, mag_rev, gyro_rev, sw_rev, bl_rev)
+
+	def getCalibration(self):
+		calData = self.readBytes(BNO055.BNO055_CALIB_STAT_ADDR)[0]
+		return (calData >> 6 & 0x03, calData >> 4 & 0x03, calData >> 2 & 0x03, calData & 0x03)
+
+	def getTemp(self):
+		return self.readBytes(BNO055.BNO055_TEMP_ADDR)[0]
+
+	def getVector(self, vectorType):
+		buf = self.readBytes(vectorType, 6)
+		xyz = struct.unpack('hhh', struct.pack('BBBBBB', buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]))
+		if vectorType == BNO055.VECTOR_MAGNETOMETER:	scalingFactor = 16.0
+		elif vectorType == BNO055.VECTOR_GYROSCOPE:	scalingFactor = 900.0
+		elif vectorType == BNO055.VECTOR_EULER: 		scalingFactor = 16.0
+		elif vectorType == BNO055.VECTOR_GRAVITY:	scalingFactor = 100.0
+		else:											scalingFactor = 1.0
+		return tuple([i/scalingFactor for i in xyz])
+
+	def getQuat(self):
+		buf = self.readBytes(BNO055.BNO055_QUATERNION_DATA_W_LSB_ADDR, 8)
+		wxyz = struct.unpack('hhhh', struct.pack('BBBBBBBB', buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]))
+		return tuple([i * (1.0 / (1 << 14)) for i in wxyz])
+
+	def readBytes(self, register, numBytes=1):
+		return self._bus.read_i2c_block_data(self._address, register, numBytes)
+
+	def writeBytes(self, register, byteVals):
+		return self._bus.write_i2c_block_data(self._address, register, byteVals)
+
+
+if __name__ == '__main__':
+	bno = BNO055()
+	if bno.begin() is not True:
+		print("Error initializing device")
+		exit()
+	time.sleep(1)
+	bno.setExternalCrystalUse(True)
+	while True:
+		print(bno.getVector(BNO055.VECTOR_EULER))
+		time.sleep(0.01)
