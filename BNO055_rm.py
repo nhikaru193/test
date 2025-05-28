@@ -38,7 +38,7 @@ class BNO055:
 	# REGISTER DEFINITION START(BNO055にはページレジスタという概念がある。簡単に言うと0x00;データ取得のレジスタ群が存在するページ0, 0x01;設定・チューニング用のレジスタ群が存在するページ1)
 	BNO055_PAGE_ID_ADDR 				= 0X07        #ページIDレジスタに対応。ページ1を使いたいときにはbus.write_byte_data(BNO055_ADDRESS, BNO055_PAGE_ID_ADDR, 0x01)と入力する
 
-	#識別子の割り当て(おもにデバッグや確認として使われる)
+	#識別子の割り当て(おもにデバッグや確認として使われる)データシートp60~参照
 	BNO055_CHIP_ID_ADDR 				= 0x00        #chip id 機器に固有の番号
 	BNO055_ACCEL_REV_ID_ADDR 			= 0x01        #加速度センサの識別子(chip id)
 	BNO055_MAG_REV_ID_ADDR 				= 0x02        #地磁気センサの識別子(chip id) 
@@ -114,38 +114,37 @@ class BNO055:
 	BNO055_INTR_STAT_ADDR 				= 0X37        #interrupt（割り込み）検知　構成は(加速度no motion 1bit, 加速度any motion 1bit, 加速度high-g 1bit, ジャイロdata ready 1bit, ジャイロhigh rate 1bit, ジャイロany motion 1bit, 地磁気data ready 1bit, 加速度/bsx 1bit)　(1(7),)で長時間動きがない
 
 	BNO055_SYS_CLK_STAT_ADDR 			= 0X38        #クロック（時計）が設定されているか　構成は(予約済み7bit, 時計状態1bit) 0;設定可能　1;設定不可(内部or外部機器により設定済み)
-	BNO055_SYS_STAT_ADDR 				= 0X39
-	BNO055_SYS_ERR_ADDR 				= 0X3A
-
+	BNO055_SYS_STAT_ADDR 				= 0X39        #p74　システムを表す　構成は(定義なし1bit, センサフュージョンなしで動作中1bit, センサーフュージョンアルゴリズムが動作中1bit, self-test実行中1bit, システム全体初期化中1bit, 周辺機器を初期化中1bit, システムエラー発生中1bit, システムアイドリングストップ1bit)　0;問題なし　1;実行中or問題あり
+	BNO055_SYS_ERR_ADDR 				= 0X3A        #p75　システムエラーを表す　1byteすべて使用　0;no error, 1;周辺機器の初期化エラー, 2;システム初期化エラー, 3;self-test失敗, 4;レジスタ値が範囲外, 5;無効なレジスタアドレスにアクセス, 6;レジスタへの書き込み失敗, 7;セルフテスト設定が正しくない, 8無効または不適切なモード設定, 9;センサ設定のエラー, A;電源モードとセンサ設定が矛盾している
 	# Unit selection register 
-	BNO055_UNIT_SEL_ADDR 				= 0X3B
-	BNO055_DATA_SELECT_ADDR 			= 0X3C
+	BNO055_UNIT_SEL_ADDR 				= 0X3B        #p75　(動作モード1bit(0;windows, 1;android), )
+	BNO055_DATA_SELECT_ADDR 			= 0X3C        #
 
 	# Mode registers 
-	BNO055_OPR_MODE_ADDR 				= 0X3D
-	BNO055_PWR_MODE_ADDR 				= 0X3E
+	BNO055_OPR_MODE_ADDR 				= 0X3D        #
+	BNO055_PWR_MODE_ADDR 				= 0X3E        #
 
-	BNO055_SYS_TRIGGER_ADDR 			= 0X3F
-	BNO055_TEMP_SOURCE_ADDR 			= 0X40
+	BNO055_SYS_TRIGGER_ADDR 			= 0X3F        #
+	BNO055_TEMP_SOURCE_ADDR 			= 0X40        #
 
 	# Axis remap registers 
-	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41
-	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42
+	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41        #
+	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42        #
 
 	# SIC registers 
-	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43
-	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44
-	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45
-	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46
-	BNO055_SIC_MATRIX_2_LSB_ADDR 			= 0X47
-	BNO055_SIC_MATRIX_2_MSB_ADDR 			= 0X48
-	BNO055_SIC_MATRIX_3_LSB_ADDR 			= 0X49
-	BNO055_SIC_MATRIX_3_MSB_ADDR 			= 0X4A
-	BNO055_SIC_MATRIX_4_LSB_ADDR 			= 0X4B
-	BNO055_SIC_MATRIX_4_MSB_ADDR 			= 0X4C
-	BNO055_SIC_MATRIX_5_LSB_ADDR 			= 0X4D
-	BNO055_SIC_MATRIX_5_MSB_ADDR 			= 0X4E
-	BNO055_SIC_MATRIX_6_LSB_ADDR 			= 0X4F
+	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43        #
+	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44        #
+	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45        #
+	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46        #
+	BNO055_SIC_MATRIX_2_LSB_ADDR 			= 0X47        #
+	BNO055_SIC_MATRIX_2_MSB_ADDR 			= 0X48        #
+	BNO055_SIC_MATRIX_3_LSB_ADDR 			= 0X49        #
+	BNO055_SIC_MATRIX_3_MSB_ADDR 			= 0X4A        #
+	BNO055_SIC_MATRIX_4_LSB_ADDR 			= 0X4B        #
+	BNO055_SIC_MATRIX_4_MSB_ADDR 			= 0X4C        #
+	BNO055_SIC_MATRIX_5_LSB_ADDR 			= 0X4D        #
+	BNO055_SIC_MATRIX_5_MSB_ADDR 			= 0X4E        #
+	BNO055_SIC_MATRIX_6_LSB_ADDR 			= 0X4F        #
 	BNO055_SIC_MATRIX_6_MSB_ADDR 			= 0X50
 	BNO055_SIC_MATRIX_7_LSB_ADDR 			= 0X51
 	BNO055_SIC_MATRIX_7_MSB_ADDR 			= 0X52
