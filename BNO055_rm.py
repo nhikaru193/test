@@ -132,7 +132,7 @@ class BNO055:
 	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42        #
 
 	# SIC registers 
-	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43        #
+	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43        #ソフトアイアン行列の最初のバイトを示す。ソフトアイアン行列を利用すると、センサが補正した磁場データを補正できる。
 	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44        #
 	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45        #
 	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46        #
