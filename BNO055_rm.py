@@ -117,14 +117,14 @@ class BNO055:
 	BNO055_SYS_STAT_ADDR 				= 0X39        #p74　システムを表す　構成は(定義なし1bit, センサフュージョンなしで動作中1bit, センサーフュージョンアルゴリズムが動作中1bit, self-test実行中1bit, システム全体初期化中1bit, 周辺機器を初期化中1bit, システムエラー発生中1bit, システムアイドリングストップ1bit)　0;問題なし　1;実行中or問題あり
 	BNO055_SYS_ERR_ADDR 				= 0X3A        #p75　システムエラーを表す　1byteすべて使用　0;no error, 1;周辺機器の初期化エラー, 2;システム初期化エラー, 3;self-test失敗, 4;レジスタ値が範囲外, 5;無効なレジスタアドレスにアクセス, 6;レジスタへの書き込み失敗, 7;セルフテスト設定が正しくない, 8無効または不適切なモード設定, 9;センサ設定のエラー, A;電源モードとセンサ設定が矛盾している
 	# Unit selection register 
-	BNO055_UNIT_SEL_ADDR 				= 0X3B        #p75　(動作モード1bit(0;windows, 1;android), )
+	BNO055_UNIT_SEL_ADDR 				= 0X3B        #p75　(動作モード1bit(0;windows, 1;android), 予約済み2bit, 温度の単位1bit(0;セルシウス温度℃, 1;ファーレンヘイト℉), オイラー角の単位1bit(0;度, 1;rad), 角速度の単位1bit(0;dps. 1;rps), 加速度の単位1bit(0;m/s^2, 1;mil_gravity))
 	BNO055_DATA_SELECT_ADDR 			= 0X3C        #
 
 	# Mode registers 
-	BNO055_OPR_MODE_ADDR 				= 0X3D        #
-	BNO055_PWR_MODE_ADDR 				= 0X3E        #
+	BNO055_OPR_MODE_ADDR 				= 0X3D        #p76　動作モードレジスタ　構成は(予約済み4bit, オペレーションモード4bit)　多分使わないので自分で見ましょう
+	BNO055_PWR_MODE_ADDR 				= 0X3E        #p76　パワーモード設定　構成は(予約済み6bit, パワーモード2bit)　00;normal, 01;low power, 10;suspend, 11;invalid
 
-	BNO055_SYS_TRIGGER_ADDR 			= 0X3F        #
+	BNO055_SYS_TRIGGER_ADDR 			= 0X3F        #p76　システムトリガ制御　構成は(発信機1bit(0;内部発振器の使用, 1;外部発振器の使用), 割り込み操作1bit(1;すべての割り込み操作を中断), システムリセット1bit(1;システムリセット), 予約済み4bit, セルフテスト1bit(1;セルフテストを行う) )
 	BNO055_TEMP_SOURCE_ADDR 			= 0X40        #
 
 	# Axis remap registers 
