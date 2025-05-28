@@ -153,7 +153,5 @@ init_bme280()
 #補正データ読み込み
 read_compensate()
 
-#測定データ読み込み  
-while True:
-        read_data()
-        time.sleep(0.01)  # 0.01秒間隔で繰り返す
+#測定データ読み込み 
+read_data()
