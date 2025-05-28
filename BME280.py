@@ -1,4 +1,5 @@
 import smbus
+import time
 
 #補正用
 t_fine = 0.0
@@ -154,4 +155,6 @@ init_bme280()
 read_compensate()
 
 #測定データ読み込み 
-read_data()
+ while True:
+        read_data()
+        time.sleep(0.01)  # 0.01秒待機
