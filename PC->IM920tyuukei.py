@@ -1,7 +1,7 @@
 import serial
 import time
 
-ser = serial.Serial('/dev/ttyS0', 19200, timeout=1)
+ser = serial.Serial('/dev/ttyAMA0', 19200, timeout=1)
 
 print("+++ を送信（Enterなし）")
 ser.write(b'+++')
