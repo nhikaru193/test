@@ -2,7 +2,7 @@ import serial
 import time
 
 # シリアルポートの設定
-serial_port = '/dev/ttyAMA0'  # 使用するシリアルポートのパス
+serial_port = '/dev/serial0'  # 使用するシリアルポートのパス
 baud_rate = 19200  # ボーレート
 
 # シリアルポートの初期化
