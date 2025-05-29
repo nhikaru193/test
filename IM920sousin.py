@@ -1,22 +1,17 @@
 import serial
 import time
 
-# シリアルポートの設定
-PORT = 'COM3'  # 環境に合わせて変更（macOS/Linuxでは例: '/dev/ttyUSB0'）
-BAUDRATE = 19200  # IM920のデフォルト
+ser = serial.Serial('/dev/serial0', 19200, timeout=1)
 
-# 送信する宛先とメッセージ、宛先は後で変える
-NODE_ID = '0001'
-MESSAGE = 'Hello, IM920!'
+ser.write(b'+++')
+time.sleep(1)
+print(ser.read_all())
 
-def send_data():
-    with serial.Serial(PORT, BAUDRATE, timeout=1) as ser:
-        print("Sending message to IM920SL...")
-        while True:
-            cmd = f'TXDA {NODE_ID} {MESSAGE}\r'
-            ser.write(cmd.encode())
-            print(f"Sent: {MESSAGE}")
-            time.sleep(5)  # 5秒ごとに送信
+ser.write(b'STNN 0001\r')
+time.sleep(0.5)
+print(ser.read_all())
 
-if __name__ == "__main__":
-    send_data()
+ser.write(b'STSN 0002\r')
+time.sleep(0.5)
+
+ser.write(b'TXDA Hello from Pi\r')
