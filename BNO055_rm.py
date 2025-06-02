@@ -125,10 +125,10 @@ class BNO055:
 	BNO055_PWR_MODE_ADDR 				= 0X3E        #p76　パワーモード設定　構成は(予約済み6bit, パワーモード2bit)　00;normal, 01;low power, 10;suspend, 11;invalid
 
 	BNO055_SYS_TRIGGER_ADDR 			= 0X3F        #p76　システムトリガ制御　構成は(発信機1bit(0;内部発振器の使用, 1;外部発振器の使用), 割り込み操作1bit(1;すべての割り込み操作を中断), システムリセット1bit(1;システムリセット), 予約済み4bit, セルフテスト1bit(1;セルフテストを行う) )
-	BNO055_TEMP_SOURCE_ADDR 			= 0X40        #
+	BNO055_TEMP_SOURCE_ADDR 			= 0X40        #p76 データシートに誤り在り　おそらく構成は(予約済み6bit, 温度制御2bit) 00;加速度センサ内部の温度センサを利用, 01;ジャイロスコープ内部の温度センサを利用
 
 	# Axis remap registers 
-	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41        #
+	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41        #p77 座標マッピング 構成は(予約済み2bit, z軸マッピング2bit, y軸マッピング2bit, x軸マッピング2bit) 00;
 	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42        #
 
 	# SIC registers 
