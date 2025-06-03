@@ -121,115 +121,117 @@ class BNO055:
 	BNO055_DATA_SELECT_ADDR 			= 0X3C        #
 
 	# Mode registers 
-	BNO055_OPR_MODE_ADDR 				= 0X3D        #p76　動作モードレジスタ　構成は(予約済み4bit, オペレーションモード4bit)　多分使わないので自分で見ましょう
+	BNO055_OPR_MODE_ADDR 				= 0X3D        #p76　動作モードレジスタ　構成は(予約済み4bit, オペレーションモード4bit)　多分使わないので自分で見ましょう(使いました)
 	BNO055_PWR_MODE_ADDR 				= 0X3E        #p76　パワーモード設定　構成は(予約済み6bit, パワーモード2bit)　00;normal, 01;low power, 10;suspend, 11;invalid
 
 	BNO055_SYS_TRIGGER_ADDR 			= 0X3F        #p76　システムトリガ制御　構成は(発信機1bit(0;内部発振器の使用, 1;外部発振器の使用), 割り込み操作1bit(1;すべての割り込み操作を中断), システムリセット1bit(1;システムリセット), 予約済み4bit, セルフテスト1bit(1;セルフテストを行う) )
 	BNO055_TEMP_SOURCE_ADDR 			= 0X40        #p76 データシートに誤り在り　おそらく構成は(予約済み6bit, 温度制御2bit) 00;加速度センサ内部の温度センサを利用, 01;ジャイロスコープ内部の温度センサを利用
 
 	# Axis remap registers 
-	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41        #p77 座標マッピング 構成は(予約済み2bit, z軸マッピング2bit, y軸マッピング2bit, x軸マッピング2bit) 00;
-	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42        #
+	BNO055_AXIS_MAP_CONFIG_ADDR 			= 0X41        #p77 座標マッピング 構成は(予約済み2bit, z軸マッピング2bit, y軸マッピング2bit, x軸マッピング2bit) 00;x軸, 01;y軸, 10;z軸, 11;invalid
+	BNO055_AXIS_MAP_SIGN_ADDR 			= 0X42        #p77 軸の反転設定 構成は(予約済み5bit, x-axis 1bit, y-axis 1bit, z-axis 1bit) 0;positive正, 1;negative負
 
 	# SIC registers 
-	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43        #ソフトアイアン行列の最初のバイトを示す。ソフトアイアン行列を利用すると、センサが補正した磁場データを補正できる。
-	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44        #
-	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45        #
-	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46        #
-	BNO055_SIC_MATRIX_2_LSB_ADDR 			= 0X47        #
-	BNO055_SIC_MATRIX_2_MSB_ADDR 			= 0X48        #
-	BNO055_SIC_MATRIX_3_LSB_ADDR 			= 0X49        #
-	BNO055_SIC_MATRIX_3_MSB_ADDR 			= 0X4A        #
-	BNO055_SIC_MATRIX_4_LSB_ADDR 			= 0X4B        #
-	BNO055_SIC_MATRIX_4_MSB_ADDR 			= 0X4C        #
-	BNO055_SIC_MATRIX_5_LSB_ADDR 			= 0X4D        #
-	BNO055_SIC_MATRIX_5_MSB_ADDR 			= 0X4E        #
-	BNO055_SIC_MATRIX_6_LSB_ADDR 			= 0X4F        #
-	BNO055_SIC_MATRIX_6_MSB_ADDR 			= 0X50
-	BNO055_SIC_MATRIX_7_LSB_ADDR 			= 0X51
-	BNO055_SIC_MATRIX_7_MSB_ADDR 			= 0X52
-	BNO055_SIC_MATRIX_8_LSB_ADDR 			= 0X53
-	BNO055_SIC_MATRIX_8_MSB_ADDR 			= 0X54
+	BNO055_SIC_MATRIX_0_LSB_ADDR 			= 0X43        #p77 ソフトアイアン行列の最初のバイトを示す。ソフトアイアン行列を利用すると、センサが補正した磁場データを補正できる。
+	BNO055_SIC_MATRIX_0_MSB_ADDR 			= 0X44        #p77 0要素上位8bit
+	BNO055_SIC_MATRIX_1_LSB_ADDR 			= 0X45        #p77 1要素下位8bit
+	BNO055_SIC_MATRIX_1_MSB_ADDR 			= 0X46        #p77 1要素上位8bit
+	BNO055_SIC_MATRIX_2_LSB_ADDR 			= 0X47        #同様
+	BNO055_SIC_MATRIX_2_MSB_ADDR 			= 0X48        #同様
+	BNO055_SIC_MATRIX_3_LSB_ADDR 			= 0X49        #同様
+	BNO055_SIC_MATRIX_3_MSB_ADDR 			= 0X4A        #同様
+	BNO055_SIC_MATRIX_4_LSB_ADDR 			= 0X4B        #同様
+	BNO055_SIC_MATRIX_4_MSB_ADDR 			= 0X4C        #同様
+	BNO055_SIC_MATRIX_5_LSB_ADDR 			= 0X4D        #同様
+	BNO055_SIC_MATRIX_5_MSB_ADDR 			= 0X4E        #同様
+	BNO055_SIC_MATRIX_6_LSB_ADDR 			= 0X4F        #同様
+	BNO055_SIC_MATRIX_6_MSB_ADDR 			= 0X50        #同様
+	BNO055_SIC_MATRIX_7_LSB_ADDR 			= 0X51        #同様
+	BNO055_SIC_MATRIX_7_MSB_ADDR 			= 0X52        #同様
+	BNO055_SIC_MATRIX_8_LSB_ADDR 			= 0X53        #同様
+	BNO055_SIC_MATRIX_8_MSB_ADDR 			= 0X54        #同様
 	
 	# Accelerometer Offset registers	 
-	ACCEL_OFFSET_X_LSB_ADDR 			= 0X55
-	ACCEL_OFFSET_X_MSB_ADDR 			= 0X56
-	ACCEL_OFFSET_Y_LSB_ADDR 			= 0X57
-	ACCEL_OFFSET_Y_MSB_ADDR 			= 0X58
-	ACCEL_OFFSET_Z_LSB_ADDR 			= 0X59
-	ACCEL_OFFSET_Z_MSB_ADDR 			= 0X5A
+	ACCEL_OFFSET_X_LSB_ADDR 			= 0X55        #p81 加速度補正値 x-axis 下位8bit
+	ACCEL_OFFSET_X_MSB_ADDR 			= 0X56        #p82 加速度補正値 x-axis 上位8bit
+	ACCEL_OFFSET_Y_LSB_ADDR 			= 0X57        #p82 加速度補正値 y-axis 下位8bit
+	ACCEL_OFFSET_Y_MSB_ADDR 			= 0X58        #p82 加速度補正値 y-axis 上位8bit
+	ACCEL_OFFSET_Z_LSB_ADDR 			= 0X59        #p82 加速度補正値 z-axis 下位8bit
+	ACCEL_OFFSET_Z_MSB_ADDR 			= 0X5A        #p83 加速度補正値 z-axis 上位8bit
 
 	# Magnetometer Offset registers 
-	MAG_OFFSET_X_LSB_ADDR 				= 0X5B
-	MAG_OFFSET_X_MSB_ADDR 				= 0X5C
-	MAG_OFFSET_Y_LSB_ADDR 				= 0X5D
-	MAG_OFFSET_Y_MSB_ADDR 				= 0X5E
-	MAG_OFFSET_Z_LSB_ADDR 				= 0X5F
-	MAG_OFFSET_Z_MSB_ADDR 				= 0X60
+	MAG_OFFSET_X_LSB_ADDR 				= 0X5B        #p83 地磁気補正値 x-axis 下位8bit
+	MAG_OFFSET_X_MSB_ADDR 				= 0X5C        #p83 地磁気補正値 x-axis 上位8bit
+	MAG_OFFSET_Y_LSB_ADDR 				= 0X5D        #p83 地磁気補正値 y-axis 下位8bit
+	MAG_OFFSET_Y_MSB_ADDR 				= 0X5E        #p84 地磁気補正値 y-axis 上位8bit
+	MAG_OFFSET_Z_LSB_ADDR 				= 0X5F        #p84 地磁気補正値 z-axis 下位8bit
+	MAG_OFFSET_Z_MSB_ADDR 				= 0X60        #p84 地磁気補正値 z-axis 上位8bit
 
 	# Gyroscope Offset registers
-	GYRO_OFFSET_X_LSB_ADDR 				= 0X61
-	GYRO_OFFSET_X_MSB_ADDR 				= 0X62
-	GYRO_OFFSET_Y_LSB_ADDR 				= 0X63
-	GYRO_OFFSET_Y_MSB_ADDR 				= 0X64
-	GYRO_OFFSET_Z_LSB_ADDR 				= 0X65
-	GYRO_OFFSET_Z_MSB_ADDR 				= 0X66
+	GYRO_OFFSET_X_LSB_ADDR 				= 0X61        #p84 ジャイロ補正値 x-axis 下位8bit
+	GYRO_OFFSET_X_MSB_ADDR 				= 0X62        #p85 ジャイロ補正値 x-axis 上位8bit
+	GYRO_OFFSET_Y_LSB_ADDR 				= 0X63        #p85 ジャイロ補正値 y-axis 下位8bit
+	GYRO_OFFSET_Y_MSB_ADDR 				= 0X64        #p85 ジャイロ補正値 y-axis 上位8bit
+	GYRO_OFFSET_Z_LSB_ADDR 				= 0X65        #p85 ジャイロ補正値 z-axis 下位8bit
+	GYRO_OFFSET_Z_MSB_ADDR 				= 0X66        #p86 ジャイロ補正値 z-axis 上位8bit
 
 	# Radius registers 
-	ACCEL_RADIUS_LSB_ADDR 				= 0X67
-	ACCEL_RADIUS_MSB_ADDR 				= 0X68
-	MAG_RADIUS_LSB_ADDR 				= 0X69
-	MAG_RADIUS_MSB_ADDR 				= 0X6A
+	ACCEL_RADIUS_LSB_ADDR 				= 0X67        #p86 加速度全体補正値 下位8bit
+	ACCEL_RADIUS_MSB_ADDR 				= 0X68        #p86 加速度全体補正値 上位8bit
+	MAG_RADIUS_LSB_ADDR 				= 0X69        #p86 地磁気全体補正値 下位8bit
+	MAG_RADIUS_MSB_ADDR 				= 0X6A        #p86 地磁気全体補正値 上位8bit
 
-	# REGISTER DEFINITION END
+	# REGISTER DEFINITION END(レジスタの割り当てが終わりましたよということです)
 
+        #init関数;パケージの初期化に使われる (self, ・・・)とするのは関数外の変数にアクセスするため(今回の場合はOPERATION_MODE_NDOF,　つまりselfはクラス内の関数を用いるときに必要（BNO055に固有） )
+	def __init__(self, sensorId=-1, address=0x28):                #0x28アドレスはi2c通信アドレス
+		self._sensorId = sensorId                             #渡されたセンサidをsensorIdに格納
+		self._address = address                               #I2Cのデバイスアドレスを_adressに保存する
+		self._mode = BNO055.OPERATION_MODE_NDOF               #センサをバランスよく使えるNDOFモードを_modeに保存する(関数を持ってくるときはモジュール名.関数名であるのでBNO055は必要)
 
-	def __init__(self, sensorId=-1, address=0x28):
-		self._sensorId = sensorId
-		self._address = address
-		self._mode = BNO055.OPERATION_MODE_NDOF
-
-
-	def begin(self, mode=None):
-		if mode is None: mode = BNO055.OPERATION_MODE_NDOF
-		# Open I2C bus
-		self._bus = smbus.SMBus(1)
+	#bigin関数
+	def begin(self, mode=None):                                   #mode値が設定されていなければ
+		if mode is None: mode = BNO055.OPERATION_MODE_NDOF    #NDOF(地磁気、ジャイロ、加速度センサ＋地磁気校正あり)に設定
+		# Open I2C bus(smbusはI2C通信を行うためのpythonライブラリ)
+		self._bus = smbus.SMBus(1)                            #I2Cパス1を開放することを_busとして格納 ラズパイ上のI2C1のこと
 
 		# Make sure we have the right device
-		if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
-			time.sleep(1)	# Wait for the device to boot up
-			if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
-				return False
+		if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:         # 危機ID=0なら
+			time.sleep(1)	# Wait for the device to boot up                      #スリープ時間 1 s
+			if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID: # 危機ID=0なら
+				return False                                                  #失敗！！
 
 		# Switch to config mode
-		self.setMode(BNO055.OPERATION_MODE_CONFIG)
+		self.setMode(BNO055.OPERATION_MODE_CONFIG)                                    #selfとはpythonのクラスの中で「そのインスタンス自身」を表す特別な引数 受け渡しのみ行われる
 
 		# Trigger a reset and wait for the device to boot up again
-		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x20])
-		time.sleep(1)
-		while self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
-			time.sleep(0.01)
-		time.sleep(0.05)
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x20])                       #125行目参照 writeBytes(A, B)はAにBを書き込む 外部発振器の使用とシステム(ソフトウェア)リセットを行う
+		time.sleep(1)                                                                 #1 s待機
+		while self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:      #readBytes(A)でAを読み込む [0]のbit読み込みデータシート参照 起動すればBN055idは0xA0となる→ループ脱出
+			time.sleep(0.01)                                                      #0.01 s待機
+		time.sleep(0.05)                                                              #0.05 s待機
 
 		# Set to normal power mode
-		self.writeBytes(BNO055.BNO055_PWR_MODE_ADDR, [BNO055.POWER_MODE_NORMAL])
-		time.sleep(0.01)
+		self.writeBytes(BNO055.BNO055_PWR_MODE_ADDR, [BNO055.POWER_MODE_NORMAL])      #125行参照 Power Modeを標準状態にする
+		time.sleep(0.01)                                                              #0.01 s待機
 
-		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
-		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0])
-		time.sleep(0.01)
+		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])                              #39行目参照 ページ0に変更 念のため戻すらしい→意味わからん
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0])                          #127行目参照 先ほどのソフトウェアリセットを解除
+		time.sleep(0.01)                                                              #0.01 s待機
 
 		# Set the requested mode
-		self.setMode(mode)
-		time.sleep(0.02)
+		self.setMode(mode)                                                            #194行目参照 OPERATION_MODE_NDOFに設定する
+		time.sleep(0.02)                                                              #0.02 s待機
 
-		return True
+		return True                                                                   #trueを返す
 
-	def setMode(self, mode):
-		self._mode = mode
-		self.writeBytes(BNO055.BNO055_OPR_MODE_ADDR, [self._mode])
-		time.sleep(0.03)
+	#setMode関数の定義
+	def setMode(self, mode):                                                              
+		self._mode = mode                                                             #mode値を_modeに格納
+		self.writeBytes(BNO055.BNO055_OPR_MODE_ADDR, [self._mode])                    #_modeを動作モードレジスタに移す
+		time.sleep(0.03)                                                              #0.03 s待機 モード変更の際には必須　ないとバグっちゃう
 
+	#
 	def setExternalCrystalUse(self, useExternalCrystal = True):
 		prevMode = self._mode
 		self.setMode(BNO055.OPERATION_MODE_CONFIG)
