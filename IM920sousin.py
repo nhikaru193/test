@@ -3,22 +3,23 @@ import time
 
 ser = serial.Serial('/dev/serial0', 19200, timeout=1)
 
-# ガードタイム：送信前に1秒待つ
-time.sleep(1)
-ser.write(b'+++')
-time.sleep(1)  # ガードタイム（後）
+# ---- コマンドモード突入手順（ガードタイムあり） ----
+time.sleep(1.2)               # ガードタイム前
+ser.write(b'+++')             # 改行なしで送ること！
+time.sleep(1.2)               # ガードタイム後
 
-print(ser.read_all())  # ← OKが出るかは状況次第（何も返らないことも）
+# 応答確認（なくても成功してる場合もある）
+resp = ser.read_all()
+print(f'+++応答: {resp}')
 
-# 親機アドレス（ネットワークアドレス）設定
-ser.write(b'STNN 0001\r')
+# ---- 設定コマンド ----
+ser.write(b'STNN 0001\r')     # 親機のネットワークアドレス
 time.sleep(0.5)
-print(ser.read_all())
+print(f'STNN応答: {ser.read_all()}')
 
-# 自分のノード番号設定
-ser.write(b'STSN 0002\r')
+ser.write(b'STSN 0002\r')     # ノード番号
 time.sleep(0.5)
-print(ser.read_all())
+print(f'STSN応答: {ser.read_all()}')
 
-# データ送信
+# ---- データ送信 ----
 ser.write(b'TXDA Hello from Pi\r')
