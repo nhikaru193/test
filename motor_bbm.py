@@ -1,14 +1,17 @@
 import RPi.GPIO as GPIO
 import time
 
-# モーターB側を使用する例
-BIN1 = 16   # B_1
-BIN2 = 26   # B_2
-PWMB = 19   # B_P
+BIN1 = 16
+BIN2 = 26
+PWMB = 19
+STBY = 21
 
-# GPIO初期化
 GPIO.setmode(GPIO.BCM)
-GPIO.setup([BIN1, BIN2, PWMB], GPIO.OUT)
+GPIO.setup([BIN1, BIN2, PWMB, STBY], GPIO.OUT)
+
+# STBY解除
+GPIO.output(STBY, GPIO.HIGH)
+
 pwm = GPIO.PWM(PWMB, 1000)
 pwm.start(0)
 
