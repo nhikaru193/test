@@ -2,7 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 
-SERVO_PIN = 18  # GPIO18を使用
+SERVO_PIN = 13  # GPIO13を使用
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(SERVO_PIN, GPIO.OUT)
