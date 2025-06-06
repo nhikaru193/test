@@ -84,12 +84,15 @@ def check_release(pressure_threshold=900.0, acc_threshold=3.0, timeout=60):
     init_bme280()
     read_compensate()
 
-    # BNO055初期化
-    bno = BNO055()
-    if not bno.begin():
-        print("BNO055 初期化失敗")
-        return
-    bno.setExternalCrystalUse(True)
+    from BNO055 import BNO055
+
+# BNO055初期化部分
+bno = BNO055.BNO055()  # BNO055クラスが正しく呼ばれているか
+if not bno.begin():
+    print("BNO055 初期化失敗")
+    return
+bno.setExternalCrystalUse(True)
+
 
     print("放出判定開始")
 
