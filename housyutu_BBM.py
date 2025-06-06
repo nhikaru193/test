@@ -1,6 +1,6 @@
 import smbus
 import time
-from BNO055 import BNO055  # インポート文は関数外で行うべき
+from BNO055 import BNO055  # BNO055をインポート
 
 # BME280関連のグローバル変数
 t_fine = 0.0
@@ -111,7 +111,7 @@ def check_release(pressure_threshold=900.0, acc_threshold=3.0, timeout=60):
                     break  # タイムアウト後ループ終了
 
             pressure = read_pressure()
-            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_LINEARACC)
+            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 修正した部分
 
             print(f"[気圧] {pressure:.2f} hPa, [加速度Z] {acc_z:.2f} m/s²")
 
