@@ -83,7 +83,7 @@ def check_release(pressure_threshold=900.0, acc_threshold=3.0, timeout=60):
     # BME280初期化
     init_bme280()
     read_compensate()
-
+    
     from BNO055 import BNO055
 
 # BNO055初期化部分
