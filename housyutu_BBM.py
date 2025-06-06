@@ -1,6 +1,6 @@
 import smbus
 import time
-from BNO055 import BNO055
+from BNO055 import BNO055  # インポート文は関数外で行うべき
 
 # BME280関連のグローバル変数
 t_fine = 0.0
@@ -83,16 +83,13 @@ def check_release(pressure_threshold=900.0, acc_threshold=3.0, timeout=60):
     # BME280初期化
     init_bme280()
     read_compensate()
-    
-    from BNO055 import BNO055
 
-# BNO055初期化部分
-bno = BNO055.BNO055()  # BNO055クラスが正しく呼ばれているか
-if not bno.begin():
-    print("BNO055 初期化失敗")
-    return
-bno.setExternalCrystalUse(True)
-
+    # BNO055初期化部分
+    bno = BNO055()  # BNO055クラスのインスタンス化
+    if not bno.begin():
+        print("BNO055 初期化失敗")
+        return
+    bno.setExternalCrystalUse(True)
 
     print("放出判定開始")
 
