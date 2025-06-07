@@ -1,0 +1,88 @@
+import cv2
+import numpy as np
+import time
+import RPi.GPIO as GPIO
+
+# モータ制御ピン定義
+BIN1 = 16
+BIN2 = 26
+PWMB = 19
+STBY = 21
+
+# GPIO初期化
+GPIO.setmode(GPIO.BCM)
+GPIO.setup([BIN1, BIN2, PWMB, STBY], GPIO.OUT)
+
+GPIO.output(STBY, GPIO.HIGH)
+pwm = GPIO.PWM(PWMB, 1000)
+pwm.start(0)
+
+def motor_forward(speed=60):
+    GPIO.output(BIN1, GPIO.HIGH)
+    GPIO.output(BIN2, GPIO.LOW)
+    pwm.ChangeDutyCycle(speed)
+
+def motor_stop():
+    pwm.ChangeDutyCycle(0)
+    GPIO.output(BIN1, GPIO.LOW)
+    GPIO.output(BIN2, GPIO.LOW)
+
+# カメラ初期化
+cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    print("❌ カメラが開けません")
+    GPIO.cleanup()
+    exit()
+
+try:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("⚠️ 画像取得に失敗")
+            break
+
+        frame = cv2.resize(frame, (320, 240))
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # 赤色の範囲定義
+        lower_red1 = np.array([0, 40, 50])
+        upper_red1 = np.array([6, 255, 255])
+        lower_red2 = np.array([165, 40, 50])
+        upper_red2 = np.array([179, 255, 255])
+
+        # 赤色マスク生成
+        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+        mask = cv2.bitwise_or(mask1, mask2)
+
+        # 赤色領域の輪郭抽出と面積計算
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        total_area = sum(cv2.contourArea(c) for c in contours if cv2.contourArea(c) > 100)
+        image_area = frame.shape[0] * frame.shape[1]
+        percentage = (total_area / image_area) * 100
+
+        # 判定とモータ制御
+        if percentage < 10.0:
+            print(f"赤色割合 {percentage:.2f}% → 前進")
+            motor_forward()
+        else:
+            print(f"赤色割合 {percentage:.2f}% → 停止")
+            motor_stop()
+
+        # 表示（必要なら）
+        cv2.imshow("Camera", frame)
+        cv2.imshow("Red Mask", mask)
+
+        # 0.5秒待機
+        time.sleep(0.5)
+
+        # ESCキーで終了
+        if cv2.waitKey(1) == 27:
+            break
+
+finally:
+    print("終了処理中...")
+    pwm.stop()
+    GPIO.cleanup()
+    cap.release()
+    cv2.destroyAllWindows()
