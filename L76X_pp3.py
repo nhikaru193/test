@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import pigpio
 import time
 
 # ─────────────────────────────────────────────────────────
-# 送信先 GPIO とボーレート設定（自由に変更可）
+# 送受信に使う GPIO とボーレート設定（自由に変更可）
 # ─────────────────────────────────────────────────────────
 
-TX_PIN = 17      # 例: BCM17（ピン11）を「ソフトUART TX」として使う
-BAUD   = 9600    # ボーレート（例: NMEA デフォルト 9600bps）
+TX_PIN = 17    # BCM17 → L76XのRX へ接続
+RX_PIN = 27    # BCM27 ← L76XのTX から受信
+BAUD   = 9600  # 両方向とも 9600bps
 
 # ─────────────────────────────────────────────────────────
 # pigpio 初期化／デーモン接続確認
@@ -21,52 +21,58 @@ if not pi.connected:
     exit(1)
 
 # ─────────────────────────────────────────────────────────
-# wave_add_serial で送信する NMEA 文字列を定義
-# （ここでは例として「テスト用 NMEA」をそのまま送ってみる）
+# ソフトUART TX を wave 機能で使う準備
 # ─────────────────────────────────────────────────────────
 
-# 実際には、必要に応じて pyserial などで受信した GPS 情報から
-# 「lat,lon」等を組み立て、「$GPRMC,....」の形式で文字列を作成します。
-# 今回は例示のため固定文字列を使います。
-
-nmea_message = "$GPRMC,123519,A,3539.1234,N,13944.5678,E,0.00,0.0,010621,0.0,W*6A\r\n"
+# （TX 側は wave_add_serial による波形送信を使うため特別な open は不要）
 
 # ─────────────────────────────────────────────────────────
-# 1回だけ NMEA を波形化して送信する例
-# （ループさせたい場合は for 文や while True で繰り返しても OK）
+# ソフトUART RX をビットバンギング受信で開く
 # ─────────────────────────────────────────────────────────
 
-# 1. 既存の wave をクリア
-pi.wave_clear()
-
-# 2. NMEA 文字列を波形データとして登録
-#    → 波形中にスタートビット・8bit データ・ストップビット が自動的に生成される
-pi.wave_add_serial(TX_PIN, BAUD, nmea_message)
-
-# 3. 波形ID を取得
-wave_id = pi.wave_create()
-if wave_id < 0:
-    print("Wave の生成に失敗しました。")
+#   pigpio.bb_serial_read_open(GPIOnumber, baud, word_bits)
+#   で「このピンを RX 専用のソフトUART」として開く
+err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
+if err != 0:
+    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}, {BAUD}bps")
     pi.stop()
     exit(1)
-
-# 4. 波形（UART データ）を送信
-pi.wave_send_once(wave_id)
-
-# 5. 波形送信が終わるまで待機
-while pi.wave_tx_busy():
-    time.sleep(0.01)
-
-# 6. 送信後は不要になった wave を削除
-pi.wave_delete(wave_id)
-
-print("NMEA 文字列を送信しました:", nmea_message.strip())
+print(f"▶ ソフトUART RX を開始：GPIO={RX_PIN}, {BAUD}bps")
 
 # ─────────────────────────────────────────────────────────
-# 必要に応じて：複数回繰り返す場合は上記ステップを再度実行
+# メインループ：受信データがあれば読み取り、送信処理も試す
 # ─────────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────────────────
-# pigpio 終了処理
-# ─────────────────────────────────────────────────────────
-pi.stop()
+try:
+    while True:
+        # ------- [1] ソフトUART RX で受信する例 -------
+        (count, data) = pi.bb_serial_read(RX_PIN)
+        if count and data:
+            # data はバイト列なので、文字列に変換
+            recv_str = data.decode("ascii", errors="ignore")
+            print(f"<< SoftUART Received ({count}bytes):", recv_str.strip())
+
+            # 例：受信した NMEA ($GPRMC など) をそのまま wave 送信する
+            # もし波形送信したいなら以下のように
+            # pi.wave_clear()
+            # pi.wave_add_serial(TX_PIN, BAUD, recv_str)
+            # wid = pi.wave_create()
+            # if wid >= 0:
+            #     pi.wave_send_once(wid)
+            #     while pi.wave_tx_busy():
+            #         time.sleep(0.005)
+            #     pi.wave_delete(wid)
+            # print("→ リレー送信しました:", recv_str.strip())
+
+        # ------- [2] 必要であれば、別メッセージを挟んで定期送信も可能 -------
+        # ここでは特に何もしないか、1秒待機
+        time.sleep(1.0)
+
+except KeyboardInterrupt:
+    print("\nユーザー割り込みで終了します。")
+
+finally:
+    # ソフトUART RX をクローズしてリソース解放
+    pi.bb_serial_read_close(RX_PIN)
+    pi.stop()
+    print("終了しました。")
