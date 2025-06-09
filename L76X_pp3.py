@@ -38,50 +38,31 @@ def parse_gga(nmea_string):
     match = re.match(pattern, nmea_string)
     
     if match:
-        time = match.group(1)
         latitude = match.group(2)
         longitude = match.group(3)
-        quality = match.group(4)
-        num_sats = match.group(5)
-        hdop = match.group(6)
-        altitude = match.group(9)
 
-        print(f"Time: {time}")
-        print(f"Latitude: {latitude}")
-        print(f"Longitude: {longitude}")
-        print(f"Quality: {quality}")
-        print(f"Num Satellites: {num_sats}")
-        print(f"HDOP: {hdop}")
-        print(f"Altitude: {altitude} m")
-        
-        # 緯度経度を返す
-        return latitude, longitude
+        # 緯度経度を返す（リスト形式で返す）
+        return [latitude, longitude]
     else:
         print("Invalid GGA message")
-        return None, None
+        return None
 
-def parse_gll(nmea_string):
+def parse_rmc(nmea_string):
     """
-    $GNGLL,NMEA文を解析して緯度、経度、状態を返す
+    $GNRMC,NMEA文を解析して緯度、経度、速度、日付などの情報を返す
     """
-    pattern = r"\$GNGLL,([^,]+),([^,]+),([^,]+),([^,]+)"
+    pattern = r"\$GNRMC,(\d{6}\.\d{3}),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)"
     match = re.match(pattern, nmea_string)
     
     if match:
-        latitude = match.group(1)
-        longitude = match.group(2)
-        status = match.group(3)
-        time = match.group(4)
-        
-        print(f"Latitude: {latitude}")
-        print(f"Longitude: {longitude}")
-        print(f"Status: {status}")
-        
-        # 緯度経度を返す
-        return latitude, longitude
+        latitude = match.group(2)
+        longitude = match.group(3)
+
+        # 緯度経度を返す（リスト形式で返す）
+        return [latitude, longitude]
     else:
-        print("Invalid GLL message")
-        return None, None
+        print("Invalid RMC message")
+        return None
 
 # ─────────────────────────────────────────────────────────
 # メインループ：受信データがあれば読み取り、送信処理も試す
@@ -98,17 +79,17 @@ try:
 
             # GGAメッセージの解析
             if recv_str.startswith("$GNGGA"):
-                latitude, longitude = parse_gga(recv_str)
-                if latitude and longitude:
-                    print(f"緯度: {latitude}, 経度: {longitude}")
+                coords = parse_gga(recv_str)
+                if coords:
+                    print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
             
-            # GLLメッセージの解析
-            elif recv_str.startswith("$GNGLL"):
-                latitude, longitude = parse_gll(recv_str)
-                if latitude and longitude:
-                    print(f"緯度: {latitude}, 経度: {longitude}")
+            # RMCメッセージの解析
+            elif recv_str.startswith("$GNRMC"):
+                coords = parse_rmc(recv_str)
+                if coords:
+                    print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
         
-        time.sleep(0.1)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
