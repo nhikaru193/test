@@ -34,7 +34,7 @@ try:
     a_speed = 0
     b_speed = 80
     changing_control(a_speed, b_speed)
-    C_speed = 0 
+    c_speed = 0 
     changing_control(b_speed, c_speed)
     
 finally:
