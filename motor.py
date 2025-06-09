@@ -102,6 +102,7 @@ def changing_forward(self, before, after):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
        self.motor_forward(speed)
+       time.sleep(0.02)
 
 #右折：回転数制御(基本は停止してから使いましょう)
 def changing_right(self, before, after):
@@ -109,7 +110,8 @@ def changing_right(self, before, after):
     for i in range(200):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
-       self.motor_light(speed)
+       self.motor_right(speed)
+       time.sleep(0.02)
 
 #左折（同様）
 def changing_left(self, before, after):
@@ -118,4 +120,5 @@ def changing_left(self, before, after):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
        self.motor_left(speed)
+       time.sleep(0.02)
 
