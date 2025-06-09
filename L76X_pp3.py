@@ -1,27 +1,19 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import pigpio
 import time
-import re
 
-# ─────────────────────────────────────────────────────────
-# 送受信に使う GPIO とボーレート設定（自由に変更可）
-# ─────────────────────────────────────────────────────────
+# ──────────────── 設定 ────────────────
+TX_PIN = 17    # TX 未使用でもOK
+RX_PIN = 27    # GPS TX → GPIO27
+BAUD   = 9600  # ボーレート
 
-TX_PIN = 17    # BCM17 → L76XのRX へ接続
-RX_PIN = 27    # BCM27 ← L76XのTX から受信
-BAUD   = 9600  # 両方向とも 9600bps
-
-# ─────────────────────────────────────────────────────────
-# pigpio 初期化／デーモン接続確認
-# ─────────────────────────────────────────────────────────
-
+# ────── pigpio 初期化 ──────
 pi = pigpio.pi()
 if not pi.connected:
     print("pigpio デーモンに接続できません。")
     exit(1)
-
-# ─────────────────────────────────────────────────────────
-# ソフトUART RX をビットバンギング受信で開く
-# ─────────────────────────────────────────────────────────
 
 err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
 if err != 0:
@@ -30,64 +22,52 @@ if err != 0:
     exit(1)
 print(f"▶ ソフトUART RX を開始：GPIO={RX_PIN}, {BAUD}bps")
 
-def parse_gga(nmea_string):
-    """
-    $GNGGA,NMEA文を解析して緯度、経度などの情報を返す
-    """
-    pattern = r"\$GNGGA,(\d{6}\.\d{3}),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)"
-    match = re.match(pattern, nmea_string)
-    
-    if match:
-        latitude = match.group(2)
-        longitude = match.group(3)
+# ────── 緯度・経度を10進数に変換 ──────
+def convert_to_decimal(degree_min, direction):
+    if not degree_min or not direction:
+        return None
+    if '.' not in degree_min:
+        return None
+    d, m = degree_min.split('.', 1)
+    if len(d) <= 2:  # 例外的
+        deg = int(d)
+        minutes = float('0.' + m) * 60
+    else:
+        deg = int(d[:-2])
+        minutes = float(d[-2:] + '.' + m)
+    decimal = deg + minutes / 60
+    if direction in ['S', 'W']:
+        decimal *= -1
+    return decimal
 
-        # 緯度と経度が有効な場合のみ返す
-        if latitude and longitude and latitude != "0" and longitude != "0":
-            return [latitude, longitude]
-    return None
-
-def parse_rmc(nmea_string):
-    """
-    $GNRMC,NMEA文を解析して緯度、経度、速度、日付などの情報を返す
-    """
-    pattern = r"\$GNRMC,(\d{6}\.\d{3}),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)"
-    match = re.match(pattern, nmea_string)
-    
-    if match:
-        latitude = match.group(2)
-        longitude = match.group(3)
-
-        # 緯度と経度が有効な場合のみ返す
-        if latitude and longitude and latitude != "0" and longitude != "0":
-            return [latitude, longitude]
-    return None
-
-# ─────────────────────────────────────────────────────────
-# メインループ：受信データがあれば読み取り、送信処理も試す
-# ─────────────────────────────────────────────────────────
-
+# ────── メインループ ──────
 try:
+    buffer = ""
     while True:
-        # 受信データ
         (count, data) = pi.bb_serial_read(RX_PIN)
-        
-        if count and data:
-            recv_str = data.decode("ascii", errors="ignore")
-            print(f"<< SoftUART Received ({count}bytes):", recv_str.strip())
+        if count > 0:
+            text = data.decode("ascii", errors="ignore")
+            buffer += text
 
-            # GGAメッセージの解析
-            if recv_str.startswith("$GNGGA"):
-                coords = parse_gga(recv_str)
-                if coords:
-                    print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
-            
-            # RMCメッセージの解析
-            elif recv_str.startswith("$GNRMC"):
-                coords = parse_rmc(recv_str)
-                if coords:
-                    print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
-        
-        time.sleep(1)
+            # センテンスごとに分割
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                line = line.strip()
+
+                # デバッグ出力（オプション）
+                # print("<<", line)
+
+                # `$GNRMC` の有効なセンテンスを解析
+                if line.startswith("$GNRMC") and ',A,' in line:
+                    fields = line.split(',')
+                    if len(fields) > 6:
+                        lat = convert_to_decimal(fields[3], fields[4])
+                        lon = convert_to_decimal(fields[5], fields[6])
+                        if lat is not None and lon is not None:
+                            x = [lat, lon]
+                            print("緯度と経度 (10進数):", x)
+
+        time.sleep(0.1)
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
