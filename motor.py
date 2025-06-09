@@ -53,72 +53,72 @@ class MotorDriver:
          self.pwma.ChangeDutyCycle(speed)
          self.pwmb.ChangeDutyCycle(speed)
 
-#後退
-    def motor_retreat(self, speed):
-        GPIO.output(self.A1, GPIO.LOW)
-        GPIO.output(self.A2, GPIO.HIGH)
-        GPIO.output(self.B1, GPIO.LOW)
-        GPIO.output(self.B2, GPIO.HIGH)
-        self.pwma.ChangeDutyCycle(speed)
-        self.pwmb.ChangeDutyCycle(speed)
+ #後退
+     def motor_retreat(self, speed):
+         GPIO.output(self.A1, GPIO.LOW)
+         GPIO.output(self.A2, GPIO.HIGH)
+         GPIO.output(self.B1, GPIO.LOW)
+         GPIO.output(self.B2, GPIO.HIGH)
+         self.pwma.ChangeDutyCycle(speed)
+         self.pwmb.ChangeDutyCycle(speed)
+ 
+     #モータのトルクでブレーキをかける
+     def motor_stop_free(self):
+         self.pwma.ChangeDutyCycle(0)
+         self.pwmb.ChangeDutyCycle(0)
+         GPIO.output(self.A1, GPIO.LOW)
+         GPIO.output(self.A2, GPIO.LOW)
+         GPIO.output(self.B1, GPIO.LOW)
+         GPIO.output(self.B2, GPIO.LOW)
+ 
+ #ガチブレーキ(恐らく)
+     def motor_stop_brake(self):
+         self.pwma.ChangeDutyCycle(0)
+         self.pwmb.ChangeDutyCycle(0)
+         GPIO.output(self.A1, GPIO.HIGH)
+         GPIO.output(self.A2, GPIO.HIGH)
+         GPIO.output(self.B1, GPIO.HIGH)
+         GPIO.output(self.B2, GPIO.HIGH)
 
-    #モータのトルクでブレーキをかける
-    def motor_stop_free(self):
-        self.pwma.ChangeDutyCycle(0)
-        self.pwmb.ChangeDutyCycle(0)
-        GPIO.output(self.A1, GPIO.LOW)
-        GPIO.output(self.A2, GPIO.LOW)
-        GPIO.output(self.B1, GPIO.LOW)
-        GPIO.output(self.B2, GPIO.LOW)
+ #雑なキャリブレーション(__init__とセットで使おうね)
+     def cleanup(self):
+         self.pwma.stop()
+         self.pwmb.stop()
+         GPIO.cleanup()
+ 
+    #前進：任意
+     def motor_forward(self, speed):
+         GPIO.output(self.A1, GPIO.HIGH)
+         GPIO.output(self.A2, GPIO.LOW)
+         GPIO.output(self.B1, GPIO.HIGH)
+         GPIO.output(self.B2, GPIO.LOW)
+         self.pwma.ChangeDutyCycle(speed) 
+         self.pwmb.ChangeDutyCycle(speed)
+    
+    #前進：回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
+     def changing_forward(self, before, after):
+         global speed
+         for i in range(200):
+             delta_speed = (after - before) / 200
+             speed = before + i * delta_speed
+             self.motor_forward(speed)
+             time.sleep(0.02)
 
-#ガチブレーキ(恐らく)
-    def motor_stop_brake(self):
-        self.pwma.ChangeDutyCycle(0)
-        self.pwmb.ChangeDutyCycle(0)
-        GPIO.output(self.A1, GPIO.HIGH)
-        GPIO.output(self.A2, GPIO.HIGH)
-        GPIO.output(self.B1, GPIO.HIGH)
-        GPIO.output(self.B2, GPIO.HIGH)
-
-#雑なキャリブレーション(__init__とセットで使おうね)
-    def cleanup(self):
-        self.pwma.stop()
-        self.pwmb.stop()
-        GPIO.cleanup()
-
-   #前進：任意
-    def motor_forward(self, speed):
-        GPIO.output(self.A1, GPIO.HIGH)
-        GPIO.output(self.A2, GPIO.LOW)
-        GPIO.output(self.B1, GPIO.HIGH)
-        GPIO.output(self.B2, GPIO.LOW)
-        self.pwma.ChangeDutyCycle(speed) 
-        self.pwmb.ChangeDutyCycle(speed)
-   
-   #前進：回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
-    def changing_forward(self, before, after):
-        global speed
-        for i in range(200):
-            delta_speed = (after - before) / 200
-            speed = before + i * delta_speed
-            self.motor_forward(speed)
-            time.sleep(0.02)
-
-#右折：回転数制御(基本は停止してから使いましょう)
-    def changing_right(self, before, after):
-        global speed
-        for i in range(200):
-            delta_speed = (after - before) / 200
-            speed = before + i * delta_speed
-            self.motor_right(speed)
-            time.sleep(0.02)
-
-#左折（同様）
-    def changing_left(self, before, after):
-        global speed
-        for i in range(200):
-            delta_speed = (after - before) / 200
-            speed = before + i * delta_speed
-            self.motor_left(speed)
-            time.sleep(0.02)
+ #右折：回転数制御(基本は停止してから使いましょう)
+     def changing_right(self, before, after):
+         global speed
+         for i in range(200):
+             delta_speed = (after - before) / 200
+             speed = before + i * delta_speed
+             self.motor_right(speed)
+             time.sleep(0.02)
+ 
+ #左折（同様）
+     def changing_left(self, before, after):
+         global speed
+         for i in range(200):
+             delta_speed = (after - before) / 200
+             speed = before + i * delta_speed
+             self.motor_left(speed)
+             time.sleep(0.02)
 
