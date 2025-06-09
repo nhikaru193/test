@@ -67,7 +67,7 @@ try:
 
         # ------- [2] 必要であれば、別メッセージを挟んで定期送信も可能 -------
         # ここでは特に何もしないか、1秒待機
-        time.sleep(0.5)
+        time.sleep(10)
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
