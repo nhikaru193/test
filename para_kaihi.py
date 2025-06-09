@@ -20,10 +20,21 @@ WAIT_DURATION = 5
 left_motor = Motor(forward=17, backward=18)
 right_motor = Motor(forward=22, backward=23)
 
-def move_forward(): left_motor.forward(); right_motor.forward()
-def stop(): left_motor.stop(); right_motor.stop()
-def turn_left(): left_motor.backward(); right_motor.forward()
-def turn_right(): left_motor.forward(); right_motor.backward()
+def move_forward():
+    left_motor.forward()
+    right_motor.forward()
+
+def stop():
+    left_motor.stop()
+    right_motor.stop()
+
+def turn_left():
+    left_motor.backward()
+    right_motor.forward()
+
+def turn_right():
+    left_motor.forward()
+    right_motor.backward()
 
 # --- センサ初期化 ---
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -33,7 +44,7 @@ camera = Picamera2()
 camera.configure(camera.create_preview_configuration(main={"format": 'RGB888', "size": (320, 240)}))
 camera.start()
 
-# --- 色検出設定（赤） ---
+# --- 赤色検出範囲（HSV） ---
 LOWER_RED1 = np.array([0, 120, 70])
 UPPER_RED1 = np.array([10, 255, 255])
 LOWER_RED2 = np.array([170, 120, 70])
@@ -83,6 +94,7 @@ color_detection_mode = False
 goal_reached = False
 
 try:
+    # --- 目標方向へ向くフェーズ ---
     while not color_detection_mode:
         lat, lon = get_gps_position()
         heading = sensor.euler[0]
@@ -93,7 +105,7 @@ try:
                 diff = 360 - diff
             print(f"現在方位: {heading:.1f}°, 目的地方位: {goal_bearing:.1f}°, 差: {diff:.1f}°")
             if diff < BEARING_TOLERANCE:
-                print("✅ 目的地方向に向いた → 色検知モード開始")
+                print("✅ 向き完了 → 色検知モードへ")
                 color_detection_mode = True
             else:
                 print("🔄 向き調整中...")
@@ -102,31 +114,55 @@ try:
                 stop()
         time.sleep(0.5)
 
+    # --- 色検知＆回避・最終GPS取得 ---
     while not goal_reached:
         frame = camera.capture_array()
         centroid = detect_red_centroid(frame)
 
-       if centroid is None:
-   　　　　 print("🟢 パラシュートなし → 前進してGPS確認")
-  　　　　  move_forward()
-           time.sleep(2)
-           stop()
-    
-           # GPSを再取得
-           lat, lon = get_gps_position()
-           if lat and lon:
-               print(f"📍 再取得位置: 緯度={lat}, 経度={lon}")
-           else:
-               print("⚠️ GPS取得失敗")
+        if centroid is None:
+            print("🟢 パラシュートなし → 前進してGPS再取得")
+            move_forward()
+            time.sleep(2)
+            stop()
 
-           # モーター停止（安全対策）とキャリブレーション（方位取得）
-           stop()
-           heading = sensor.euler[0]
-           if heading is not None:
-               print(f"🧭 キャリブレーション完了。最終方位: {heading:.2f}°")
-           else:
-               print("⚠️ 方位センサからの読み取り失敗")
+            # --- GPS再取得 ---
+            lat, lon = get_gps_position()
+            if lat and lon:
+                print(f"📍 再取得位置: 緯度={lat}, 経度={lon}")
+            else:
+                print("⚠️ GPS取得失敗")
 
-           print("✅ ミッション完了（GPS再取得 & キャリブレーション済）")
-           goal_reached = True
-           break
+            # --- キャリブレーション ---
+            heading = sensor.euler[0]
+            if heading is not None:
+                print(f"🧭 キャリブレーション完了。最終方位: {heading:.2f}°")
+            else:
+                print("⚠️ 方位センサ読み取り失敗")
+
+            print("✅ ミッション完了（回避 → GPS → 停止 → キャリブレーション）")
+            goal_reached = True
+            break
+
+        else:
+            print(f"🔴 パラシュート検知 → 回避実行中 ({avoid_count+1})")
+            avoid_count += 1
+            if avoid_count >= AVOID_LIMIT:
+                print("⚠️ 被さり判定 → 停止して待機")
+                stop()
+                time.sleep(WAIT_DURATION)
+                avoid_count = 0
+                continue
+
+            if centroid < 100:
+                turn_right()
+            elif centroid > 220:
+                turn_left()
+            else:
+                stop()
+            time.sleep(0.5)
+
+except KeyboardInterrupt:
+    print("⛔ 手動停止")
+finally:
+    stop()
+    print("🛑 ローバー停止完了")
