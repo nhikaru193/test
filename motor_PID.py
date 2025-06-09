@@ -28,7 +28,7 @@ def changing_control(before, after):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
        motor_any(speed)
-       time.sleep(0.01)
+       time.sleep(0.1)
      
 try:
     a_speed = 0
