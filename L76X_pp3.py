@@ -45,7 +45,6 @@ try:
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
                                 print("緯度と経度 (10進数):", [lat, lon])
-                                print("Google Mapsで開く →", f"https://www.google.com/maps?q={lat},{lon}")
             except Exception as e:
                 print("デコードエラー:", e)
         time.sleep(0.1)
