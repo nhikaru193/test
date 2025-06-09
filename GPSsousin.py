@@ -9,7 +9,7 @@ target_lat = 35.681236
 target_lon = 139.767125
 
 # 送信文字列の組み立て（ローバーが受け取りやすい形式）
-msg = f"TXDA GPS:{target_lat},{target_lon}\r\n"
+msg = "TXDA GPS:35.681236,139.767125\r\n"
 
 # 送信
 im920.write(msg.encode())
