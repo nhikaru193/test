@@ -41,11 +41,10 @@ def parse_gga(nmea_string):
         latitude = match.group(2)
         longitude = match.group(3)
 
-        # 緯度経度を返す（リスト形式で返す）
-        return [latitude, longitude]
-    else:
-        print("Invalid GGA message")
-        return None
+        # 緯度と経度が有効な場合のみ返す
+        if latitude != "" and longitude != "" and latitude != "0" and longitude != "0":
+            return [latitude, longitude]
+    return None
 
 def parse_rmc(nmea_string):
     """
@@ -58,11 +57,10 @@ def parse_rmc(nmea_string):
         latitude = match.group(2)
         longitude = match.group(3)
 
-        # 緯度経度を返す（リスト形式で返す）
-        return [latitude, longitude]
-    else:
-        print("Invalid RMC message")
-        return None
+        # 緯度と経度が有効な場合のみ返す
+        if latitude != "" and longitude != "" and latitude != "0" and longitude != "0":
+            return [latitude, longitude]
+    return None
 
 # ─────────────────────────────────────────────────────────
 # メインループ：受信データがあれば読み取り、送信処理も試す
@@ -89,7 +87,7 @@ try:
                 if coords:
                     print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
         
-        time.sleep(1)
+        time.sleep(0.1)
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
