@@ -87,7 +87,7 @@ try:
                 if coords:
                     print(f"緯度と経度: {coords}")  # [緯度, 経度] の形で出力
         
-        time.sleep(0.1)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
