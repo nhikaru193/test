@@ -42,7 +42,7 @@ def parse_gga(nmea_string):
         longitude = match.group(3)
 
         # 緯度と経度が有効な場合のみ返す
-        if latitude != "" and longitude != "" and latitude != "0" and longitude != "0":
+        if latitude and longitude and latitude != "0" and longitude != "0":
             return [latitude, longitude]
     return None
 
@@ -58,7 +58,7 @@ def parse_rmc(nmea_string):
         longitude = match.group(3)
 
         # 緯度と経度が有効な場合のみ返す
-        if latitude != "" and longitude != "" and latitude != "0" and longitude != "0":
+        if latitude and longitude and latitude != "0" and longitude != "0":
             return [latitude, longitude]
     return None
 
