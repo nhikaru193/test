@@ -1,41 +1,122 @@
 import math
 import time
-from motor_driver import MotorDriver  # 自作クラスファイル名がmotor_driver.pyであると仮定
+import pigpio
+from RPi.GPIO import GPIO
+
+class MotorDriver:
+ #初期設定関数の定義
+ def __init__(self,
+              PWMA, AIN1, AIN2,
+              PWMB, BIN1, BIN2, STBY,
+              freq = 1000):
+    
+    #GPIO初期化
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup([AIN1, BIN2, PWMA, BIN1, BIN2, PWMB, STBY], GPIO.OUT)   #すべてのpinの出力を開始(使えるようになる)
+
+    #右車輪モータ制御ピン代入
+    BIN1 = 16
+    BIN2 = 26
+    PWMB = 19
+
+    #左車輪モータ制御ピン代入
+    AIN1 = 23
+    AIN2 = 18
+    PWMA = 12
+    STBY = 21
+    
+    #モータ起動
+    GPIO.output(STBY, GPIO.HIGH)
+
+    #self型の関数に格納　なぜか？⇒self型に格納しないと同クラス内で関数の情報が引き継がない(スコープの問題)
+    self.A1, self.A2 = AIN1, AIN2
+    self.B1, self.B2 = BIN1, BIN2
+    self.pwma = GPIO.PWM(PWMA, freq)
+    self.pwmb = GPIO.PWM(PWMB, freq)
+    #motorの起動：デューティ比0⇒停止
+    self.pwma.start(0)
+    self.pwmb.start(0)
 
 # === 目標地点設定（[緯度, 経度]）===
 GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 
 # === GPSデータ取得（仮の実装）===
-def get_current_gps_location():
-    # L76Xから現在の緯度経度を取得する処理をここに書く
-    return [35.6600, 139.7400]  # 仮データ（実装時に置き換えてください）
+TX_PIN = 17
+RX_PIN = 27
+BAUD = 9600
+
+pi = pigpio.pi()
+if not pi.connected:
+    print("pigpio デーモンに接続できません。")
+    exit(1)
+
+err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
+if err != 0:
+    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}, {BAUD}bps")
+    pi.stop()
+    exit(1)
+
+print(f"▶ ソフトUART RX を開始：GPIO={RX_PIN}, {BAUD}bps")
+
+def convert_to_decimal(coord, direction):
+    # 度分（ddmm.mmmm）形式を10進数に変換
+    degrees = int(coord[:2]) if direction in ['N', 'S'] else int(coord[:3])
+    minutes = float(coord[2:]) if direction in ['N', 'S'] else float(coord[3:])
+    decimal = degrees + minutes / 60
+    if direction in ['S', 'W']:
+        decimal *= -1
+    return decimal
+
+try:
+    while True:
+        (count, data) = pi.bb_serial_read(RX_PIN)
+        if count and data:
+            try:
+                text = data.decode("ascii", errors="ignore")
+                if "$GNRMC" in text:
+                    lines = text.split("\n")
+                    for line in lines:
+                        if "$GNRMC" in line:
+                            parts = line.strip().split(",")
+                            if len(parts) > 6 and parts[2] == "A":
+                                lat = convert_to_decimal(parts[3], parts[4])
+                                lon = convert_to_decimal(parts[5], parts[6])
+                                print("緯度と経度 (10進数):", [lat, lon])
+            except Exception as e:
+                print("デコードエラー:", e)
+        time.sleep(0.1)
+
+except KeyboardInterrupt:
+    print("\nユーザー割り込みで終了します。")
 
 # === 方位角・距離の関数 ===
-def direction(last_lng, location):
-    x1 = math.radians(last_lng[0])
-    y1 = math.radians(last_lng[1])
-    x2 = math.radians(location[0])
-    y2 = math.radians(location[1])
-    delta_y = y2 - y1
-    phi = math.atan2(math.sin(delta_y), math.cos(x1) * math.tan(x2) - math.sin(x1) * math.cos(delta_y))
-    angle = (math.degrees(phi) + 360) % 360
-    return angle
+def direction(last_lng, location):   #last_lng, locationはいずれも行列形式[latitude, longitude]　last_lngは現在地点, locationはゴール目標地点
+    x1 = math.radians(last_lng[0])   #現在地点　緯度
+    y1 = math.radians(last_lng[1])   #現在地点　経度
+    x2 = math.radians(location[0])   #目標地点　緯度
+    y2 = math.radians(location[1])   #目標地点　経度
 
+    delta_y = y2 - y1
+    #print("delta_y", delta_y)
+
+    phi = math.atan2(math.sin(delta_y), math.cos(x1) * math.tan(x2) - math.sin(x1) * math.cos(delta_y))
+    phi = math.degrees(phi)
+    angle = (phi + 360) % 360
+    #print("phi =", phi)
+    return abs(angle) + (1 / 7200.0) #単位は°
+
+# 2地点間の距離を計算
 def distance(current_location, destination_location):
     x1 = math.radians(current_location[0])
     y1 = math.radians(current_location[1])
     x2 = math.radians(destination_location[0])
     y2 = math.radians(destination_location[1])
-    R = 6378137.0
-    d = R * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
-    return d
 
-# === モーター制御インスタンス作成 ===
-motor = MotorDriver(
-    PWMA=12, AIN1=23, AIN2=18,
-    PWMB=19, BIN1=16, BIN2=26,
-    STBY=21
-)
+    radius = 6378137.0
+
+    dist = radius * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
+
+    return dist #単位はメートル
 
 # === メイン制御ループ ===
 def navigate_to_goal():
@@ -66,9 +147,16 @@ def navigate_to_goal():
                 forward_duration = 20
 
             print(f"[MOVING] {forward_duration}秒前進します")
-            motor.motor_level2(speed=40)
-            time.sleep(forward_duration)
-            motor.motor_stop_free()
+
+             def motor_forward(self, speed):
+   　　　　　　 GPIO.output(self.A1, GPIO.HIGH)
+ 　　　　　　   GPIO.output(self.A2, GPIO.LOW)
+    　　　　　　GPIO.output(self.B1, GPIO.HIGH)
+    　　　　　　GPIO.output(self.B2, GPIO.LOW)
+    　　　　　　self.pwma.ChangeDutyCycle(speed) 
+    　　　　　　self.pwmb.ChangeDutyCycle(speed)
+               time.sleep(forward_duration)
+               motor.motor_stop_free()
 
             # 再測定
             current_location = get_current_gps_location()
