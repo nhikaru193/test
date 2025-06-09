@@ -32,7 +32,7 @@ def changing_control(before, after):
      
 try:
     a_speed = 0
-    b_speed = 80
+    b_speed = 50
     changing_control(a_speed, b_speed)
     c_speed = 0 
     changing_control(b_speed, c_speed)
