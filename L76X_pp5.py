@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import pigpio
 import time
 
+TX_PIN = 17
 RX_PIN = 27
 BAUD = 9600
 
@@ -9,15 +13,15 @@ if not pi.connected:
     print("pigpio デーモンに接続できません。")
     exit(1)
 
-# RXポートをオープン
-if pi.bb_serial_read_open(RX_PIN, BAUD, 8) != 0:
-    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}")
+# RXをオープン
+err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
+if err != 0:
+    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}, {BAUD}bps")
     pi.stop()
     exit(1)
-
 print(f"▶ ソフトUART RX を開始：GPIO={RX_PIN}, {BAUD}bps")
 
-recv_buffer = b""
+recv_buffer = b""  # バッファを初期化
 
 try:
     while True:
@@ -31,10 +35,10 @@ try:
                     if decoded.startswith("$GPRMC"):
                         print("✅ GPRMC:", decoded)
                     elif decoded.startswith("$"):
-                        print("その他のNMEA:", decoded)
+                        print("NMEA:", decoded)
                 except Exception as e:
                     print("デコードエラー:", e)
-        time.sleep(0.05)
+        time.sleep(0.05)  # 50ミリ秒ごとにチェック（高速）
 
 except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
