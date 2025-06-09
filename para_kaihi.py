@@ -106,38 +106,27 @@ try:
         frame = camera.capture_array()
         centroid = detect_red_centroid(frame)
 
-        if centroid is None:
-            print("🟢 パラシュートなし → 前進してGPS確認")
-            move_forward()
-            time.sleep(2)
-            stop()
-            lat, lon = get_gps_position()
-            if lat and lon:
-                print(f"📍 現在位置: 緯度={lat}, 経度={lon}")
-            heading = sensor.euler[0]
-            print(f"🧭 現在の方位: {heading:.2f}°")
-            print("✅ ミッション完了")
-            goal_reached = True
-            break
-        else:
-            print(f"🔴 パラシュート検知！回避実行中 ({avoid_count+1})")
-            avoid_count += 1
-            if avoid_count >= AVOID_LIMIT:
-                print("⚠️ 被さり判定 → 待機")
-                stop()
-                time.sleep(WAIT_DURATION)
-                avoid_count = 0
-                continue
-            if centroid < 100:
-                turn_right()
-            elif centroid > 220:
-                turn_left()
-            else:
-                stop()
-            time.sleep(0.5)
+       if centroid is None:
+   　　　　 print("🟢 パラシュートなし → 前進してGPS確認")
+  　　　　  move_forward()
+           time.sleep(2)
+           stop()
+    
+           # GPSを再取得
+           lat, lon = get_gps_position()
+           if lat and lon:
+               print(f"📍 再取得位置: 緯度={lat}, 経度={lon}")
+           else:
+               print("⚠️ GPS取得失敗")
 
-except KeyboardInterrupt:
-    print("⛔ 手動停止")
-finally:
-    stop()
-    print("🛑 ローバー停止")
+           # モーター停止（安全対策）とキャリブレーション（方位取得）
+           stop()
+           heading = sensor.euler[0]
+           if heading is not None:
+               print(f"🧭 キャリブレーション完了。最終方位: {heading:.2f}°")
+           else:
+               print("⚠️ 方位センサからの読み取り失敗")
+
+           print("✅ ミッション完了（GPS再取得 & キャリブレーション済）")
+           goal_reached = True
+           break
