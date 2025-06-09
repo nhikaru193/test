@@ -2,13 +2,7 @@ import math
 import time
 import pigpio
 from RPi.GPIO import GPIO
-
-class MotorDriver:
- #初期設定関数の定義
- def __init__(self,
-              PWMA, AIN1, AIN2,
-              PWMB, BIN1, BIN2, STBY,
-              freq = 1000):
+from motor import MotorDriver
     
     #GPIO初期化
     GPIO.setmode(GPIO.BCM)
