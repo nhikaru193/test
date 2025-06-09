@@ -6,11 +6,11 @@
 import math
 
 # 2地点間の方位角を計算
-def direction(last_lng, location):
-    x1 = math.radians(last_lng[0])
-    y1 = math.radians(last_lng[1])
-    x2 = math.radians(location[0])
-    y2 = math.radians(location[1])
+def direction(last_lng, location):   #last_lng, locationはいずれも行列形式[latitude, longitude]　last_lngは現在地点, locationはゴール目標地点
+    x1 = math.radians(last_lng[0])   #現在地点　緯度
+    y1 = math.radians(last_lng[1])   #現在地点　経度
+    x2 = math.radians(location[0])   #目標地点　緯度
+    y2 = math.radians(location[1])   #目標地点　経度
 
     delta_y = y2 - y1
     #print("delta_y", delta_y)
