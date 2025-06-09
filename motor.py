@@ -124,7 +124,7 @@ def cleanup(self):
 
 #回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
 def changing_control(self, before, after):
-    global.speed
+    global speed
     for i in range(200):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
