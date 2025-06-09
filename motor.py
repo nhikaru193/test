@@ -112,3 +112,21 @@ def cleanup(self):
    self.pwma.stop()
    self.pwmb.stop()
    GPIO.cleanup()
+
+#前進：任意
+ def motor_any(self, speed):
+    GPIO.output(self.A1, GPIO.HIGH)
+    GPIO.output(self.A2, GPIO.LOW)
+    GPIO.output(self.B1, GPIO.HIGH)
+    GPIO.output(self.B2, GPIO.LOW)
+    self.pwma.ChangeDutyCycle(speed) 
+    self.pwmb.ChangeDutyCycle(speed)
+
+#回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
+def changing_control(self, before, after):
+    global.speed
+    for i in range(200):
+       delta_speed = (after - before) / 200
+       speed = before + i * delta_speed
+       self.motor_any(speed)
+
