@@ -35,35 +35,8 @@ class MotorDriver:
     self.pwma.start(0)
     self.pwmb.start(0)
 
-    #前進：レベル3 
- def motor_level3(self, speed=60):
-    GPIO.output(self.A1, GPIO.HIGH)
-    GPIO.output(self.A2, GPIO.LOW)
-    GPIO.output(self.B1, GPIO.HIGH)
-    GPIO.output(self.B2, GPIO.LOW)
-    self.pwma.ChangeDutyCycle(speed)
-    self.pwmb.ChangeDutyCycle(speed)
-
-    #前進：レベル2
- def motor_level2(self, speed=40):
-    GPIO.output(self.A1, GPIO.HIGH)
-    GPIO.output(self.A2, GPIO.LOW)
-    GPIO.output(self.B1, GPIO.HIGH)
-    GPIO.output(self.B2, GPIO.LOW)
-    self.pwma.ChangeDutyCycle(speed)
-    self.pwmb.ChangeDutyCycle(speed)
-
-#モータ速度制御レベル1
- def motor_level1(self, speed=20):
-    GPIO.output(self.A1, GPIO.HIGH)
-    GPIO.output(self.A2, GPIO.LOW)
-    GPIO.output(self.B1, GPIO.HIGH)
-    GPIO.output(self.B2, GPIO.LOW)
-    self.pwma.ChangeDutyCycle(speed) 
-    self.pwmb.ChangeDutyCycle(speed)
-
 #右回頭
- def motor_right(self, speed = 20):
+ def motor_right(self, speed):
     GPIO.output(self.A1, GPIO.HIGH)
     GPIO.output(self.A2, GPIO.LOW)
     GPIO.output(self.B1, GPIO.LOW)
@@ -72,7 +45,7 @@ class MotorDriver:
     self.pwmb.ChangeDutyCycle(speed)
 
 #左回頭
-def motor_left(self, speed = 20):
+def motor_left(self, speed):
     GPIO.output(self.A1, GPIO.LOW)
     GPIO.output(self.A2, GPIO.HIGH)
     GPIO.output(self.B1, GPIO.HIGH)
@@ -81,7 +54,7 @@ def motor_left(self, speed = 20):
     self.pwmb.ChangeDutyCycle(speed)
 
 #後退
-def motor_retreat(self, speed = 30):
+def motor_retreat(self, speed):
     GPIO.output(self.A1, GPIO.LOW)
     GPIO.output(self.A2, GPIO.HIGH)
     GPIO.output(self.B1, GPIO.LOW)
@@ -114,7 +87,7 @@ def cleanup(self):
    GPIO.cleanup()
 
 #前進：任意
- def motor_any(self, speed):
+ def motor_forward(self, speed):
     GPIO.output(self.A1, GPIO.HIGH)
     GPIO.output(self.A2, GPIO.LOW)
     GPIO.output(self.B1, GPIO.HIGH)
@@ -122,11 +95,27 @@ def cleanup(self):
     self.pwma.ChangeDutyCycle(speed) 
     self.pwmb.ChangeDutyCycle(speed)
 
-#回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
-def changing_control(self, before, after):
+#前進：回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
+def changing_forward(self, before, after):
     global speed
     for i in range(200):
        delta_speed = (after - before) / 200
        speed = before + i * delta_speed
-       self.motor_any(speed)
+       self.motor_forward(speed)
+
+#右折：回転数制御(基本は停止してから使いましょう)
+def changing_right(self, before, after):
+    global speed
+    for i in range(200):
+       delta_speed = (after - before) / 200
+       speed = before + i * delta_speed
+       self.motor_light(speed)
+
+#左折（同様）
+def changing_left(self, before, after):
+    global speed
+    for i in range(200):
+       delta_speed = (after - before) / 200
+       speed = before + i * delta_speed
+       self.motor_left(speed)
 
