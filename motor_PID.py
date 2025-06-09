@@ -6,6 +6,8 @@ BIN2 = 26
 PWMB = 19
 STBY = 21
 
+speed = 0
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup([BIN1, BIN2, PWMB, STBY], GPIO.OUT)
 
