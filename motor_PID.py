@@ -23,7 +23,7 @@ def motor_any(speed):
     pwm.ChangeDutyCycle(speed)
 
 def changing_control(before, after):
-    global speed
+   global speed
    for i in range(200):
        delta_speed = (after - before) / 200
        speed = speed + i * delta_speed
