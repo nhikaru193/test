@@ -1,6 +1,7 @@
 import time
 import RPi.GPIO as GPIO
-from GNSS_navigate import GNSS_navigate
+from GNSS_navigate import direction
+from GNSS_navigate import 
 from motor import motor
 import cv2
 import numpy as np
