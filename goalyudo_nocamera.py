@@ -4,6 +4,13 @@ import pigpio
 from RPi.GPIO import GPIO
 from motor import MotorDriver
 
+# インスタンス生成：GPIOピン番号を正しく指定
+driver = MotorDriver(
+    PWMA=12, AIN1=23, AIN2=18,   # 左モーター用（モータA）
+    PWMB=19, BIN1=16, BIN2=26,   # 右モーター用（モータB）
+    STBY=21                      # STBYピン
+)
+
 # === 目標地点設定（[緯度, 経度]）===
 GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 
@@ -101,9 +108,9 @@ def navigate_to_goal():
             # 方位誤差が2°以内に収まるまで右回転
             while abs(angle_error) > 2.0:
                 print("[TURNING] 誤差が大きいため右回頭中...")
-                MotorDriver.changing_right(0, 25)
+                driver.changing_right(0, 25)
                 time.sleep(1)
-                MotorDriver.motor_stop_free()
+                driver.motor_stop_free()
                 current_location = get_current_gps_location()
                 angle_to_goal = direction(current_location, GOAL_LOCATION)
                 angle_error = (angle_to_goal - current_heading + 360) % 360
@@ -116,7 +123,7 @@ def navigate_to_goal():
 
             print(f"[MOVING] {forward_duration}秒前進します")
 
-             MortorDriver.changing_forward(0, 25, 80):
+             driver.changing_forward(25, 80):
                time.sleep(forward_duration)
                MotorDriver.motor_stop_free()
 
@@ -127,7 +134,7 @@ def navigate_to_goal():
             # 終了条件
             if dist <= 5.0:
                 print("[GOAL] 目標地点に到達しました！")
-                MotorDriver.motor_stop_brake()
+                driver.motor_stop_brake()
                 break
 
             print("[LOOP] 次のループへ移行...\n")
@@ -135,7 +142,7 @@ def navigate_to_goal():
     except KeyboardInterrupt:
         print("[INTERRUPT] 停止します")
     finally:
-        MotorDriver.cleanup()
+        driver.cleanup()
 
 # === 実行 ===
 navigate_to_goal()
