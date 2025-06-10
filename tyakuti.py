@@ -1,18 +1,15 @@
 import smbus
 import time
-from BNO055 import BNO055  # BNO055をインポート
+from bno055 import BNO055
 
-# BME280関連のグローバル変数
+# BME280関連
 t_fine = 0.0
 digT = []
 digP = []
 digH = []
 
-# I2Cアドレスとバス設定
 i2c = smbus.SMBus(1)
 address = 0x76
-
-# ----------- BME280 初期化と補正関数群（あなたのコードそのまま） -----------
 
 def init_bme280():
     i2c.write_byte_data(address, 0xF2, 0x01)
@@ -50,8 +47,7 @@ def bme280_compensate_t(adc_T):
     var1 = (adc_T / 8.0 - digT[0] * 2.0) * digT[1] / 2048.0
     var2 = ((adc_T / 16.0 - digT[0]) ** 2) * digT[2] / 16384.0
     t_fine = var1 + var2
-    t = (t_fine * 5 + 128) / 256 / 100
-    return t
+    return (t_fine * 5 + 128) / 256 / 100
 
 def bme280_compensate_p(adc_P):
     global t_fine
@@ -79,75 +75,74 @@ def read_pressure():
 
 # ----------- 着地判定処理 -----------
 
-def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3):
-    # BME280初期化
+def check_landing(pressure_threshold=1010.0, acc_threshold=0.1, gyro_threshold=1.0, timeout=60):
     init_bme280()
     read_compensate()
 
-    # BNO055初期化部分
-    bno = BNO055()  # BNO055クラスのインスタンス化
+    bno = BNO055()
     if not bno.begin():
         print("BNO055 初期化失敗")
         return
     bno.setExternalCrystalUse(True)
+    bno.setMode(BNO055.OPERATION_MODE_NDOF)
+    time.sleep(0.1)
+    bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # ウォームアップ
+    time.sleep(0.1)
 
-    print("着地判定開始")
+    print("🛬 着地判定開始")
 
-    stable_pressure = None  # 着地時に安定している気圧を記録
-    stable_acc = None  # 着地時に安定している加速度
-    stable_gyro = None  # 着地時に安定している角加速度
-
-    release_counter = 0  # 連続判定回数
+    landing_counter = 0
     start_time = time.time()
 
     try:
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
-                print("⏰ タイムアウト：判定中止")
+                print("⏰ タイムアウト：強制判定")
                 landing_counter += 1
-                print(f"⚠️ 判定成立 {landing_counter}/3 - タイムアウトによる強制判定")
                 if landing_counter >= 3:
-                    print("✅ 着地判定成功：タイムアウトで3回連続成立！")
+                    print("✅ 着地判定成功（タイムアウトで3回連続）")
                 break
-            else:
-                break  # タイムアウト後、判定中止
 
             pressure = read_pressure()
-            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
-            gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)  # 角加速度（角速度）
+            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+            gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)
 
-            print(f"[気圧] {pressure:.2f} hPa, [加速度] X: {acc_x:.2f}, Y: {acc_y:.2f}, Z: {acc_z:.2f} m/s²"
-                  f"[角加速度X] {gyro_x:.2f} °/s, [角加速度Y] {gyro_y:.2f} °/s, [角加速度Z] {gyro_z:.2f} °/s")
+            print(f"[気圧] {pressure:.2f} hPa")
+            print(f"[加速度] X: {acc_x:.2f}, Y: {acc_y:.2f}, Z: {acc_z:.2f} m/s²")
+            print(f"[角速度] X: {gyro_x:.2f}, Y: {gyro_y:.2f}, Z: {gyro_z:.2f} °/s")
 
-            # 初期安定した気圧、加速度、角加速度を取得
-            if stable_pressure is None:
-                stable_pressure = pressure
-            if stable_acc is None:
-                stable_acc = acc_z
-            if stable_gyro is None:
-                stable_gyro = gyro_x  # 角加速度が安定しているか確認
+            acc_static = (abs(acc_x) < acc_threshold and
+                          abs(acc_y) < acc_threshold and
+                          abs(acc_z - 9.8) < acc_threshold)
 
-            # 気圧が一定（±1hPa範囲内）、加速度が極端に少ない、角加速度が安定している
-            if abs(pressure - stable_pressure) < 1.0 and abs(acc_x) < acc_threshold and
-                abs(acc_y) < acc_threshold and
-                abs(acc_z - 9.8) < acc_threshold < acc_threshold and abs(gyro_x - stable_gyro) < gyro_threshold:
-                release_counter += 1
-                print(f"⚠️ 判定成立 {release_counter}/{max_consecutive}")
+            gyro_static = (abs(gyro_x) < gyro_threshold and
+                           abs(gyro_y) < gyro_threshold and
+                           abs(gyro_z) < gyro_threshold)
 
+            pressure_ok = pressure > pressure_threshold  # 地上の気圧近辺想定
+
+            if acc_static and gyro_static and pressure_ok:
+                landing_counter += 1
+                print(f"⚠️ 着地条件成立 {landing_counter}/3")
             else:
-                release_counter = 0  # 条件が満たされない場合リセット
+                landing_counter = 0
 
-            if release_counter >= max_consecutive:
-                print("✅ 着地判定成功：3回連続成立！")
+            if landing_counter >= 3:
+                print("✅ 着地判定成功（3回連続成立）")
                 break
 
-            time.sleep(0.5)
+            time.sleep(5)  # 測定間隔を5秒に設定
 
     except KeyboardInterrupt:
-        print("中断されました")
+        print("⛔ 中断されました")
     finally:
-        print("処理終了")
+        print("🔚 判定処理終了")
 
-# 🔧 実行
-check_landing(pressure_threshold=890.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3)
+# 実行
+check_landing(
+    pressure_threshold=1010.0,
+    acc_threshold=0.1,
+    gyro_threshold=1.0,
+    timeout=60
+)
