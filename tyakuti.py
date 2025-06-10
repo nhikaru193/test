@@ -85,11 +85,27 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
     read_compensate()
 
     # BNO055初期化部分
-    bno = BNO055()  # BNO055クラスのインスタンス化
-    if not bno.begin():
-        print("BNO055 初期化失敗")
-        return
-    bno.setExternalCrystalUse(True)
+    bno = BNO055()
+if not bno.begin():
+   　　 print("BNO055 初期化失敗")
+    return
+
+bno.setExternalCrystalUse(True)
+bno.setMode(BNO055.OPERATION_MODE_NDOF)
+time.sleep(0.05)
+
+# ダミー読み取りでウォームアップ
+bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+time.sleep(0.1)
+
+# 以降、測定ループ内で補正も入れる
+acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+
+if abs(acc_x) > 100 or abs(acc_y) > 100 or abs(acc_z) > 100:
+    acc_x *= 0.0098
+    acc_y *= 0.0098
+    acc_z *= 0.0098
+
 
     print("着地判定開始")
 
