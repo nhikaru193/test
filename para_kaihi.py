@@ -1,6 +1,6 @@
 import time
 import RPi.GPIO as GPIO
-from gps import get_current_location
+from GNSS_navigate import get_current_location
 from motor import Motor
 import cv2
 import numpy as np
