@@ -9,7 +9,7 @@ class MotorDriver():
     
         #GPIO初期化
          GPIO.setmode(GPIO.BCM)
-         GPIO.setup([AIN1, BIN2, PWMA, BIN1, BIN2, PWMB, STBY], GPIO.OUT)   #すべてのpinの出力を開始(使えるようになる)
+         GPIO.setup([AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, STBY], GPIO.OUT)   #すべてのpinの出力を開始(使えるようになる)
 
      #右車輪モータ制御ピン代入
          #BIN1 = 16
