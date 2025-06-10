@@ -112,7 +112,7 @@ def detect_red_object(picam2):
 def save_image(frame):
     # 現在の時刻をファイル名に使用
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    filename = f"/home/simulation/parakame.jpeg"
+    filename = f"photo_{timestamp}.jpg"
     cv2.imwrite(filename, frame)
     print(f"画像保存: {filename}")
 
