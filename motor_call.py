@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 from motor import MotorDriver  # motor.py から MotorDriver クラスを読み込む
 import time
 
-motordriver.__init__(PWMA=12, AIN1=23, AIN2=18,  
+MotorDriver.__init__(PWMA=12, AIN1=23, AIN2=18,  
     PWMB=19, BIN1=16, BIN2=26, 
     STBY=21)
 
