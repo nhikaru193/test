@@ -3,20 +3,18 @@
 
 import time
 import pigpio
-import cv2
-import numpy as np
 import board
 import busio
 import adafruit_bno055
 import RPi.GPIO as GPIO
+import numpy as np
+import cv2
+from picamera2 import Picamera2
 
 # -------------------------------
-# モーター制御設定
+# GPIO モーター制御設定
 # -------------------------------
-IN1 = 17
-IN2 = 18
-IN3 = 22
-IN4 = 23
+IN1, IN2, IN3, IN4 = 17, 18, 22, 23
 
 def init_motor():
     GPIO.setup(IN1, GPIO.OUT)
@@ -29,12 +27,6 @@ def forward():
     GPIO.output(IN2, False)
     GPIO.output(IN3, True)
     GPIO.output(IN4, False)
-
-def backward():
-    GPIO.output(IN1, False)
-    GPIO.output(IN2, True)
-    GPIO.output(IN3, False)
-    GPIO.output(IN4, True)
 
 def turn_left():
     GPIO.output(IN1, False)
@@ -58,15 +50,11 @@ def cleanup_motor():
     stop()
 
 # -------------------------------
-# pigpio GPS処理
+# GPS (pigpio)
 # -------------------------------
 RX_PIN = 27
-BAUD = 9600
 pi = pigpio.pi()
-if not pi.connected:
-    raise RuntimeError("pigpioデーモンに接続できません")
-
-pi.bb_serial_read_open(RX_PIN, BAUD, 8)
+pi.bb_serial_read_open(RX_PIN, 9600, 8)
 
 def convert_to_decimal(coord, direction):
     degrees = int(coord[:2]) if direction in ['N', 'S'] else int(coord[:3])
@@ -84,21 +72,20 @@ def get_current_location():
             try:
                 text = data.decode("ascii", errors="ignore")
                 if "$GNRMC" in text:
-                    lines = text.split("\n")
-                    for line in lines:
+                    for line in text.split("\n"):
                         if "$GNRMC" in line:
                             parts = line.strip().split(",")
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
                                 return lat, lon
-            except Exception:
+            except:
                 continue
         time.sleep(0.1)
     raise TimeoutError("GPSデータの取得に失敗しました")
 
 # -------------------------------
-# 方位計算
+# 方位計算（GPS→目的地）
 # -------------------------------
 def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     import math
@@ -110,55 +97,60 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     return (bearing + 360) % 360
 
 # -------------------------------
-# 色検出（赤）
+# 赤色検出（Picamera2 + OpenCV）
 # -------------------------------
-def detect_color(camera):
-    ret, frame = camera.read()
-    if not ret:
-        return None
+def detect_red_object(picam2):
+    frame = picam2.capture_array()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask = cv2.inRange(hsv, lower_red, upper_red)
     if np.sum(mask) > 5000:
-        return "red"
-    return None
+        return True
+    return False
 
 # -------------------------------
-# メイン処理
+# 初期化
 # -------------------------------
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 init_motor()
 
-camera = cv2.VideoCapture(0)
-
-# BNO055初期化（IMU）
+# BNO055（方位センサー）
 i2c = busio.I2C(board.SCL, board.SDA)
 sensor = adafruit_bno055.BNO055_I2C(i2c)
 
-# 目的地の座標（例：東京駅）
+# Picamera2 設定
+picam2 = Picamera2()
+picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
+picam2.start()
+time.sleep(2)
+
+# 目的地座標（例：東京駅）
 destination_lat = 35.681236
 destination_lon = 139.767125
 
+# -------------------------------
+# メイン処理
+# -------------------------------
 try:
     current_lat, current_lon = get_current_location()
-    print(f"現在地：{current_lat}, {current_lon}")
-    
+    print("現在地：", current_lat, current_lon)
+
     target_heading = calculate_heading(current_lat, current_lon, destination_lat, destination_lon)
-    print(f"目的地への方位：{target_heading:.2f}°")
+    print("目標方位：", target_heading)
 
     heading = sensor.euler[0]
     if heading is None:
         heading = 0
-    print(f"現在のIMU方位：{heading:.2f}°")
+    print("現在の方位：", heading)
 
     diff = (target_heading - heading + 360) % 360
     if 10 < diff < 180:
-        print("右旋回して調整")
+        print("右旋回")
         turn_right()
     elif diff >= 180:
-        print("左旋回して調整")
+        print("左旋回")
         turn_left()
     else:
         print("方位OK")
@@ -166,23 +158,22 @@ try:
 
     time.sleep(2)
 
-    color = detect_color(camera)
-    if color == "red":
-        print("赤色検出 → 右に避ける")
+    if detect_red_object(picam2):
+        print("赤色検出 → 右へ回避")
         turn_right()
         time.sleep(1)
     else:
-        print("前進")
+        print("赤なし → 前進")
         forward()
         time.sleep(2)
 
     stop()
-    print("停止")
 
 finally:
+    print("終了処理中...")
     cleanup_motor()
-    camera.release()
     pi.bb_serial_read_close(RX_PIN)
     pi.stop()
+    picam2.close()
     GPIO.cleanup()
-    print("終了しました。")
+    print("全ての処理を終了しました。")
