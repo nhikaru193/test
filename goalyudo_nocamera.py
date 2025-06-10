@@ -121,13 +121,13 @@ def navigate_to_goal():
             else:
                 forward_duration = 20
 
-            print(f"[MOVING] {forward_duration}秒前進します")
+                print(f"[MOVING] {forward_duration}秒前進します")
 
-             driver.changing_forward(25, 80):
-               time.sleep(forward_duration)
-               MotorDriver.motor_stop_free()
+                driver.changing_forward(25, 80):
+                time.sleep(forward_duration)
+                driver.motor_stop_free()
 
-            # 再測定
+            # 再測
             current_location = get_current_gps_location()
             dist = distance(current_location, GOAL_LOCATION)
 
