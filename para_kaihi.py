@@ -101,18 +101,24 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
 # -------------------------------
 def detect_red_object(picam2):
     frame = picam2.capture_array()
-    cv2.imwrite("/home/simulation/paracamera.jpg", frame)
+    
+    if frame is None:
+        print("画像取得失敗")
+        return False
+    
+    # 画像をファイルに保存
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    filename = f"/home/simulation/paracamera_{timestamp}.jpg"
+    cv2.imwrite(filename, frame)
+    print(f"画像保存: {filename}")
+    
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask = cv2.inRange(hsv, lower_red, upper_red)
+    
     return np.sum(mask) > 5000
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_red = np.array([0, 120, 70])
-    upper_red = np.array([10, 255, 255])
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    if np.sum(mask) > 5000:
-        return True
+    return True
     return False
 
 # -------------------------------
