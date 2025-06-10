@@ -1,7 +1,6 @@
 import math
 import time
 import pigpio
-from RPi.GPIO import GPIO
 from motor import MotorDriver
 
 # インスタンス生成：GPIOピン番号を正しく指定
