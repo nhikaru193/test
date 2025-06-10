@@ -1,3 +1,4 @@
+import RPi.GPIO as GPIO
 from motor import MotorDriver  # motor.py から MotorDriver クラスを読み込む
 import time
 
