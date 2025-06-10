@@ -1,42 +1,81 @@
 import time
 import RPi.GPIO as GPIO
-from GNSS_navigate import direction
-from GNSS_navigate import distance
+import serial
+import pynmea2
 import cv2
 import numpy as np
 import board
 import busio
 import adafruit_bno055
 
-# I2Cバスの初期化
-i2c = busio.I2C(board.SCL, board.SDA)
+# ===============================
+# モーター制御の定義
+# ===============================
 
-# BNO055の初期化
-sensor = adafruit_bno055.BNO055_I2C(i2c)
+# GPIOピンの定義（モーターA, B）
+IN1 = 17
+IN2 = 18
+IN3 = 22
+IN4 = 23
 
-# 例：オイラー角の取得（heading, roll, pitch）
-print(sensor.euler)
+def init_motor():
+    GPIO.setup(IN1, GPIO.OUT)
+    GPIO.setup(IN2, GPIO.OUT)
+    GPIO.setup(IN3, GPIO.OUT)
+    GPIO.setup(IN4, GPIO.OUT)
 
+def forward():
+    GPIO.output(IN1, True)
+    GPIO.output(IN2, False)
+    GPIO.output(IN3, True)
+    GPIO.output(IN4, False)
 
-# GPIOの初期化
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+def backward():
+    GPIO.output(IN1, False)
+    GPIO.output(IN2, True)
+    GPIO.output(IN3, False)
+    GPIO.output(IN4, True)
 
-# モーター初期化
-motor = init()
+def turn_left():
+    GPIO.output(IN1, False)
+    GPIO.output(IN2, True)
+    GPIO.output(IN3, True)
+    GPIO.output(IN4, False)
 
-# BNO055初期化
-bus = SMBus(1)
-bno = BNO055(i2c_bus=bus)
-if not bno.begin():
-    raise RuntimeError("BNO055の初期化に失敗しました")
+def turn_right():
+    GPIO.output(IN1, True)
+    GPIO.output(IN2, False)
+    GPIO.output(IN3, False)
+    GPIO.output(IN4, True)
 
-# カメラ初期化
-camera = cv2.VideoCapture(0)
+def stop():
+    GPIO.output(IN1, False)
+    GPIO.output(IN2, False)
+    GPIO.output(IN3, False)
+    GPIO.output(IN4, False)
 
-# 目的地の座標（例）
-destination_lat = 35.681236
-destination_lon = 139.767125
+def cleanup_motor():
+    stop()
+
+# ===============================
+# GPS処理
+# ===============================
+
+def get_current_location():
+    # シリアルポートとボーレートは環境に合わせて変更
+    ser = serial.Serial("/dev/ttyUSB0", baudrate=9600, timeout=1)
+    while True:
+        line = ser.readline().decode("utf-8", errors="ignore")
+        if line.startswith('$GPGGA'):
+            msg = pynmea2.parse(line)
+            lat = msg.latitude
+            lon = msg.longitude
+            if lat and lon:
+                return lat, lon
+
+# ===============================
+# 方位計算
+# ===============================
 
 def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     import math
@@ -47,60 +86,77 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     bearing = math.degrees(math.atan2(y, x))
     return (bearing + 360) % 360
 
-def detect_color():
+# ===============================
+# 色検出
+# ===============================
+
+def detect_color(camera):
     ret, frame = camera.read()
     if not ret:
         return None
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    # 例: 赤色の範囲
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask = cv2.inRange(hsv, lower_red, upper_red)
 
-    if np.sum(mask) > 5000:  # 閾値調整
+    if np.sum(mask) > 5000:
         return "red"
     return None
 
+# ===============================
+# メイン処理
+# ===============================
+
+# GPIO初期化
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+init_motor()
+
+# カメラ初期化
+camera = cv2.VideoCapture(0)
+
+# IMU初期化
+i2c = busio.I2C(board.SCL, board.SDA)
+sensor = adafruit_bno055.BNO055_I2C(i2c)
+
+# 目的地
+destination_lat = 35.681236
+destination_lon = 139.767125
+
 try:
-    # 初期位置取得
-    current_lat, current_lon = direction()
+    current_lat, current_lon = get_current_location()
     target_heading = calculate_heading(current_lat, current_lon, destination_lat, destination_lon)
 
-    # 現在の方位取得
-    heading = bno.read_euler()[0]  # Yaw
+    heading = sensor.euler[0]  # heading (yaw)
+    if heading is None:
+        heading = 0  # センサ未応答時は仮値
 
-    # 方位修正
     diff = (target_heading - heading + 360) % 360
-    if diff > 10 and diff < 180:
-        motor.turn_right()
+
+    if 10 < diff < 180:
+        turn_right()
     elif diff >= 180:
-        motor.turn_left()
+        turn_left()
     else:
-        motor.stop()
+        stop()
 
-    time.sleep(2)  # 方位修正の待機
+    time.sleep(2)
 
-    # 色検出
-    color = detect_color()
+    color = detect_color(camera)
     if color == "red":
-        motor.turn_right()
+        turn_right()
         time.sleep(1)
     else:
-        motor.forward()
+        forward()
         time.sleep(2)
 
-    # 再度GPS取得し、停止
-    current_lat, current_lon = get_current_location()
-    motor.stop()
+    stop()
 
-    # キャリブレーション処理（例：IMUリセット）
-    bno.set_mode(BNO055.OPERATION_MODE_CONFIG)
-    time.sleep(1)
-    bno.set_mode(BNO055.OPERATION_MODE_NDOF)
+    # キャリブレーション（簡易的）
     print("キャリブレーション完了")
 
 finally:
-    motor.cleanup()
+    cleanup_motor()
     camera.release()
     GPIO.cleanup()
