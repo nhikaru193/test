@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 
-class MotorDriver:
+class MotorDriver():
  #初期設定関数の定義
      def __init__(self,
                   PWMA, AIN1, AIN2,
