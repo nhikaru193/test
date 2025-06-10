@@ -102,6 +102,7 @@ def save_image_before_detection(picam2):
     
     # 撮影した画像を保存
     image_path = "/home/mark1/captured_image.jpg"
+    picam2.capture_file(image_path)
     cv2.imwrite(filename, frame)
     print(f"初期画像保存成功: {filename}")
     
