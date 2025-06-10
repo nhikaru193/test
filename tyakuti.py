@@ -160,7 +160,7 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
                 print("✅ 着地判定成功：3回連続成立！")
                 break
 
-            time.sleep(0.2)
+            time.sleep(1)
 
     except KeyboardInterrupt:
         print("中断されました")
@@ -168,4 +168,4 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
         print("処理終了")
 
 # 実行
-check_landing(pressure_threshold=890.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3)
+check_landing(pressure_threshold=890.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=30, max_consecutive=3)
