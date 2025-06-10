@@ -12,7 +12,7 @@ digH = []
 i2c = smbus.SMBus(1)
 address = 0x76
 
-# ----------- BME280 初期化と補正関数群（あなたのコードそのまま） -----------
+# ----------- BME280 初期化と補正関数群（そのまま） -----------
 
 def init_bme280():
     i2c.write_byte_data(address, 0xF2, 0x01)
@@ -84,7 +84,7 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
     init_bme280()
     read_compensate()
 
-    # BNO055初期化部分
+    # BNO055初期化
     bno = BNO055()  # BNO055クラスのインスタンス化
     if not bno.begin():
         print("BNO055 初期化失敗")
@@ -94,8 +94,12 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
     print("着地判定開始")
 
     stable_pressure = None  # 着地時に安定している気圧を記録
-    stable_acc = None  # 着地時に安定している加速度
-    stable_gyro = None  # 着地時に安定している角加速度
+    stable_acc_x = None  # 加速度X軸
+    stable_acc_y = None  # 加速度Y軸
+    stable_acc_z = None  # 加速度Z軸
+    stable_gyro_x = None  # 角加速度X軸
+    stable_gyro_y = None  # 角加速度Y軸
+    stable_gyro_z = None  # 角加速度Z軸
 
     release_counter = 0  # 連続判定回数
     start_time = time.time()
@@ -118,19 +122,34 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
             acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
             gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)  # 角加速度（角速度）
 
-            print(f"[気圧] {pressure:.2f} hPa, [加速度Z] {acc_z:.2f} m/s², "
-                  f"[角加速度X] {gyro_x:.2f} °/s, [角加速度Y] {gyro_y:.2f} °/s, [角加速度Z] {gyro_z:.2f} °/s")
+            print(f"[気圧] {pressure:.2f} hPa, [加速度X] {acc_x:.2f} m/s², [加速度Y] {acc_y:.2f} m/s², "
+                  f"[加速度Z] {acc_z:.2f} m/s², [角加速度X] {gyro_x:.2f} °/s, "
+                  f"[角加速度Y] {gyro_y:.2f} °/s, [角加速度Z] {gyro_z:.2f} °/s")
 
             # 初期安定した気圧、加速度、角加速度を取得
             if stable_pressure is None:
                 stable_pressure = pressure
-            if stable_acc is None:
-                stable_acc = acc_z
-            if stable_gyro is None:
-                stable_gyro = gyro_x  # 角加速度が安定しているか確認
+            if stable_acc_x is None:
+                stable_acc_x = acc_x
+            if stable_acc_y is None:
+                stable_acc_y = acc_y
+            if stable_acc_z is None:
+                stable_acc_z = acc_z
+            if stable_gyro_x is None:
+                stable_gyro_x = gyro_x
+            if stable_gyro_y is None:
+                stable_gyro_y = gyro_y
+            if stable_gyro_z is None:
+                stable_gyro_z = gyro_z
 
-            # 気圧が一定（±1hPa範囲内）、加速度が極端に少ない、角加速度が安定している
-            if abs(pressure - stable_pressure) < 1.0 and abs(acc_z - stable_acc) < acc_threshold and abs(gyro_x - stable_gyro) < gyro_threshold:
+            # 気圧が一定（±1hPa範囲内）、加速度（X、Y、Z）が極端に少ない、角加速度（X、Y、Z）が安定している
+            if (abs(pressure - stable_pressure) < 1.0 and 
+                abs(acc_x - stable_acc_x) < acc_threshold and 
+                abs(acc_y - stable_acc_y) < acc_threshold and
+                abs(acc_z - stable_acc_z) < acc_threshold and
+                abs(gyro_x - stable_gyro_x) < gyro_threshold and 
+                abs(gyro_y - stable_gyro_y) < gyro_threshold and 
+                abs(gyro_z - stable_gyro_z) < gyro_threshold):
                 release_counter += 1
                 print(f"⚠️ 判定成立 {release_counter}/{max_consecutive}")
 
@@ -148,5 +167,5 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
     finally:
         print("処理終了")
 
-# 🔧 実行
+# 実行
 check_landing(pressure_threshold=890.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3)
