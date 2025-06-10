@@ -3,20 +3,6 @@ import time
 import pigpio
 from RPi.GPIO import GPIO
 from motor import MotorDriver
-    
-
-    
-    #モータ起動
-    GPIO.output(STBY, GPIO.HIGH)
-
-    #self型の関数に格納　なぜか？⇒self型に格納しないと同クラス内で関数の情報が引き継がない(スコープの問題)
-    self.A1, self.A2 = AIN1, AIN2
-    self.B1, self.B2 = BIN1, BIN2
-    self.pwma = GPIO.PWM(PWMA, freq)
-    self.pwmb = GPIO.PWM(PWMB, freq)
-    #motorの起動：デューティ比0⇒停止
-    self.pwma.start(0)
-    self.pwmb.start(0)
 
 # === 目標地点設定（[緯度, 経度]）===
 def GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
