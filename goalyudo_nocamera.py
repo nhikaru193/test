@@ -123,7 +123,7 @@ def navigate_to_goal():
 
                 print(f"[MOVING] {forward_duration}秒前進します")
 
-                driver.changing_forward(25, 80):
+                driver.changing_forward(25, 80)
                 time.sleep(forward_duration)
                 driver.motor_stop_free()
 
