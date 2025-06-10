@@ -1,20 +1,22 @@
-# run_motor.py
+from motor import MotorDriver  # motor.py から MotorDriver クラスを読み込む
 import time
-from motor import MotorDriver
 
-# ② メソッドはインスタンス経由で呼び出す
-print("前進加速中")
-driver.changing_forward(0, 80)
+# モータードライバのインスタンスを作成（仮のピン番号）
+driver = MotorDriver(
+    PWMA=12, AIN1=23, AIN2=18,
+    PWMB=19, BIN1=16, BIN2=26,
+    STBY=21
+)
 
-print("前進減速中")
-driver.changing_forward(80, 0)
+try:
+    print("前進（加速）")
+    driver.changing_forward(0, 80)
 
-print("右折加速中")
-driver.changing_right(0, 50)
+    time.sleep(2)
 
-print("右折減速中")
-driver.changing_right(50, 0)
+    print("前進（減速）")
+    driver.changing_forward(80, 0)
 
-# ③ 最後に GPIO をクリーンアップ
-driver.cleanup()
-
+finally:
+    print("停止")
+    driver.cleanup()
