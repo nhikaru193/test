@@ -101,6 +101,12 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
 # -------------------------------
 def detect_red_object(picam2):
     frame = picam2.capture_array()
+    cv2.imwrite("/home/mark1/last_capture.jpg", frame)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower_red = np.array([0, 120, 70])
+    upper_red = np.array([10, 255, 255])
+    mask = cv2.inRange(hsv, lower_red, upper_red)
+    return np.sum(mask) > 5000
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
