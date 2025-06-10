@@ -32,7 +32,7 @@ from motor import MotorDriver
     self.pwmb.start(0)
 
 # === 目標地点設定（[緯度, 経度]）===
-GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
+def GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 
 # === GPSデータ取得（仮の実装）===
 TX_PIN = 17
@@ -84,11 +84,12 @@ except KeyboardInterrupt:
     print("\nユーザー割り込みで終了します。")
 
 # === 方位角・距離の関数 ===
-def direction(last_lng, location):   #last_lng, locationはいずれも行列形式[latitude, longitude]　last_lngは現在地点, locationはゴール目標地点
+last_lng = [lat, lon]
+def direction(last_lng, GOAL_LOCATION):   #last_lng, locationはいずれも行列形式[latitude, longitude]　last_lngは現在地点, locationはゴール目標地点
     x1 = math.radians(last_lng[0])   #現在地点　緯度
     y1 = math.radians(last_lng[1])   #現在地点　経度
-    x2 = math.radians(location[0])   #目標地点　緯度
-    y2 = math.radians(location[1])   #目標地点　経度
+    x2 = math.radians(GOAL_LOCATION[0])   #目標地点　緯度
+    y2 = math.radians(GOAL_LOCATION[1])   #目標地点　経度
 
     delta_y = y2 - y1
     #print("delta_y", delta_y)
@@ -119,7 +120,7 @@ def navigate_to_goal():
             current_location = get_current_gps_location()
             dist = distance(current_location, GOAL_LOCATION)
             angle_to_goal = direction(current_location, GOAL_LOCATION)
-            current_heading = 0.0  # 北向きと仮定。実際は電子コンパスなどで取得推奨
+            current_heading = 0.0  # 北向きと仮定。9軸でやりたい。
 
             angle_error = (angle_to_goal - current_heading + 360) % 360
             print(f"[INFO] 距離: {dist:.2f} m, 目標角: {angle_to_goal:.2f}°, 誤差: {angle_error:.2f}°")
