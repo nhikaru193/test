@@ -10,44 +10,17 @@ import RPi.GPIO as GPIO
 import numpy as np
 import cv2
 from picamera2 import Picamera2
+from motor import MotorDriver
 
 # -------------------------------
 # GPIO モーター制御設定
 # -------------------------------
-IN1, IN2, IN3, IN4 = 17, 18, 22, 23
 
-def init_motor():
-    GPIO.setup(IN1, GPIO.OUT)
-    GPIO.setup(IN2, GPIO.OUT)
-    GPIO.setup(IN3, GPIO.OUT)
-    GPIO.setup(IN4, GPIO.OUT)
-
-def forward():
-    GPIO.output(IN1, True)
-    GPIO.output(IN2, False)
-    GPIO.output(IN3, True)
-    GPIO.output(IN4, False)
-
-def turn_left():
-    GPIO.output(IN1, False)
-    GPIO.output(IN2, True)
-    GPIO.output(IN3, True)
-    GPIO.output(IN4, False)
-
-def turn_right():
-    GPIO.output(IN1, True)
-    GPIO.output(IN2, False)
-    GPIO.output(IN3, False)
-    GPIO.output(IN4, True)
-
-def stop():
-    GPIO.output(IN1, False)
-    GPIO.output(IN2, False)
-    GPIO.output(IN3, False)
-    GPIO.output(IN4, False)
-
-def cleanup_motor():
-    stop()
+driver = MotorDriver(
+    PWMA=12, AIN1=23, AIN2=18,   # 左モーター用（モータA）
+    PWMB=19, BIN1=16, BIN2=26,   # 右モーター用（モータB）
+    STBY=21                      # STBYピン
+)
 
 # -------------------------------
 # GPS (pigpio)
@@ -128,7 +101,6 @@ def detect_red_object(picam2):
 # -------------------------------
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-init_motor()
 
 # BNO055（方位センサー）
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -159,23 +131,28 @@ try:
     diff = (target_heading - heading + 360) % 360
     if 10 < diff < 180:
         print("右旋回")
-        turn_right()
+        driver.changing_right(0, 40)
+    
     elif diff >= 180:
         print("左旋回")
-        turn_left()
+        driver.changing_left(0, 40)
+        
     else:
         print("方位OK")
-        stop()
+        driver.motor_stop_brake()
 
     time.sleep(2)
 
     if detect_red_object(picam2):
         print("赤色検出 → 右へ回避")
-        turn_right()
+        driver.changing_right(0, 40)
+        driver.motor_stop_brake()
+        driver.changing_forward(0, 80)
         time.sleep(1)
+    
     else:
         print("赤なし → 前進")
-        forward()
+        driver.changing_forward(0, 80)
         time.sleep(2)
 
     stop()
@@ -187,7 +164,7 @@ except TimeoutError as e:
 
 finally:
     print("終了処理中...")
-    cleanup_motor()
+    driver.cleanup()
     pi.bb_serial_read_close(RX_PIN)
     pi.stop()
     picam2.close()
