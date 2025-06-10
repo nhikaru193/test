@@ -109,6 +109,13 @@ def detect_red_object(picam2):
         return True
     return False
 
+def save_image(frame):
+    # 現在の時刻をファイル名に使用
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    filename = f"photo_{timestamp}.jpg"
+    cv2.imwrite(filename, frame)
+    print(f"画像保存: {filename}")
+
 # -------------------------------
 # 初期化
 # -------------------------------
@@ -157,6 +164,10 @@ try:
         stop()
 
     time.sleep(2)
+
+    # 画像キャプチャ
+    frame = picam2.capture_array()
+    save_image(frame)  # 撮影した画像を保存
 
     if detect_red_object(picam2):
         print("赤色検出 → 右へ回避")
