@@ -44,13 +44,13 @@ try:
 
         # 判定出力
         print(f"🔴 赤割合: {percentage:.2f}% → ", end="")
-        if percentage >= 20.0:
+        if percentage >= 10.0:
             print("非常に近い（終了）")
             driver.changing_forward(100, 0)
             driver.motor_stop_brake()
             break
           
-        elif percentage >= 10.0:
+        elif percentage >= 5.0:
             print("近い")
             driver.changing_forward(50, 100)
             time.sleep(0.1)
