@@ -1,6 +1,6 @@
 import smbus
 import time
-from bno055 import BNO055  # BNO055ライブラリをインポート
+from BNO055 import BNO055  # BNO055をインポート
 
 # BME280関連のグローバル変数
 t_fine = 0.0
@@ -12,7 +12,7 @@ digH = []
 i2c = smbus.SMBus(1)
 address = 0x76
 
-# BME280 初期化と補正関数群（省略）
+# ----------- BME280 初期化と補正関数群（あなたのコードそのまま） -----------
 
 def init_bme280():
     i2c.write_byte_data(address, 0xF2, 0x01)
@@ -77,64 +77,76 @@ def read_pressure():
     bme280_compensate_t(dat_t)
     return bme280_compensate_p(dat_p)
 
-# 着地判定処理
-def check_landing(pressure_threshold=1010.0, acc_threshold=0.05, timeout=60):
+# ----------- 着地判定処理 -----------
+
+def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3):
     # BME280初期化
     init_bme280()
     read_compensate()
 
-    # BNO055初期化
-    bno = BNO055()
+    # BNO055初期化部分
+    bno = BNO055()  # BNO055クラスのインスタンス化
     if not bno.begin():
         print("BNO055 初期化失敗")
         return
     bno.setExternalCrystalUse(True)
-    bno.setMode(BNO055.OPERATION_MODE_NDOF)
-    time.sleep(0.05)
-
-    # ダミー読み取りでウォームアップ
-    bno.getVector(BNO055.VECTOR_ACCELEROMETER)
-    time.sleep(0.1)
 
     print("着地判定開始")
 
-    landing_counter = 0
+    stable_pressure = None  # 着地時に安定している気圧を記録
+    stable_acc = None  # 着地時に安定している加速度
+    stable_gyro = None  # 着地時に安定している角加速度
+
+    release_counter = 0  # 連続判定回数
     start_time = time.time()
 
     try:
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
-                # タイムアウト時に着地判定を強制的に行う
+                # タイムアウト時に強制的に判定を行う
                 print("⏰ タイムアウト：判定中止")
-                landing_counter += 1
-                print(f"⚠️ 判定成立 {landing_counter}/3 - タイムアウトによる強制判定")
-                if landing_counter >= 3:
+                release_counter += 1
+                print(f"⚠️ 判定成立 {release_counter}/{max_consecutive} - タイムアウトによる強制判定")
+                if release_counter >= max_consecutive:
                     print("✅ 着地判定成功：タイムアウトで3回連続成立！")
                     break
                 else:
-                    break  # タイムアウト後ループ終了
+                    break  # タイムアウト後、判定中止
 
             pressure = read_pressure()
-            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
+            gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)  # 角加速度（角速度）
 
-            # 加速度が静止状態に近いかつ気圧が一定で、角加速度も安定しているかを判定
-            if abs(acc_x) < acc_threshold and abs(acc_y) < acc_threshold and abs(acc_z - 9.8) < acc_threshold:
-                landing_counter += 1
-                print(f"⚠️ 判定成立 {landing_counter}/3")
+            print(f"[気圧] {pressure:.2f} hPa, [加速度Z] {acc_z:.2f} m/s², "
+                  f"[角加速度X] {gyro_x:.2f} °/s, [角加速度Y] {gyro_y:.2f} °/s, [角加速度Z] {gyro_z:.2f} °/s")
+
+            # 初期安定した気圧、加速度、角加速度を取得
+            if stable_pressure is None:
+                stable_pressure = pressure
+            if stable_acc is None:
+                stable_acc = acc_z
+            if stable_gyro is None:
+                stable_gyro = gyro_x  # 角加速度が安定しているか確認
+
+            # 気圧が一定（±1hPa範囲内）、加速度が極端に少ない、角加速度が安定している
+            if abs(pressure - stable_pressure) < 1.0 and abs(acc_z - stable_acc) < acc_threshold and abs(gyro_x - stable_gyro) < gyro_threshold:
+                release_counter += 1
+                print(f"⚠️ 判定成立 {release_counter}/{max_consecutive}")
+
             else:
-                landing_counter = 0
+                release_counter = 0  # 条件が満たされない場合リセット
 
-            if landing_counter >= 3:
+            if release_counter >= max_consecutive:
                 print("✅ 着地判定成功：3回連続成立！")
                 break
 
-            time.sleep(1)
+            time.sleep(0.2)
 
     except KeyboardInterrupt:
         print("中断されました")
     finally:
         print("処理終了")
 
-# 実行
-check_landing(pressure_threshold=1010.0, acc_threshold=0.05, timeout=60)
+# 🔧 実行
+check_landing(pressure_threshold=890.0, acc_threshold=0.1, gyro_threshold=0.5, timeout=60, max_consecutive=3)
