@@ -2,7 +2,7 @@ import time
 import RPi.GPIO as GPIO
 from GNSS_navigate import direction
 from GNSS_navigate import distance
-from motor import init
+from motor import _init_
 from motor import motor_right
 from motor import motor_left
 import cv2
