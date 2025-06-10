@@ -128,9 +128,9 @@ def navigate_to_goal():
             # 方位誤差が2°以内に収まるまで右回転
             while abs(angle_error) > 2.0:
                 print("[TURNING] 誤差が大きいため右回頭中...")
-                motor.motor_right(speed=25)
+                MotorDriver.changing_right(0, 25)
                 time.sleep(1)
-                motor.motor_stop_free()
+                MotorDriver.motor_stop_free()
                 current_location = get_current_gps_location()
                 angle_to_goal = direction(current_location, GOAL_LOCATION)
                 angle_error = (angle_to_goal - current_heading + 360) % 360
@@ -143,15 +143,9 @@ def navigate_to_goal():
 
             print(f"[MOVING] {forward_duration}秒前進します")
 
-             def motor_forward(self, speed):
-   　　　　　　 GPIO.output(self.A1, GPIO.HIGH)
- 　　　　　　   GPIO.output(self.A2, GPIO.LOW)
-    　　　　　　GPIO.output(self.B1, GPIO.HIGH)
-    　　　　　　GPIO.output(self.B2, GPIO.LOW)
-    　　　　　　self.pwma.ChangeDutyCycle(speed) 
-    　　　　　　self.pwmb.ChangeDutyCycle(speed)
+             MortorDriver.changing_forward(self, before, after):
                time.sleep(forward_duration)
-               motor.motor_stop_free()
+               MotorDriver.motor_stop_free()
 
             # 再測定
             current_location = get_current_gps_location()
@@ -160,7 +154,7 @@ def navigate_to_goal():
             # 終了条件
             if dist <= 5.0:
                 print("[GOAL] 目標地点に到達しました！")
-                motor.motor_stop_brake()
+                MotorDriver.motor_stop_brake()
                 break
 
             print("[LOOP] 次のループへ移行...\n")
@@ -168,7 +162,7 @@ def navigate_to_goal():
     except KeyboardInterrupt:
         print("[INTERRUPT] 停止します")
     finally:
-        motor.cleanup()
+        MotorDriver.cleanup()
 
 # === 実行 ===
 navigate_to_goal()
