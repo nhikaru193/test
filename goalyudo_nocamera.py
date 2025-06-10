@@ -116,7 +116,7 @@ def navigate_to_goal():
 
             print(f"[MOVING] {forward_duration}秒前進します")
 
-             MortorDriver.changing_forward(self, before, after):
+             MortorDriver.changing_forward(0, 25, 80):
                time.sleep(forward_duration)
                MotorDriver.motor_stop_free()
 
