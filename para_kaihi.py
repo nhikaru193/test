@@ -96,33 +96,19 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     bearing = math.degrees(math.atan2(y, x))
     return (bearing + 360) % 360
 
-def save_image_before_detection(picam2):
-    # 画像を撮影
-    frame = picam2.capture_array()
-    
-    # 撮影した画像を保存
-    image_path = "/home/mark1/captured_image.jpg"
-    picam2.capture_file(image_path)
-    cv2.imwrite(filename, frame)
-    print(f"初期画像保存成功: {filename}")
-    
-    return frame
 # -------------------------------
 # 赤色検出（Picamera2 + OpenCV）
 # -------------------------------
 def detect_red_object(picam2):
     frame = picam2.capture_array()
-    
-    if frame is None:
-        print("画像取得失敗")
-        return False
-    
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask = cv2.inRange(hsv, lower_red, upper_red)
-    
-    return np.sum(mask) > 5000
+    if np.sum(mask) > 5000:
+        return True
+    return False
+
 # -------------------------------
 # 初期化
 # -------------------------------
@@ -140,10 +126,13 @@ picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
 picam2.start()
 time.sleep(2)
 
-# 画像保存処理（赤色検出の前に実行）
-frame = save_image_before_detection(picam2)  # ここで画像を保存
+# 目的地座標（例：東京駅）
+destination_lat = 35.681236
+destination_lon = 139.767125
 
-# GPS取得処理
+# -------------------------------
+# メイン処理
+# -------------------------------
 try:
     current_lat, current_lon = get_current_location()
     print("現在地：", current_lat, current_lon)
@@ -179,11 +168,6 @@ try:
         time.sleep(2)
 
     stop()
-
-except TimeoutError as e:
-    print(e)
-    # GPSの取得に失敗した場合でも画像は保存済み
-    print("GPS取得失敗しましたが、画像は保存されています。")
 
 finally:
     print("終了処理中...")
