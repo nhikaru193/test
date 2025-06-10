@@ -140,13 +140,10 @@ picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
 picam2.start()
 time.sleep(2)
 
-# 目的地座標（例：東京駅）
-destination_lat = 35.681236
-destination_lon = 139.767125
+# 画像保存処理（赤色検出の前に実行）
+frame = save_image_before_detection(picam2)  # ここで画像を保存
 
-# -------------------------------
-# メイン処理
-# -------------------------------
+# GPS取得処理
 try:
     current_lat, current_lon = get_current_location()
     print("現在地：", current_lat, current_lon)
@@ -182,6 +179,11 @@ try:
         time.sleep(2)
 
     stop()
+
+except TimeoutError as e:
+    print(e)
+    # GPSの取得に失敗した場合でも画像は保存済み
+    print("GPS取得失敗しましたが、画像は保存されています。")
 
 finally:
     print("終了処理中...")
