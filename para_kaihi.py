@@ -1,140 +1,95 @@
 import time
-import math
+import RPi.GPIO as GPIO
+from gps import get_current_location
+from motor import Motor
+import cv2
+import numpy as np
+from smbus2 import SMBus
+from bno055 import BNO055
 
-# 仮定：BNO055、ColorSensor、GPSModule、Motorクラスをすでに作成済みだと仮定します。
-# これらはセンサーやモーターを制御するためのクラスです。
+# GPIOの初期化
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 
-class BNO055:
-    def __init__(self):
-        # BNO055センサー初期化
-        pass
+# モーター初期化
+motor = Motor()
 
-    def get_heading(self):
-        # 現在の方位（ヘディング）を取得する
-        return 0  # 仮の値
+# BNO055初期化
+bus = SMBus(1)
+bno = BNO055(i2c_bus=bus)
+if not bno.begin():
+    raise RuntimeError("BNO055の初期化に失敗しました")
 
-    def is_calibrated(self):
-        # キャリブレーション状態を確認する
-        return True  # 仮の値
+# カメラ初期化
+camera = cv2.VideoCapture(0)
 
-    def calibrate(self):
-        # キャリブレーション処理
-        pass
+# 目的地の座標（例）
+destination_lat = 35.681236
+destination_lon = 139.767125
 
-class ColorSensor:
-    def __init__(self):
-        # 色センサー初期化
-        pass
+def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
+    import math
+    delta_lon = math.radians(dest_lon - current_lon)
+    y = math.sin(delta_lon) * math.cos(math.radians(dest_lat))
+    x = math.cos(math.radians(current_lat)) * math.sin(math.radians(dest_lat)) - \
+        math.sin(math.radians(current_lat)) * math.cos(math.radians(dest_lat)) * math.cos(delta_lon)
+    bearing = math.degrees(math.atan2(y, x))
+    return (bearing + 360) % 360
 
-    def get_color(self):
-        # 色検知処理（例えば、赤色など）
-        return "none"  # 仮の値
+def detect_color():
+    ret, frame = camera.read()
+    if not ret:
+        return None
 
-class GPSModule:
-    def __init__(self):
-        # GPS初期化
-        pass
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # 例: 赤色の範囲
+    lower_red = np.array([0, 120, 70])
+    upper_red = np.array([10, 255, 255])
+    mask = cv2.inRange(hsv, lower_red, upper_red)
 
-    def get_position(self):
-        # 現在のGPS位置を取得する
-        return 35.6895, 139.6917  # 仮の値（東京の緯度経度）
+    if np.sum(mask) > 5000:  # 閾値調整
+        return "red"
+    return None
 
-    def distance_to(self, lat, lon):
-        # 現在位置と目的地の距離を計算
-        return 0.5  # 仮の値（0.5km以内）
+try:
+    # 初期位置取得
+    current_lat, current_lon = get_current_location()
+    target_heading = calculate_heading(current_lat, current_lon, destination_lat, destination_lon)
 
-class Motor:
-    def __init__(self):
-        # モーター初期化
-        pass
+    # 現在の方位取得
+    heading = bno.read_euler()[0]  # Yaw
 
-    def move_forward(self):
-        # 前進
-        print("Moving forward")
+    # 方位修正
+    diff = (target_heading - heading + 360) % 360
+    if diff > 10 and diff < 180:
+        motor.turn_right()
+    elif diff >= 180:
+        motor.turn_left()
+    else:
+        motor.stop()
 
-    def turn_left(self):
-        # 左に回転
-        print("Turning left")
+    time.sleep(2)  # 方位修正の待機
 
-    def turn_right(self):
-        # 右に回転
-        print("Turning right")
+    # 色検出
+    color = detect_color()
+    if color == "red":
+        motor.turn_right()
+        time.sleep(1)
+    else:
+        motor.forward()
+        time.sleep(2)
 
-    def stop(self):
-        # 停止
-        print("Stopping motors")
+    # 再度GPS取得し、停止
+    current_lat, current_lon = get_current_location()
+    motor.stop()
 
-# 目的地まで移動する関数
-def move_to_destination():
-    # センサーとモーターの初期化
-    bno = BNO055()
-    color_sensor = ColorSensor()
-    gps = GPSModule()
-    motor = Motor()
+    # キャリブレーション処理（例：IMUリセット）
+    bno.set_mode(BNO055.OPERATION_MODE_CONFIG)
+    time.sleep(1)
+    bno.set_mode(BNO055.OPERATION_MODE_NDOF)
+    print("キャリブレーション完了")
 
-    # 目的地の設定（例：東京駅の位置）
-    destination_lat = 35.6895  # 目的地の緯度（仮）
-    destination_lon = 139.6917  # 目的地の経度（仮）
-
-    # GPSで現在位置を取得
-    current_lat, current_lon = gps.get_position()
-
-    # 目的地に向かって進行開始
-    while True:
-        # 目的地に向けて進行方向を修正
-        bearing_to_destination = get_bearing_to_destination(current_lat, current_lon, destination_lat, destination_lon)
-        current_heading = bno.get_heading()
-
-        # 進行方向の調整
-        if current_heading < bearing_to_destination:
-            motor.turn_left()
-        elif current_heading > bearing_to_destination:
-            motor.turn_right()
-        else:
-            motor.move_forward()
-
-        # 色センサーで障害物回避
-        detected_color = color_sensor.get_color()
-        if detected_color == "red":
-            print("Red detected! Turning left.")
-            motor.turn_left()
-
-        # 目的地に到達したらループを終了
-        if gps.distance_to(destination_lat, destination_lon) < 1.0:  # 1km以内で目的地到着
-            print("Arrived at the destination!")
-            motor.stop()  # モーターを停止
-            break  # 目的地到着後、ループを終了
-
-        # GPSを再取得
-        current_lat, current_lon = gps.get_position()
-
-    # モーターを停止後にキャリブレーションを開始
-    print("Starting calibration...")
-
-    # BNO055センサーのキャリブレーションを行う
-    while not bno.is_calibrated():  # キャリブレーションが完了するまでループ
-        print("Calibrating BNO055 sensor...")
-        time.sleep(1)  # キャリブレーションの時間待機
-    print("Calibration complete!")
-
-# 目的地への進行方向を計算するための関数
-def get_bearing_to_destination(lat1, lon1, lat2, lon2):
-    # 2地点間の方位を計算する関数（簡略化した計算式）
-    lat1_rad = math.radians(lat1)
-    lon1_rad = math.radians(lon1)
-    lat2_rad = math.radians(lat2)
-    lon2_rad = math.radians(lon2)
-    
-    delta_lon = lon2_rad - lon1_rad
-    
-    x = math.sin(delta_lon) * math.cos(lat2_rad)
-    y = math.cos(lat1_rad) * math.sin(lat2_rad) - math.sin(lat1_rad) * math.cos(lat2_rad) * math.cos(delta_lon)
-    
-    bearing = math.atan2(x, y)
-    bearing = math.degrees(bearing)
-    
-    return (bearing + 360) % 360  # 正しい範囲にするために0~360度に調整
-
-# メイン処理の開始
-if __name__ == "__main__":
-    move_to_destination()
+finally:
+    motor.cleanup()
+    camera.release()
+    GPIO.cleanup()
