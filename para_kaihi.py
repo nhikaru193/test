@@ -96,6 +96,17 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
     bearing = math.degrees(math.atan2(y, x))
     return (bearing + 360) % 360
 
+def save_image_before_detection(picam2):
+    # 画像を撮影
+    frame = picam2.capture_array()
+    
+    # 撮影した画像を保存
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    filename = f"/home/simulation/initial_image_{timestamp}.jpg"
+    cv2.imwrite(filename, frame)
+    print(f"初期画像保存成功: {filename}")
+    
+    return frame
 # -------------------------------
 # 赤色検出（Picamera2 + OpenCV）
 # -------------------------------
@@ -106,21 +117,12 @@ def detect_red_object(picam2):
         print("画像取得失敗")
         return False
     
-    # 画像をファイルに保存
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    filename = f"/home/simulation/paracamera_{timestamp}.jpg"
-    cv2.imwrite(filename, frame)
-    print(f"画像保存: {filename}")
-    
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask = cv2.inRange(hsv, lower_red, upper_red)
     
     return np.sum(mask) > 5000
-    return True
-    return False
-
 # -------------------------------
 # 初期化
 # -------------------------------
