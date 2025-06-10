@@ -1,168 +1,140 @@
 import time
 import math
-import board
-import busio
-import serial
-import cv2
-import numpy as np
-from gpiozero import Motor
-from picamera2 import Picamera2
-import adafruit_bno055
 
-# --- 初期設定 ---
-GOAL_LAT = 35.123456
-GOAL_LON = 139.123456
-BEARING_TOLERANCE = 15
-AVOID_LIMIT = 3
-WAIT_DURATION = 5
+# 仮定：BNO055、ColorSensor、GPSModule、Motorクラスをすでに作成済みだと仮定します。
+# これらはセンサーやモーターを制御するためのクラスです。
 
-# --- モーター設定 ---
-left_motor = Motor(forward=17, backward=18)
-right_motor = Motor(forward=22, backward=23)
+class BNO055:
+    def __init__(self):
+        # BNO055センサー初期化
+        pass
 
-def move_forward():
-    left_motor.forward()
-    right_motor.forward()
+    def get_heading(self):
+        # 現在の方位（ヘディング）を取得する
+        return 0  # 仮の値
 
-def stop():
-    left_motor.stop()
-    right_motor.stop()
+    def is_calibrated(self):
+        # キャリブレーション状態を確認する
+        return True  # 仮の値
 
-def turn_left():
-    left_motor.backward()
-    right_motor.forward()
+    def calibrate(self):
+        # キャリブレーション処理
+        pass
 
-def turn_right():
-    left_motor.forward()
-    right_motor.backward()
+class ColorSensor:
+    def __init__(self):
+        # 色センサー初期化
+        pass
 
-# --- センサ初期化 ---
-i2c = busio.I2C(board.SCL, board.SDA)
-sensor = adafruit_bno055.BNO055_I2C(i2c)
-gps = serial.Serial("/dev/serial0", baudrate=9600, timeout=1)
-camera = Picamera2()
-camera.configure(camera.create_preview_configuration(main={"format": 'RGB888', "size": (320, 240)}))
-camera.start()
+    def get_color(self):
+        # 色検知処理（例えば、赤色など）
+        return "none"  # 仮の値
 
-# --- 赤色検出範囲（HSV） ---
-LOWER_RED1 = np.array([0, 120, 70])
-UPPER_RED1 = np.array([10, 255, 255])
-LOWER_RED2 = np.array([170, 120, 70])
-UPPER_RED2 = np.array([180, 255, 255])
+class GPSModule:
+    def __init__(self):
+        # GPS初期化
+        pass
 
-# --- 関数定義 ---
-def convert_to_decimal(coord, direction):
-    if coord == '': return None
-    deg = float(coord[:2])
-    minutes = float(coord[2:])
-    decimal = deg + minutes / 60
-    return -decimal if direction in ['S', 'W'] else decimal
+    def get_position(self):
+        # 現在のGPS位置を取得する
+        return 35.6895, 139.6917  # 仮の値（東京の緯度経度）
 
-def get_gps_position():
-    line = gps.readline().decode('ascii', errors='replace')
-    if "$GNRMC" in line or "$GPRMC" in line:
-        parts = line.split(',')
-        if parts[2] == 'A':
-            lat = convert_to_decimal(parts[3], parts[4])
-            lon = convert_to_decimal(parts[5], parts[6])
-            return lat, lon
-    return None, None
+    def distance_to(self, lat, lon):
+        # 現在位置と目的地の距離を計算
+        return 0.5  # 仮の値（0.5km以内）
 
-def calculate_bearing(lat1, lon1, lat2, lon2):
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    dlon = lon2 - lon1
-    x = math.sin(dlon) * math.cos(lat2)
-    y = math.cos(lat1)*math.sin(lat2) - math.sin(lat1)*math.cos(lat2)*math.cos(dlon)
-    bearing = math.atan2(x, y)
-    return (math.degrees(bearing) + 360) % 360
+class Motor:
+    def __init__(self):
+        # モーター初期化
+        pass
 
-def detect_red_centroid(frame):
-    hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-    mask1 = cv2.inRange(hsv, LOWER_RED1, UPPER_RED1)
-    mask2 = cv2.inRange(hsv, LOWER_RED2, UPPER_RED2)
-    red_mask = cv2.bitwise_or(mask1, mask2)
-    M = cv2.moments(red_mask)
-    if M["m00"] > 5000:
-        cx = int(M["m10"] / M["m00"])
-        return cx
-    return None
+    def move_forward(self):
+        # 前進
+        print("Moving forward")
 
-# --- メイン処理 ---
-print("🚀 ミッション開始")
-avoid_count = 0
-color_detection_mode = False
-goal_reached = False
+    def turn_left(self):
+        # 左に回転
+        print("Turning left")
 
-try:
-    # --- 目標方向へ向くフェーズ ---
-    while not color_detection_mode:
-        lat, lon = get_gps_position()
-        heading = sensor.euler[0]
-        if lat and lon and heading is not None:
-            goal_bearing = calculate_bearing(lat, lon, GOAL_LAT, GOAL_LON)
-            diff = abs(goal_bearing - heading)
-            if diff > 180:
-                diff = 360 - diff
-            print(f"現在方位: {heading:.1f}°, 目的地方位: {goal_bearing:.1f}°, 差: {diff:.1f}°")
-            if diff < BEARING_TOLERANCE:
-                print("✅ 向き完了 → 色検知モードへ")
-                color_detection_mode = True
-            else:
-                print("🔄 向き調整中...")
-                move_forward()
-                time.sleep(1)
-                stop()
-        time.sleep(0.5)
+    def turn_right(self):
+        # 右に回転
+        print("Turning right")
 
-    # --- 色検知＆回避・最終GPS取得 ---
-    while not goal_reached:
-        frame = camera.capture_array()
-        centroid = detect_red_centroid(frame)
+    def stop(self):
+        # 停止
+        print("Stopping motors")
 
-        if centroid is None:
-            print("🟢 パラシュートなし → 前進してGPS再取得")
-            move_forward()
-            time.sleep(2)
-            stop()
+# 目的地まで移動する関数
+def move_to_destination():
+    # センサーとモーターの初期化
+    bno = BNO055()
+    color_sensor = ColorSensor()
+    gps = GPSModule()
+    motor = Motor()
 
-            # --- GPS再取得 ---
-            lat, lon = get_gps_position()
-            if lat and lon:
-                print(f"📍 再取得位置: 緯度={lat}, 経度={lon}")
-            else:
-                print("⚠️ GPS取得失敗")
+    # 目的地の設定（例：東京駅の位置）
+    destination_lat = 35.6895  # 目的地の緯度（仮）
+    destination_lon = 139.6917  # 目的地の経度（仮）
 
-            # --- キャリブレーション ---
-            heading = sensor.euler[0]
-            if heading is not None:
-                print(f"🧭 キャリブレーション完了。最終方位: {heading:.2f}°")
-            else:
-                print("⚠️ 方位センサ読み取り失敗")
+    # GPSで現在位置を取得
+    current_lat, current_lon = gps.get_position()
 
-            print("✅ ミッション完了（回避 → GPS → 停止 → キャリブレーション）")
-            goal_reached = True
-            break
+    # 目的地に向かって進行開始
+    while True:
+        # 目的地に向けて進行方向を修正
+        bearing_to_destination = get_bearing_to_destination(current_lat, current_lon, destination_lat, destination_lon)
+        current_heading = bno.get_heading()
 
+        # 進行方向の調整
+        if current_heading < bearing_to_destination:
+            motor.turn_left()
+        elif current_heading > bearing_to_destination:
+            motor.turn_right()
         else:
-            print(f"🔴 パラシュート検知 → 回避実行中 ({avoid_count+1})")
-            avoid_count += 1
-            if avoid_count >= AVOID_LIMIT:
-                print("⚠️ 被さり判定 → 停止して待機")
-                stop()
-                time.sleep(WAIT_DURATION)
-                avoid_count = 0
-                continue
+            motor.move_forward()
 
-            if centroid < 100:
-                turn_right()
-            elif centroid > 220:
-                turn_left()
-            else:
-                stop()
-            time.sleep(0.5)
+        # 色センサーで障害物回避
+        detected_color = color_sensor.get_color()
+        if detected_color == "red":
+            print("Red detected! Turning left.")
+            motor.turn_left()
 
-except KeyboardInterrupt:
-    print("⛔ 手動停止")
-finally:
-    stop()
-    print("🛑 ローバー停止完了")
+        # 目的地に到達したらループを終了
+        if gps.distance_to(destination_lat, destination_lon) < 1.0:  # 1km以内で目的地到着
+            print("Arrived at the destination!")
+            motor.stop()  # モーターを停止
+            break  # 目的地到着後、ループを終了
+
+        # GPSを再取得
+        current_lat, current_lon = gps.get_position()
+
+    # モーターを停止後にキャリブレーションを開始
+    print("Starting calibration...")
+
+    # BNO055センサーのキャリブレーションを行う
+    while not bno.is_calibrated():  # キャリブレーションが完了するまでループ
+        print("Calibrating BNO055 sensor...")
+        time.sleep(1)  # キャリブレーションの時間待機
+    print("Calibration complete!")
+
+# 目的地への進行方向を計算するための関数
+def get_bearing_to_destination(lat1, lon1, lat2, lon2):
+    # 2地点間の方位を計算する関数（簡略化した計算式）
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    delta_lon = lon2_rad - lon1_rad
+    
+    x = math.sin(delta_lon) * math.cos(lat2_rad)
+    y = math.cos(lat1_rad) * math.sin(lat2_rad) - math.sin(lat1_rad) * math.cos(lat2_rad) * math.cos(delta_lon)
+    
+    bearing = math.atan2(x, y)
+    bearing = math.degrees(bearing)
+    
+    return (bearing + 360) % 360  # 正しい範囲にするために0~360度に調整
+
+# メイン処理の開始
+if __name__ == "__main__":
+    move_to_destination()
