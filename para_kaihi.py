@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
-from GNSS_navigate import get_current_location
-from motor import Motor
+from GNSS_navigate import GNSS_navigate
+from motor import motor
 import cv2
 import numpy as np
 from smbus2 import SMBus
