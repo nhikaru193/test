@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import time
 
 class MotorDriver():
  #初期設定関数の定義
