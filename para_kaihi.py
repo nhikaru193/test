@@ -2,8 +2,6 @@ import time
 import RPi.GPIO as GPIO
 from GNSS_navigate import direction
 from GNSS_navigate import distance
-from motor import motor_right
-from motor import motor_left
 import cv2
 import numpy as np
 from smbus2 import SMBus
