@@ -15,7 +15,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 # モーター初期化
-motor = Motor()
+motor = init()
 
 # BNO055初期化
 bus = SMBus(1)
@@ -56,7 +56,7 @@ def detect_color():
 
 try:
     # 初期位置取得
-    current_lat, current_lon = get_current_location()
+    current_lat, current_lon = direction()
     target_heading = calculate_heading(current_lat, current_lon, destination_lat, destination_lon)
 
     # 現在の方位取得
