@@ -104,13 +104,12 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
-                # タイムアウト時に強制的に判定を行う
                 print("⏰ タイムアウト：判定中止")
-                release_counter += 1
-                print(f"⚠️ 判定成立 {release_counter}/{max_consecutive} - タイムアウトによる強制判定")
-                if release_counter >= max_consecutive:
+                landing_counter += 1
+                print(f"⚠️ 判定成立 {landing_counter}/3 - タイムアウトによる強制判定")
+                if landing_counter >= 3:
                     print("✅ 着地判定成功：タイムアウトで3回連続成立！")
-                    break
+                break
                 else:
                     break  # タイムアウト後、判定中止
 
@@ -118,7 +117,7 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
             acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
             gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)  # 角加速度（角速度）
 
-            print(f"[気圧] {pressure:.2f} hPa, [加速度Z] {acc_z:.2f} m/s², "
+            print(f"[気圧] {pressure:.2f} hPa, [加速度] X: {acc_x:.2f}, Y: {acc_y:.2f}, Z: {acc_z:.2f} m/s²"
                   f"[角加速度X] {gyro_x:.2f} °/s, [角加速度Y] {gyro_y:.2f} °/s, [角加速度Z] {gyro_z:.2f} °/s")
 
             # 初期安定した気圧、加速度、角加速度を取得
@@ -130,7 +129,9 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
                 stable_gyro = gyro_x  # 角加速度が安定しているか確認
 
             # 気圧が一定（±1hPa範囲内）、加速度が極端に少ない、角加速度が安定している
-            if abs(pressure - stable_pressure) < 1.0 and abs(acc_z - stable_acc) < acc_threshold and abs(gyro_x - stable_gyro) < gyro_threshold:
+            if abs(pressure - stable_pressure) < 1.0 and abs(acc_x) < acc_threshold and
+                abs(acc_y) < acc_threshold and
+                abs(acc_z - 9.8) < acc_threshold < acc_threshold and abs(gyro_x - stable_gyro) < gyro_threshold:
                 release_counter += 1
                 print(f"⚠️ 判定成立 {release_counter}/{max_consecutive}")
 
