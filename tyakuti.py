@@ -1,15 +1,18 @@
 import smbus
 import time
-from bno055 import BNO055
+from bno055 import BNO055  # BNO055ライブラリをインポート
 
-# BME280関連
+# BME280関連のグローバル変数
 t_fine = 0.0
 digT = []
 digP = []
 digH = []
 
+# I2Cアドレスとバス設定
 i2c = smbus.SMBus(1)
 address = 0x76
+
+# BME280 初期化と補正関数群（省略）
 
 def init_bme280():
     i2c.write_byte_data(address, 0xF2, 0x01)
@@ -47,7 +50,8 @@ def bme280_compensate_t(adc_T):
     var1 = (adc_T / 8.0 - digT[0] * 2.0) * digT[1] / 2048.0
     var2 = ((adc_T / 16.0 - digT[0]) ** 2) * digT[2] / 16384.0
     t_fine = var1 + var2
-    return (t_fine * 5 + 128) / 256 / 100
+    t = (t_fine * 5 + 128) / 256 / 100
+    return t
 
 def bme280_compensate_p(adc_P):
     global t_fine
@@ -73,23 +77,26 @@ def read_pressure():
     bme280_compensate_t(dat_t)
     return bme280_compensate_p(dat_p)
 
-# ----------- 着地判定処理 -----------
-
-def check_landing(pressure_threshold=1010.0, acc_threshold=0.1, gyro_threshold=1.0, timeout=60):
+# 着地判定処理
+def check_landing(pressure_threshold=1010.0, acc_threshold=0.05, timeout=60):
+    # BME280初期化
     init_bme280()
     read_compensate()
 
+    # BNO055初期化
     bno = BNO055()
     if not bno.begin():
         print("BNO055 初期化失敗")
         return
     bno.setExternalCrystalUse(True)
     bno.setMode(BNO055.OPERATION_MODE_NDOF)
-    time.sleep(0.1)
-    bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # ウォームアップ
+    time.sleep(0.05)
+
+    # ダミー読み取りでウォームアップ
+    bno.getVector(BNO055.VECTOR_ACCELEROMETER)
     time.sleep(0.1)
 
-    print("🛬 着地判定開始")
+    print("着地判定開始")
 
     landing_counter = 0
     start_time = time.time()
@@ -98,51 +105,40 @@ def check_landing(pressure_threshold=1010.0, acc_threshold=0.1, gyro_threshold=1
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
-                print("⏰ タイムアウト：強制判定")
+                # タイムアウト時に着地判定を強制的に行う
+                print("⏰ タイムアウト：判定中止")
                 landing_counter += 1
+                print(f"⚠️ 判定成立 {landing_counter}/3 - タイムアウトによる強制判定")
                 if landing_counter >= 3:
-                    print("✅ 着地判定成功（タイムアウトで3回連続）")
-                break
+                    print("✅ 着地判定成功：タイムアウトで3回連続成立！")
+                    break
+                else:
+                    break  # タイムアウト後ループ終了
 
+            # 気圧データと加速度（X, Y, Z軸）を読み取る
             pressure = read_pressure()
             acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
-            gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)
 
-            print(f"[気圧] {pressure:.2f} hPa")
-            print(f"[加速度] X: {acc_x:.2f}, Y: {acc_y:.2f}, Z: {acc_z:.2f} m/s²")
-            print(f"[角速度] X: {gyro_x:.2f}, Y: {gyro_y:.2f}, Z: {gyro_z:.2f} °/s")
+            # 加速度が静止状態に近いかつ気圧が一定で、角加速度も安定しているかを判定
+            print(f"加速度 (X: {acc_x:.2f}, Y: {acc_y:.2f}, Z: {acc_z:.2f}), 気圧: {pressure:.2f} hPa")
 
-            acc_static = (abs(acc_x) < acc_threshold and
-                          abs(acc_y) < acc_threshold and
-                          abs(acc_z - 9.8) < acc_threshold)
-
-            gyro_static = (abs(gyro_x) < gyro_threshold and
-                           abs(gyro_y) < gyro_threshold and
-                           abs(gyro_z) < gyro_threshold)
-
-            pressure_ok = pressure > pressure_threshold  # 地上の気圧近辺想定
-
-            if acc_static and gyro_static and pressure_ok:
+            # 追加条件：加速度X, Y, Zが閾値以下、かつZ軸加速度が重力近く
+            if abs(acc_x) < acc_threshold and abs(acc_y) < acc_threshold and abs(acc_z - 9.8) < acc_threshold:
                 landing_counter += 1
-                print(f"⚠️ 着地条件成立 {landing_counter}/3")
+                print(f"⚠️ 判定成立 {landing_counter}/3")
             else:
                 landing_counter = 0
 
             if landing_counter >= 3:
-                print("✅ 着地判定成功（3回連続成立）")
+                print("✅ 着地判定成功：3回連続成立！")
                 break
 
-            time.sleep(5)  # 測定間隔を5秒に設定
+            time.sleep(5)  # 5秒おきに測定
 
     except KeyboardInterrupt:
-        print("⛔ 中断されました")
+        print("中断されました")
     finally:
-        print("🔚 判定処理終了")
+        print("処理終了")
 
 # 実行
-check_landing(
-    pressure_threshold=1010.0,
-    acc_threshold=0.1,
-    gyro_threshold=1.0,
-    timeout=60
-)
+check_landing(pressure_threshold=1010.0, acc_threshold=0.05, timeout=60)
