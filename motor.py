@@ -81,7 +81,7 @@ class MotorDriver():
          GPIO.output(self.B1, GPIO.HIGH)
          GPIO.output(self.B2, GPIO.HIGH)
 
- #雑なキャリブレーション(__init__とセットで使おうね)
+ #雑なキャリブレーション
      def cleanup(self):
          self.pwma.stop()
          self.pwmb.stop()
