@@ -4,8 +4,19 @@ from GNSS_navigate import direction
 from GNSS_navigate import distance
 import cv2
 import numpy as np
-from smbus2 import SMBus
-from bno055 import BNO055
+import board
+import busio
+import adafruit_bno055
+
+# I2Cバスの初期化
+i2c = busio.I2C(board.SCL, board.SDA)
+
+# BNO055の初期化
+sensor = adafruit_bno055.BNO055_I2C(i2c)
+
+# 例：オイラー角の取得（heading, roll, pitch）
+print(sensor.euler)
+
 
 # GPIOの初期化
 GPIO.setmode(GPIO.BCM)
