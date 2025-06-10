@@ -119,7 +119,10 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
                     break  # タイムアウト後、判定中止
 
             pressure = read_pressure()
-            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
+            acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+            acc_x /= 100.0
+            acc_y /= 100.0
+            acc_z /= 100.0　　　　　# 加速度
             gyro_x, gyro_y, gyro_z = bno.getVector(BNO055.VECTOR_GYROSCOPE)  # 角加速度（角速度）
 
             print(f"[気圧] {pressure:.2f} hPa, [加速度X] {acc_x:.2f} m/s², [加速度Y] {acc_y:.2f} m/s², "
