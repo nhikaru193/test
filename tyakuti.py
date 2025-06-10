@@ -111,7 +111,7 @@ def check_landing(pressure_threshold=900.0, acc_threshold=0.1, gyro_threshold=0.
                     print("✅ 着地判定成功：タイムアウトで3回連続成立！")
                 break
             else:
-            　  break  # タイムアウト後、判定中止
+                break  # タイムアウト後、判定中止
 
             pressure = read_pressure()
             acc_x, acc_y, acc_z = bno.getVector(BNO055.VECTOR_ACCELEROMETER)  # 加速度
