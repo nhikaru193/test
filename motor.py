@@ -12,16 +12,16 @@ class MotorDriver:
          GPIO.setup([AIN1, BIN2, PWMA, BIN1, BIN2, PWMB, STBY], GPIO.OUT)   #すべてのpinの出力を開始(使えるようになる)
 
      #右車輪モータ制御ピン代入
-         BIN1 = 16
-         BIN2 = 26
-         PWMB = 19
+         #BIN1 = 16
+         #BIN2 = 26
+         #PWMB = 19
  
      #左車輪モータ制御ピン代入
-         AIN1 = 23
-         AIN2 = 18
-         PWMA = 12
+         #AIN1 = 23
+         #AIN2 = 18
+         #PWMA = 12
  
-         STBY = 21
+         #STBY = 21
      
      #モータ起動
          GPIO.output(STBY, GPIO.HIGH)
