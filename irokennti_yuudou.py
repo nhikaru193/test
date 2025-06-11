@@ -18,6 +18,10 @@ picam2.configure(config)
 picam2.start()
 time.sleep(2)
 
+#速度定義
+Va = 0
+Vb = 0
+
 try:
     while True:
         # 画像取得
@@ -48,29 +52,34 @@ try:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         center_pixel = hsv[hsv.shape[0]//2, hsv.shape[1]//2]
         print("中心のHSV値:", center_pixel)
-
-
+        
         # 判定出力
         print(f"🔴 赤割合: {percentage:.2f}% → ", end="")
         if percentage >= 10.0:
+             Vb = 0
              print("非常に近い（終了）")
-             driver.changing_forward(50, 0)
+             driver.changing_forward(Va, Vb)
              driver.motor_stop_brake()
              break
           
         elif percentage >= 5.0:
+             Vb = 50
              print("近い")
-             driver.changing_forward(100, 50)
+             driver.changing_forward(Va, Vb)
              time.sleep(0.1)
+             Va = Vb
           
         elif percentage >= 1.0:
+             Vb = 100
              print("遠い")
-             driver.changing_forward(0, 100)
+             driver.changing_forward(Va, Vb)
              time.sleep(0.1)
+             Va = Vb
 
         else: 
             print("範囲外")
             while True:
+                driver.changing_forward(Va, 0)
                 driver.changing_left(0, 15)
                 driver.changing_left(15, 0)
                 driver.motor_stop_brake()
