@@ -42,11 +42,13 @@ def classify_shape(contour):
 
 # ----- 撮影 -----
 camera = Picamera2()
-camera.resolution = (640, 480)
+config = picam2.create_still_configuration(main={"size": (640, 480)})
+picam2.configure(config)
 camera.start_preview()
 sleep(2)
 image_path = '/home/pi/captured_image.jpg'
-camera.capture(image_path)
+camera..capture_array()
+picam2.capture_file(image_path)
 camera.close()
 print("画像を保存しました:", image_path)
 
