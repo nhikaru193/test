@@ -29,10 +29,10 @@ try:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # 赤色の範囲指定
-        lower_red1 = np.array([0, 40, 45])
-        upper_red1 = np.array([10, 255, 255])
-        lower_red2 = np.array([160, 40, 45])
-        upper_red2 = np.array([179, 255, 255])
+        lower_red1 = np.array([0, 30, 30])
+        upper_red1 = np.array([20, 255, 255])
+        lower_red2 = np.array([95, 30, 30])
+        upper_red2 = np.array([130, 255, 255])
 
         # 赤マスク作成
         mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
@@ -43,6 +43,12 @@ try:
         red_area = np.count_nonzero(mask)
         total_area = frame.shape[0] * frame.shape[1]
         percentage = (red_area / total_area) * 100
+
+        # 中心画素のh, s, v測定
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        center_pixel = hsv[hsv.shape[0]//2, hsv.shape[1]//2]
+        print("中心のHSV値:", center_pixel)
+
 
         # 判定出力
         print(f"🔴 赤割合: {percentage:.2f}% → ", end="")
@@ -68,22 +74,20 @@ try:
                 driver.changing_left(0, 15)
                 driver.changing_left(15, 0)
                 driver.motor_stop_brake()
+               # 画像取得
                 frame = picam2.capture_array()
+
+                frame = cv2.GaussianBlur(frame, (5, 5), 0)
+
                 # BGR → HSV に変換
                 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
-                # 赤色の範囲指定
-                lower_red1 = np.array([0, 40, 50])
-                upper_red1 = np.array([6, 255, 255])
-                lower_red2 = np.array([165, 40, 50])
-                upper_red2 = np.array([179, 255, 255])
-    
+                
                 # 赤マスク作成
                 mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
                 mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
                 mask = cv2.bitwise_or(mask1, mask2)
     
-            # 面積計算
+                # 面積計算
                 red_area = np.count_nonzero(mask)
                 total_area = frame.shape[0] * frame.shape[1]
                 percentage = (red_area / total_area) * 100
