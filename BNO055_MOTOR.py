@@ -292,7 +292,7 @@ class BNO055:
 
 if __name__ == '__main__':
 	bno = BNO055()
-	driver.changing_forward(0, 120)
+	driver.changing_forward(0, 90)
 	
 	if bno.begin() is not True:
 		print("Error initializing device")
