@@ -28,8 +28,8 @@ hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 # 赤色の範囲指定
 lower_red1 = np.array([0, 40, 50])
-upper_red1 = np.array([6, 255, 255])
-lower_red2 = np.array([165, 40, 50])
+upper_red1 = np.array([20, 255, 255])
+lower_red2 = np.array([150, 40, 50])
 upper_red2 = np.array([179, 255, 255])
 
 # 赤マスク作成
