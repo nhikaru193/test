@@ -42,6 +42,7 @@ red_area = np.count_nonzero(mask)
 total_area = frame.shape[0] * frame.shape[1]
 percentage = (red_area / total_area) * 100
 
+# 中心画素のh, s, v測定
 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 center_pixel = hsv[hsv.shape[0]//2, hsv.shape[1]//2]
 print("中心のHSV値:", center_pixel)
