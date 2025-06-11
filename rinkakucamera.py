@@ -47,7 +47,7 @@ picam2.configure(config)
 camera.start_preview()
 sleep(2)
 image_path = '/home/pi/captured_image.jpg'
-camera..capture_array()
+camera.capture_array()
 picam2.capture_file(image_path)
 camera.close()
 print("画像を保存しました:", image_path)
