@@ -302,4 +302,4 @@ if __name__ == '__main__':
 	for i in range(100):
             print(bno.getVector(BNO055.VECTOR_EULER))
             time.sleep(0.1)
-	driver.changing_forward(120, 0)
+	driver.changing_forward(90, 0)
