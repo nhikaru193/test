@@ -74,7 +74,7 @@ def save_image_before_detection(picam2):
     frame = picam2.capture_array()
     
     # 撮影した画像を保存
-    image_path = "/home/simulation/picture/captured_image.jpg"
+    image_path = "/home/mark1/Pictures/parakaihi_image.jpg"
     picam2.capture_file(image_path)
     cv2.imwrite(image_path, frame)
     print(f"初期画像保存成功: {image_path}")
