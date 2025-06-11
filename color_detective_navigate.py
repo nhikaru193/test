@@ -102,9 +102,11 @@ try:
                 percentage = (red_area / total_area) * 100
 
                 if percentage >= 1.0:
+                   Vb = 50
                    print("遠い")
-                   driver.changing_forward(50, 0)
+                   driver.changing_forward(Va, Vb)
                    driver.motor_stop_brake()
+                   Va = Vb
                    break               
                   
 finally:
