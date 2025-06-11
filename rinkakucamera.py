@@ -44,7 +44,7 @@ def classify_shape(contour):
 camera = Picamera2()
 config = camera.create_still_configuration(main={"size": (320, 240)})
 camera.configure(config)
-camera.start_preview()
+camera.start()
 sleep(2)
 image_path = '/home/pi/captured_image.jpg'
 camera.capture_array()
