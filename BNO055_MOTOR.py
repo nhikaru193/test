@@ -301,5 +301,5 @@ if __name__ == '__main__':
 	bno.setExternalCrystalUse(True)
 	for i in range(50):
             print(bno.getVector(BNO055.VECTOR_EULER))
-	    time.sleep(0.1)
+            time.sleep(0.1)
 	driver.changing_forward(120, 0)
