@@ -46,7 +46,7 @@ config = camera.create_still_configuration(main={"size": (320, 240)})
 camera.configure(config)
 camera.start()
 sleep(2)
-image_path = '/home/pi/captured_image.jpg'
+image_path = '/home/mark1/Pictures/captured_image.jpg'
 camera.capture_array()
 camera.capture_file(image_path)
 camera.close()
