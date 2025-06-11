@@ -42,7 +42,7 @@ def classify_shape(contour):
 
 # ----- 撮影 -----
 camera = Picamera2()
-config = picam2.create_still_configuration(main={"size": (640, 480)})
+config = camera.create_still_configuration(main={"size": (640, 480)})
 camera.configure(config)
 camera.start_preview()
 sleep(2)
