@@ -299,7 +299,8 @@ if __name__ == '__main__':
 		exit()
 	time.sleep(1)
 	bno.setExternalCrystalUse(True)
-	for i in range(100):
+	for i in range(200):
             print(bno.getVector(BNO055.VECTOR_EULER))
+            print(bno.getVector(BNO055.VECTOR_MAGNETOMETER))
             time.sleep(0.1)
 	driver.changing_forward(90, 0)
