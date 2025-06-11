@@ -64,6 +64,7 @@ try:
             print("範囲外")
             while True:
                 driver.changing_left(0, 15)
+                driver.changing_left(15, 0)
                 driver.motor_stop_brake()
                 frame = picam2.capture_array()
                 # BGR → HSV に変換
