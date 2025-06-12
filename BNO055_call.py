@@ -15,21 +15,20 @@ while True:
     sys, gyro, accel, mag = bno.getCalibration()
     print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
     if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
-        
 #姿勢
-    time.sleep(1)
-    for i in range(20):
-        print(bno.getVector(BNO055.VECTOR_EULER))
-        time.sleep(0.1)
+        time.sleep(1)
+        for i in range(20):
+            print(bno.getVector(BNO055.VECTOR_EULER))
+            time.sleep(0.1)
 
 #
-    time.sleep(1)
-    for i in range(20):
-        print(bno.getVector(BNO055.VECTOR_GRAVITY))
-        time.sleep(0.1)
+        time.sleep(1)
+        for i in range(20):
+            print(bno.getVector(BNO055.VECTOR_GRAVITY))
+            time.sleep(0.1)
 
 #
-    time.sleep(1)
-    for i in range(20):
-        print(bno.getVector(BNO055.VECTOR_GYROSCOPE))
-        time.sleep(0.1)
+        time.sleep(1)
+        for i in range(20):
+            print(bno.getVector(BNO055.VECTOR_GYROSCOPE))
+            time.sleep(0.1)
