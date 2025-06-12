@@ -306,7 +306,7 @@ if __name__ == '__main__':
             break
         time.sleep(0.5)
     """
-	
+    time.sleep(5)
     bno.setExternalCrystalUse(True)
 
     while True:
