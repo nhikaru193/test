@@ -10,7 +10,7 @@ if not pi.connected:
     print("pigpio デーモンに接続できません。")
     exit(1)
 
-err_tx = pi.bb_serial_write_open(TX_PIN, BAUD, 8)
+err_tx = pi.bb_serial_write(TX_PIN, BAUD, 8)
 if err_tx != 0:
     print(f"ソフトUART TX の設定に失敗：GPIO={TX_PIN}, {BAUD}bps")
     pi.bb_serial_read_close(RX_PIN)
