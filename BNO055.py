@@ -231,23 +231,25 @@ class BNO055:
 		self.writeBytes(BNO055.BNO055_OPR_MODE_ADDR, [self._mode])                    #_modeを動作モードレジスタに移す
 		time.sleep(0.03)                                                              #0.03 s待機 モード変更の際には必須　ないとバグっちゃう
 
-	#
-	def setExternalCrystalUse(self, useExternalCrystal = True):
-		prevMode = self._mode
-		self.setMode(BNO055.OPERATION_MODE_CONFIG)
-		time.sleep(0.025)
-		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
-		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x80] if useExternalCrystal else [0])
-		time.sleep(0.01)
+	#外部クリスタルを使うか(水晶振動子の外付けコンデンサ)
+	def setExternalCrystalUse(self, useExternalCrystal = True):                                      
+		prevMode = self._mode                                                                    #self._modeをprevModeに格納
+		self.setMode(BNO055.OPERATION_MODE_CONFIG)                                               #16行目参照　configモードに入る
+		time.sleep(0.025)                                                                        #0.025秒待機
+		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])                                         #39行目参照　ページidレジスタに0を書き込む⇒データ取得のレジスタ群ページに戻る
+		self.writeBytes(BNO055.BNO055_SYS_TRIGGER_ADDR, [0x80] if useExternalCrystal else [0])   #
+		time.sleep(0.01)                                                                         #
 		self.setMode(prevMode)
 		time.sleep(0.02)
 
+	#システムステータスを参照する　行列形式
 	def getSystemStatus(self):
 		self.writeBytes(BNO055.BNO055_PAGE_ID_ADDR, [0])
 		(sys_stat, sys_err) = self.readBytes(BNO055.BNO055_SYS_STAT_ADDR, 2)
 		self_test = self.readBytes(BNO055.BNO055_SELFTEST_RESULT_ADDR)[0]
 		return (sys_stat, self_test, sys_err)
 
+	#センサのverを参照する　行列形式
 	def getRevInfo(self):
 		(accel_rev, mag_rev, gyro_rev) = self.readBytes(BNO055.BNO055_ACCEL_REV_ID_ADDR, 3)
 		sw_rev = self.readBytes(BNO055.BNO055_SW_REV_ID_LSB_ADDR, 2)
@@ -255,13 +257,16 @@ class BNO055:
 		bl_rev = self.readBytes(BNO055.BNO055_BL_REV_ID_ADDR)[0]
 		return (accel_rev, mag_rev, gyro_rev, sw_rev, bl_rev)
 
+	#各センサのキャリブレーション状態を参照する　戻り値:(加速度, 磁気, ジャイロ, システム)
 	def getCalibration(self):
 		calData = self.readBytes(BNO055.BNO055_CALIB_STAT_ADDR)[0]
 		return (calData >> 6 & 0x03, calData >> 4 & 0x03, calData >> 2 & 0x03, calData & 0x03)
 
+	#内臓温度センサ値を取得する　戻り値:整数値
 	def getTemp(self):
 		return self.readBytes(BNO055.BNO055_TEMP_ADDR)[0]
 
+	#指定タイプ(地磁気, ジャイロ, 姿勢(オイラー角:heading, roll, pitch), 重力, 線形加速度,  etc)の取得　戻り値：(x, y, z)
 	def getVector(self, vectorType):
 		buf = self.readBytes(vectorType, 6)
 		xyz = struct.unpack('hhh', struct.pack('BBBBBB', buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]))
@@ -292,5 +297,6 @@ if __name__ == '__main__':
 	time.sleep(1)
 	bno.setExternalCrystalUse(True)
 	while True:
-		print(bno.getVector(BNO055.VECTOR_EULER))
-		time.sleep(0.01)
+		for i in range(20):
+			print(bno.getVector(BNO055.VECTOR_EULER))
+			time.sleep(0.1)
