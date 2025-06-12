@@ -60,8 +60,6 @@ try:
                 print("デコードエラー:", e)
         time.sleep(0.1)
 
-except KeyboardInterrupt:
-    print("\nユーザー割り込みで終了します。")
 
 # === 方位角・距離の関数 ===
 last_lng = [lat, lon]
