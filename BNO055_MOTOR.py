@@ -292,7 +292,7 @@ class BNO055:
 
 if __name__ == '__main__':
 	bno = BNO055()
-	driver.changing_forward(0, 90)
+	driver.changing_forward(0, 100)
 	
 	if bno.begin() is not True:
 		print("Error initializing device")
@@ -303,4 +303,4 @@ if __name__ == '__main__':
             print(bno.getVector(BNO055.VECTOR_EULER))
             #print(bno.getVector(BNO055.VECTOR_MAGNETOMETER))
             time.sleep(0.1)
-	driver.changing_forward(90, 0)
+	driver.changing_forward(100, 0)
