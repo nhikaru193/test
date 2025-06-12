@@ -17,21 +17,18 @@ while True:
     if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
         
 #姿勢
-print("(headings, pitch, yo)出力開始")
 time.sleep(1)
 for i in range(20):
     print(bno.getVector(BNO055.VECTOR_EULER))
     time.sleep(0.1)
 
 #
-print("重力ベクトル")
 time.sleep(1)
 for i in range(20):
     print(bno.getVector(BNO055.VECTOR_GRAVITY))
     time.sleep(0.1)
 
 #
-print("ジャイロ")
 time.sleep(1)
 for i in range(20):
     print(bno.getVector(BNO055.VECTOR_GYROSCOPE))
