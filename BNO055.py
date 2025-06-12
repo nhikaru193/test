@@ -303,7 +303,7 @@ if __name__ == '__main__':
 	    if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
 	        print("\n✅ キャリブレーション完了！")
 	        break
-    time.sleep(0.5)
+        time.sleep(0.5)
 	bno.setExternalCrystalUse(True)
 	bno.setMode(BNO055.OPERATION_MODE_NDOF)
 	while True:
