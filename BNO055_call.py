@@ -5,7 +5,7 @@ from BNO055 import BNO055
 
 #インスタンス作成
 bno = BNO055()
-bno = begin()
+bno.begin()
 time.sleep(1)
 bno.setExternalCrystalUse(True)      #外部水晶振動子使用(クロック)
 setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
