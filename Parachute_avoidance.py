@@ -12,6 +12,9 @@ if not cap.isOpened():
     GPIO.cleanup()
     exit()
 
+#
+
+
 try:
     while True:
         ret, frame = cap.read()                            #ret:フレームが正常に読み込めたかどうかのtrue/false ,frame:実際の画像データ　を取得する。
