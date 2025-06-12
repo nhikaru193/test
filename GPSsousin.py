@@ -10,9 +10,10 @@ if not pi.connected:
     print("pigpio デーモンに接続できません。")
     exit(1)
 
-err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
-if err != 0:
-    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}, {BAUD}bps")
+err_tx = pi.bb_serial_write_open(TX_PIN, BAUD, 8)
+if err_tx != 0:
+    print(f"ソフトUART TX の設定に失敗：GPIO={TX_PIN}, {BAUD}bps")
+    pi.bb_serial_read_close(RX_PIN)
     pi.stop()
     exit(1)
 
@@ -44,8 +45,8 @@ try:
                             lat = convert_to_decimal(parts[3], parts[4])
                             lon = convert_to_decimal(parts[5], parts[6])
                             print(f"送信: 緯度={lat}, 経度={lon}")
-                            # ここでIM920SLへ送信する場合
-                            # pi.bb_serial_write(TX_PIN, f"{lat},{lon}\r\n".encode())
+                            msg = f"{lat},{lon}\r\n"
+                            pi.bb_serial_write(TX_PIN, msg.encode())
                             time.sleep(1)  # 1秒待って次を受信
                             break  # 1つ処理したら次のループへ
 
@@ -59,5 +60,6 @@ except KeyboardInterrupt:
 
 finally:
     pi.bb_serial_read_close(RX_PIN)
+    pi.bb_serial_write_close(TX_PIN)
     pi.stop()
     print("終了しました。")
