@@ -8,7 +8,7 @@ bno = BNO055()
 bno.begin()
 time.sleep(1)
 bno.setExternalCrystalUse(True)      #外部水晶振動子使用(クロック)
-setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
+bno.setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
 
 #校正
 print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
