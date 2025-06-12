@@ -288,25 +288,29 @@ class BNO055:
 	def writeBytes(self, register, byteVals):
 		return self._bus.write_i2c_block_data(self._address, register, byteVals)
 
-
 if __name__ == '__main__':
-	bno = BNO055()
-	if bno.begin() is not True:
-		print("Error initializing device")
-		exit()
-	time.sleep(1)
-	# ==== キャリブレーション完了待機 ====
-	print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
-        while True:
-	    sys, gyro, accel, mag = sensor.getCalibrationStatus()
-	    print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
-	    if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
-                print("\n✅ キャリブレーション完了！")
-                break
+    bno = BNO055()
+    if bno.begin() is not True:
+        print("Error initializing device")
+        exit()
+    time.sleep(1)
+
+    # ==== キャリブレーション完了待機 ====
+    print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
+    while True:
+        sys, gyro, accel, mag = bno.getCalibrationStatus()
+        print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
+        if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
+            print("\n✅ キャリブレーション完了！")
+            break
         time.sleep(0.5)
-	bno.setExternalCrystalUse(True)
-	bno.setMode(BNO055.OPERATION_MODE_NDOF)
-	while True:
-		for i in range(20):
-			print(bno.getVector(BNO055.VECTOR_EULER))
-			time.sleep(0.1)
+
+    bno.setExternalCrystalUse(True)
+    bno.setMode(BNO055.OPERATION_MODE_NDOF)
+
+    while True:
+        for i in range(20):
+            print(bno.getVector(BNO055.VECTOR_EULER))
+            time.sleep(0.1)
+
+
