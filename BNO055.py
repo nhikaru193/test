@@ -295,6 +295,15 @@ if __name__ == '__main__':
 		print("Error initializing device")
 		exit()
 	time.sleep(1)
+	# ==== キャリブレーション完了待機 ====
+	print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
+	while True:
+	    sys, gyro, accel, mag = sensor.getCalibrationStatus()
+	    print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
+	    if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
+	        print("\n✅ キャリブレーション完了！")
+	        break
+    time.sleep(0.5)
 	bno.setExternalCrystalUse(True)
 	bno.setMode(BNO055.OPERATION_MODE_NDOF)
 	while True:
