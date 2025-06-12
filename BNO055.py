@@ -296,7 +296,7 @@ if __name__ == '__main__':
 		exit()
 	time.sleep(1)
 	bno.setExternalCrystalUse(True)
-	setMode(BNO055.OPERATION_MODE_NDOF)
+	bno.setMode(BNO055.OPERATION_MODE_NDOF)
 	while True:
 		for i in range(20):
 			print(bno.getVector(BNO055.VECTOR_EULER))
