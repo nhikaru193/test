@@ -301,7 +301,7 @@ if __name__ == '__main__':
     while True:
         sys, gyro, accel, mag = bno.getCalibration()
         print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
-        if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
+        if gyro == 3 and mag == 3:
             print("\n✅ キャリブレーション完了！")
             break
         time.sleep(0.5)
