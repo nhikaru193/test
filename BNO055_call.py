@@ -11,10 +11,10 @@ setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
 
 #校正
 print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
-   while True:
-       sys, gyro, accel, mag = bno.getCalibration()
-       print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
-       if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
+while True:
+    sys, gyro, accel, mag = bno.getCalibration()
+    print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
+    if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
         
 #姿勢
 print("(headings, pitch, yo)出力開始")
