@@ -298,6 +298,7 @@ if __name__ == '__main__':
     # ==== キャリブレーション完了待機 ====
     print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
     while True:
+        bno.setMode(BNO055.OPERATION_MODE_NDOF)
         sys, gyro, accel, mag = bno.getCalibration()
         print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
         if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
@@ -306,7 +307,6 @@ if __name__ == '__main__':
         time.sleep(0.5)
 
     bno.setExternalCrystalUse(True)
-    bno.setMode(BNO055.OPERATION_MODE_NDOF)
 
     while True:
         for i in range(20):
