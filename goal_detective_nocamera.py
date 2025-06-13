@@ -65,9 +65,13 @@ def get_current_gps_location():
     return None
 
 # === 方位角の計算 ===
-def direction(current, goal):
-    x1, y1 = map(math.radians, current)
-    x2, y2 = map(math.radians, goal)
+def direction(goal_location):                    #direction(GOAL_LOCATION)
+    current = get_current_gps_location()
+    goal = goal_location
+    x1 = math.radians(current[0]) #この辺怪し
+    y1 = math.radians(current[1])#この辺怪し
+    x2 = math.radians(current[0]) #この辺怪し
+    y2 = math.radians(current[1])#この辺怪し
 
     delta_y = y2 - y1
     phi = math.atan2(math.sin(delta_y), math.cos(x1)*math.tan(x2) - math.sin(x1)*math.cos(delta_y))
@@ -113,7 +117,7 @@ def navigate_to_goal():
                     time.sleep(0.5)
                     driver.changing_right(25, 0)
                     time.sleep(0.5)
-                    driver.motor_stop_free()
+                    driver.motor_stop_brake()
                 continue  # 再評価
 
             # 距離によって前進
@@ -127,7 +131,7 @@ def navigate_to_goal():
                 break
 
             print(f"[MOVE] {move_duration:.1f}秒前進")
-            driver.changing_forward(60, 60)
+            driver.changing_forward(0, 90)
             time.sleep(move_duration)
             driver.motor_stop_free()
 
