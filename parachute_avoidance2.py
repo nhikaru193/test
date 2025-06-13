@@ -156,11 +156,18 @@ def navigate_to_goal():
 
             #パラシュート検知し回避
             if percentage > 10:
-                driver.quick_right(0, 20)
+                driver.quick_right(0, 20)               #1
                 driver.quick_right(20, 0)
-                driver.changing_forward(0, 30)
+                driver.changing_forward(0, 30)          #2
                 driver.changing_forward(30, 0)
-                driver.
+                driver.quick_left(0, 20)                #3
+                driver.quick_left(20, 0)
+                driver.changing_forward(0, 30)          #4
+                driver.changing_forward(30, 0)
+                driver.changing_left(0, 20)             #5
+                driver.changing_left(20, 0)
+                driver.changing_forward(0, 30)          #6
+                driver.changing_forward(30, 0)
             
 # === ナビゲーション制御の続き ===
             if dist < 2.0:
