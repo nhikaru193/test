@@ -81,6 +81,7 @@ def get_block_number():
         print("❌ 赤色物体が見つかりません")
     return number
 
+"""
 number = get_block_number()
 print(number)
 """
@@ -99,8 +100,19 @@ try:
                 break
         driver.motor_stop_free()
 
+    #次は中心地を求める
+    r1 = r2 = r3 = r4 = s1 = s2 = s3 = s4 = none
+
+    #r[m], s[rad]
+    while true:
+        driver.changing_left(0, 10)
+        driver.changing_left(10, 0)
+        number = get_block_number()
+            if number == 3:
+                percentage = get percentage()
+                
     
-"""     
+   
         
 
 
