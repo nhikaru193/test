@@ -315,8 +315,8 @@ if __name__ == '__main__':
 
     while True:
         for i in range(20):
-            print(bno.getVector(bno.VECTOR_EULER))
-            a = bno.getVector(bno.VECTOR_EULER)
+            print(bno.getVector(BNO055.VECTOR_EULER))
+            a = bno.getVector(BNO055.VECTOR_EULER)
             B = a[0]
             print(B)
             c = bno.get_heading()
