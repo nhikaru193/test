@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 from picamera import PiCamera
 from motor import MotorDriver
+import RPi.GPIO as GPIO
 import serial
 
 # BNO055関連追加
