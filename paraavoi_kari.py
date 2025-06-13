@@ -58,7 +58,7 @@ def nmea_to_decimal(coord, direction):
     pass
 
 image_dir = "/home/pi/images"
-camera = PiCamera()
+camera = Picamera2()
 camera.resolution = (640, 480)
 
 motor = MotorDriver(
