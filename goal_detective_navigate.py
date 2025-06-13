@@ -81,6 +81,12 @@ def get_block_number():
         print("❌ 赤色物体が見つかりません")
     return number
 
+def distance(percentage)
+    x = (320 * 240 * percentage) / 3.141592
+    mother = sqrt(x)
+    distance = 824 * 0.20 / mother
+    return distance
+
 """
 number = get_block_number()
 print(number)
@@ -110,6 +116,7 @@ try:
         number = get_block_number()
             if number == 3:
                 percentage = get percentage()
+                
                 
     
    
