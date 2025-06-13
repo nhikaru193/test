@@ -3,7 +3,7 @@ import time
 import pigpio
 import RPi.GPIO as GPIO
 from motor import MotorDriver 
-from goalyudo_nocamera import convert_to_decimal
+from BNO055 import BNO055
 
 # インスタンス生成：GPIOピン番号を正しく指定
 driver = MotorDriver(
