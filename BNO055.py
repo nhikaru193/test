@@ -288,6 +288,11 @@ class BNO055:
 	def writeBytes(self, register, byteVals):
 		return self._bus.write_i2c_block_data(self._address, register, byteVals)
 
+        def get_heading():
+		a = self.getVector(BNO055.Vector_EULER)
+		heading = a[0]
+		return heading
+
 if __name__ == '__main__':
     bno = BNO055()
     if bno.begin() is not True:
