@@ -312,6 +312,9 @@ if __name__ == '__main__':
     while True:
         for i in range(20):
             print(bno.getVector(BNO055.VECTOR_EULER))
+            a = getVector(BNO055.VECTOR_EULER)
+            B = a[0]
+            print(B)
             time.sleep(0.1)
 
 
