@@ -7,6 +7,8 @@ import RPi.GPIO as GPIO
 from picamera2 import Picamera2
 from motor import MotorDriver 
 from BNO055 import BNO055
+import smbus
+import struct
 
 # === モーター初期化 ===
 driver = MotorDriver(
@@ -22,6 +24,13 @@ GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 TX_PIN = 17
 RX_PIN = 27
 BAUD = 9600
+
+# カメラ初期化と設定
+picam2 = Picamera2()
+config = picam2.create_still_configuration(main={"size": (320, 240)})
+picam2.configure(config)
+picam2.start()
+time.sleep(1)
 
 pi = pigpio.pi()
 if not pi.connected:
@@ -67,6 +76,23 @@ def get_current_gps_location():
             print("GPSデコードエラー:", e)
     return None
 
+#赤色領域部分の割合
+def get_percentage():
+    frame = picam2.capture_array()
+    frame = cv2.GaussianBlur(frame, (5, 5), 0)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower_red1 = np.array([0, 30, 30])
+    upper_red1 = np.array([20, 255, 255])
+    lower_red2 = np.array([95, 30, 30])
+    upper_red2 = np.array([130, 255, 255])
+    mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+    mask = cv2.bitwise_or(mask1, mask2)
+    red_area = np.count_nonzero(mask)
+    total_area = frame.shape[0] * frame.shape[1]
+    percentage = (red_area / total_area) * 100
+    return percentage
+    
 # === 方位角の計算 ===
 def direction(goal_location):                    #direction(GOAL_LOCATION)
     current = get_current_gps_location()
@@ -105,7 +131,7 @@ def navigate_to_goal():
 
             dist = distance(current_location, GOAL_LOCATION)
             angle_to_goal = direction(GOAL_LOCATION)
-
+            percentage = get_percentage()
             heading = bno.getVector(BNO055.VECTOR_EULER)[0]  # yaw
             angle_error = (angle_to_goal + heading + 360) % 360
 
@@ -128,40 +154,19 @@ def navigate_to_goal():
                     driver.motor_stop_brake()
                 continue  # 再評価
 
-# === Picamera2 初期化 ===
-picam2 = Picamera2()
-picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
-picam2.start()
-
-def detect_red_object():
-    frame = picam2.capture_array()
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # 赤色のHSV範囲（2つに分かれる）
-    lower_red1 = np.array([0, 70, 50])
-    upper_red1 = np.array([10, 255, 255])
-    lower_red2 = np.array([170, 70, 50])
-    upper_red2 = np.array([180, 255, 255])
-
-    mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-    mask = cv2.bitwise_or(mask1, mask2)
-
-    red_area = cv2.countNonZero(mask)
-    return red_area > 500  # 赤色領域が一定以上なら検出とみなす
-
+            #パラシュート検知し回避
+            if percentage > 10:
+                driver.quick_right(0, 20)
+                driver.quick_right(20, 0)
+                driver.changing_forward(0, 30)
+                driver.changing_forward(30, 0)
+                driver.
+            
 # === ナビゲーション制御の続き ===
             if dist < 2.0:
                 print("[GOAL] 目的地に到達しました。")
                 driver.motor_stop_brake()
                 break
-
-            if detect_red_object():
-                print("[DETECT] 赤色物体検出！回避行動")
-                driver.motor_quick_right(25)  # クイックライト旋回
-                time.sleep(1.0)
-                driver.motor_forward(30, 30)
-                time.sleep(1.5)
             else:
                 print("[MOVE] 前進中")
                 driver.motor_forward(30, 30)
@@ -174,3 +179,4 @@ def detect_red_object():
         pi.bb_serial_read_close(RX_PIN)
         pi.stop()
         GPIO.cleanup()
+
