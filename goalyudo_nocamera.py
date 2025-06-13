@@ -100,7 +100,8 @@ def navigate_to_goal():
             current_location = get_current_gps_location()
             dist = distance(current_location, GOAL_LOCATION)
             angle_to_goal = direction(current_location, GOAL_LOCATION)
-            current_heading = 0.0  # 北向きと仮定。9軸でやりたい。
+            a = bno.getVector(BNO055.VECTOR_EULER)
+            current_heading = a[0]　# BNO055から
 
             angle_error = (angle_to_goal - current_heading + 360) % 360
             print(f"[INFO] 距離: {dist:.2f} m, 目標角: {angle_to_goal:.2f}°, 誤差: {angle_error:.2f}°")
