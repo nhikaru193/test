@@ -79,13 +79,14 @@ def get_block_number():
     return number
 
 number = get_block_number()
-print(mumber)
+print(number)
 """
 try:  
     while true:
         driver.changing_left(0, 10)
         driver.changing_left(10, 0)
-        percentage = take_a_picture()
+        percentage = get_percentage()
+        if percentage =
 """     
         
 
