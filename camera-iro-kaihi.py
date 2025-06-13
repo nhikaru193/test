@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from datetime import datetime
 from picamera import PiCamera
-from motor_driver import MotorDriver
+from motor import MotorDriver
 
 # ==== 初期設定 ====
 image_dir = "/home/pi/images"  # 撮影画像保存先
