@@ -4,6 +4,7 @@ import time
 import RPi.GPIO as GPIO
 from motor import MotorDriver
 
+
 #コーン、ボールを一定割合以上検知し、静止している状態からのスタート
 #ARLISSゴール付近のボールは大きさが既知であるため検知割合による距離の計算が可能
 
