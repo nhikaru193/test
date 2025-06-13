@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 from datetime import datetime
-from picamer2a import PiCamera2
+from picamer2 import PiCamera2
 from motor import MotorDriver
 import RPi.GPIO as GPIO
 import serial
