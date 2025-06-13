@@ -81,12 +81,22 @@ def get_block_number():
 number = get_block_number()
 print(number)
 """
-try:  
-    while true:
-        driver.changing_left(0, 10)
-        driver.changing_left(10, 0)
-        percentage = get_percentage()
-        if percentage =
+try: 
+    #まずはゴールの正方形内部に入る！
+    for i in range(3):
+        while true:
+            driver.changing_left(0, 10)
+            driver.changing_left(10, 0)
+            number = get_block_number()
+            if number == 3:
+                Vb = 40
+                Vb = Vb - i * 10
+                driver.changing_forward(0, Vb)
+                driver.changing_forward(Vb, 0)
+                break
+        driver.motor_stop_free()
+
+    
 """     
         
 
