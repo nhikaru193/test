@@ -104,7 +104,7 @@ def navigate_to_goal():
             angle_to_goal = direction(GOAL_LOCATION)
 
             heading = bno.getVector(BNO055.VECTOR_EULER)[0]  # yaw
-            angle_error = (angle_to_goal - heading + 360) % 360
+            angle_error = (angle_to_goal + heading + 360) % 360
 
             print(f"[INFO] 距離: {dist:.2f}m | 目標角: {angle_to_goal:.2f}° | 現在角: {heading:.2f}° | 誤差: {angle_error:.2f}°")
 
