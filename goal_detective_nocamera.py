@@ -70,8 +70,8 @@ def direction(goal_location):                    #direction(GOAL_LOCATION)
     goal = goal_location
     x1 = math.radians(current[0]) #この辺怪し
     y1 = math.radians(current[1])#この辺怪し
-    x2 = math.radians(current[0]) #この辺怪し
-    y2 = math.radians(current[1])#この辺怪し
+    x2 = math.radians(goal_location[0]) #この辺怪し
+    y2 = math.radians(goal_location[1])#この辺怪し
 
     delta_y = y2 - y1
     phi = math.atan2(math.sin(delta_y), math.cos(x1)*math.tan(x2) - math.sin(x1)*math.cos(delta_y))
@@ -80,10 +80,15 @@ def direction(goal_location):                    #direction(GOAL_LOCATION)
 
 # === 距離の計算 ===
 def distance(current, goal):
-    lat1, lon1 = map(math.radians, current)
-    lat2, lon2 = map(math.radians, goal)
+    x1 = math.radians(current[0]) #この辺怪し
+    y1 = math.radians(current[1])#この辺怪し
+    x2 = math.radians(goal_location[0]) #この辺怪し
+    y2 = math.radians(goal_location[1])#この辺怪し
+
     radius = 6378137.0
-    return radius * math.acos(math.sin(lat1)*math.sin(lat2) + math.cos(lat1)*math.cos(lat2)*math.cos(lon2 - lon1))
+    dist = radius * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
+
+    return dist #単位はメートル
 
 # === ナビゲーション制御 ===
 def navigate_to_goal():
@@ -96,7 +101,7 @@ def navigate_to_goal():
                 continue
 
             dist = distance(current_location, GOAL_LOCATION)
-            angle_to_goal = direction(current_location, GOAL_LOCATION)
+            angle_to_goal = direction(GOAL_LOCATION)
 
             heading = bno.getVector(BNO055.VECTOR_EULER)[0]  # yaw
             angle_error = (angle_to_goal - heading + 360) % 360
