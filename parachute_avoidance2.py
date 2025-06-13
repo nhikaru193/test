@@ -25,6 +25,10 @@ TX_PIN = 17
 RX_PIN = 27
 BAUD = 9600
 
+#速度定義
+Va = 0
+Vb = 0
+
 # カメラ初期化と設定
 picam2 = Picamera2()
 config = picam2.create_still_configuration(main={"size": (320, 240)})
@@ -136,7 +140,9 @@ def navigate_to_goal():
             angle_error = (angle_to_goal + heading + 360) % 360
 
             print(f"[INFO] 距離: {dist:.2f}m | 目標角: {angle_to_goal:.2f}° | 現在角: {heading:.2f}° | 誤差: {angle_error:.2f}°")
-
+            #止まる
+            driver.changing_forward(Va, 0)
+            
             # 誤差に応じて方向調整
             if angle_error > 5:
                 if angle_error > 180:
@@ -156,6 +162,9 @@ def navigate_to_goal():
 
             #パラシュート検知し回避
             if percentage > 10:
+                Vc = Va / 3
+                driver.changing_forward(Va, Vc)         #三分の一の速度まで減衰
+                driver.motor_stop_brake()               #止まる
                 driver.quick_right(0, 20)               #1
                 driver.quick_right(20, 0)
                 driver.changing_forward(0, 30)          #2
@@ -168,7 +177,9 @@ def navigate_to_goal():
                 driver.changing_left(20, 0)
                 driver.changing_forward(0, 30)          #6
                 driver.changing_forward(30, 0)
-            
+                Va = 0
+                break
+                
 # === ナビゲーション制御の続き ===
             if dist < 2.0:
                 print("[GOAL] 目的地に到達しました。")
@@ -176,8 +187,10 @@ def navigate_to_goal():
                 break
             else:
                 print("[MOVE] 前進中")
-                driver.motor_forward(30, 30)
-                time.sleep(1.5)
+                Vb = 100
+                driver.changing_forward(Va, Vb)
+                Va = 100
+                time.sleep(2)
     except KeyboardInterrupt:
         print("中断されました")
         driver.motor_stop_brake()
