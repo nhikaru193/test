@@ -288,7 +288,7 @@ class BNO055:
 	def writeBytes(self, register, byteVals):
 		return self._bus.write_i2c_block_data(self._address, register, byteVals)
 	def get_heading(self):
-		heading = self.getVector(BNO055.Vector_EULER)[0]
+		heading = self.getVector(self.Vector_EULER)[0]
 		return heading
 
 if __name__ == '__main__':
@@ -300,6 +300,7 @@ if __name__ == '__main__':
     bno.setMode(BNO055.OPERATION_MODE_NDOF)
     # ==== キャリブレーション完了待機 ====
     #(トリプルくうぉーテーションでコメントアウト)
+    """
     print("キャリブレーション中... センサをいろんな向きにゆっくり回してください")
     while True:
         sys, gyro, accel, mag = bno.getCalibration()
@@ -308,7 +309,7 @@ if __name__ == '__main__':
             print("\n✅ キャリブレーション完了！")
             break
         time.sleep(0.5)
-    
+    """
     time.sleep(5)
     bno.setExternalCrystalUse(True)
 
