@@ -1,9 +1,11 @@
 #goalyudo_nocamera.py→color_detective_navigate.py→このファイル
+import cv2
 import math
 import time
 import RPi.GPIO as GPIO
 from motor import MotorDriver
-
+from picamera2 import Picamera2
+import numpy as np
 
 #コーン、ボールを一定割合以上検知し、静止している状態からのスタート
 #ARLISSゴール付近のボールは大きさが既知であるため検知割合による距離の計算が可能
