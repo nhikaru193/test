@@ -87,6 +87,12 @@ def get_distance(percentage):
     distance = 824 * 0.20 / mother
     return distance
 
+def get_picture():
+    image_path = "/home/mark1/Pictures/got_image.jpg"
+    picam2.capture_file(image_path)
+
 percentage = get_percentage()
+print("割合は"percentage)
 distance = get_distance(percentage)
-print(distance)
+print("距離は"distance)
+get_picture()
