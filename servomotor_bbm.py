@@ -22,12 +22,12 @@ try:
     print("正回転（速い）")
     set_servo_duty(10.0)
 
-    time.sleep(2)
+    time.sleep(10)
 
     print("逆回転（速い）")
     set_servo_duty(5.0)
 
-    time.sleep(2)
+    time.sleep(10)
 
     print("停止")
     set_servo_duty(7.5)
