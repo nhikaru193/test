@@ -77,12 +77,12 @@ def get_block_number():
     else:
         print("❌ 赤色物体が見つかりません")
     return number
-                
-        
 
-    
-  
+number = get_block_number()
+print(mumber)
+"""
 try:
+    
     while true:
         driver.changing_left(0, 10)
         driver.changing_left(10, 0)
