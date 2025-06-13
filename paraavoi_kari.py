@@ -99,8 +99,7 @@ try:
             print("⚠️ GPS信号なし")
 
         # 撮影
-        now = datetime.now().strftime("%Y%m%d_%H%M%S")
-        image_path = f"{image_dir}/image_{now}.jpg"
+        image_path = "/home/mark1/Pictures/para.jpg"
         camera.capture(image_path)
         print(f"📸 撮影完了: {image_path}")
 
