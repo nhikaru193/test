@@ -92,7 +92,7 @@ def get_picture():
     picam2.capture_file(image_path)
 
 percentage = get_percentage()
-print("割合は"percentage)
+print("割合は", percentage)
 distance = get_distance(percentage)
-print("距離は"distance)
+print("距離は", distance)
 get_picture()
