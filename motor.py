@@ -139,4 +139,11 @@ class MotorDriver():
              speed = before + i * delta_speed
              self.motor_right(speed)
              time.sleep(0.02)
-    
+
+     def quick_left(self, before, after):
+         global speed
+         for i in range(10):
+             delta_speed = (after - before) / 10
+             speed = before + i * delta_speed
+             self.motor_left(speed)
+             time.sleep(0.02)
