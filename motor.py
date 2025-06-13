@@ -129,5 +129,5 @@ class MotorDriver():
          for i in range(50):
              delta_speed = (after - before) / 50
              speed = before + i * delta_speed
-             self.motor_forward(speed)
+             self.motor_retreat(speed)
              time.sleep(0.02)
