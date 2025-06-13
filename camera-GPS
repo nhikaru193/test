@@ -1,0 +1,17 @@
+from picamera import PiCamera
+from time import sleep
+from datetime import datetime
+
+camera = PiCamera()
+camera.resolution = (1024, 768)
+
+# カメラのウォームアップ
+sleep(2)
+
+# 現在の日時を取得してファイル名に整形
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+filename = f"/home/pi/image_{timestamp}.jpg"
+
+# 撮影して保存
+camera.capture(filename)
+print(f"{filename} を保存しました。")
