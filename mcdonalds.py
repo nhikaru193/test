@@ -1,7 +1,6 @@
 import serial
 import time
 import pigpio
-import struct
 
 TX_PIN = 27
 RX_PIN = 17
@@ -31,36 +30,20 @@ def convert_to_decimal(coord, direction):
 
 im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 
-buffer = b''
+"""
+for i in range(10):
+    data = f'TEST{i:02}'
+    msg = f'TXDA 0003,{data}\r\n'
+    im920.write(msg.encode())
+    print(f"送信: {msg.strip()}")
+    time.sleep(1)
+"""
 
 try:
     while True:
-        # 受信処理
         (count, data) = pi.bb_serial_read(RX_PIN)
         if count and data:
-            buffer += data
-            # 受信バッファに "TXDA 0003," があるか探す
-            start = buffer.find(b'TXDA 0003,')
-            if start != -1:
-                # "TXDA 0003," のあとに16バイト（緯度経度のdouble）あるか確認
-                needed_len = start + len(b'TXDA 0003,') + 16
-                if len(buffer) >= needed_len:
-                    data_start = start + len(b'TXDA 0003,')
-                    bin_data = buffer[data_start:data_start+16]
-
-                    # バイナリ16バイトをdouble2つに変換（リトルエンディアン）
-                    lat, lon = struct.unpack('<dd', bin_data)
-                    print(f"受信 緯度: {lat:.8f}, 経度: {lon:.8f}")
-
-                    # 処理済みデータをバッファから削除
-                    buffer = buffer[data_start+16:]
-
-        # GPSデータ読み込みと送信
-        try:
-            # pi.bb_serial_readは非同期なので、別のポートなどからGPS NMEAを読んでいる想定
-            # ここはあなたの元コードを踏襲
-            (count, data) = pi.bb_serial_read(RX_PIN)
-            if count and data:
+            try:
                 text = data.decode("ascii", errors="ignore")
                 if "$GNRMC" in text:
                     lines = text.split("\n")
@@ -70,18 +53,14 @@ try:
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
-
-                                # バイナリ形式で送信
-                                data_bin = struct.pack('<dd', lat, lon)
-                                msg = b'TXDA 0003,' + data_bin + b'\r\n'
-                                im920.write(msg)
-
-                                print(f"送信 緯度: {lat:.8f}, 経度: {lon:.8f}")
+                                #print("緯度と経度 (10進数):", [lat, lon])
+                                data_str = f"{lat:.8f},{lon:.8f}"
+                                msg = f"TXDA 0003,{data_str}\r\n"
+                                im920.write(msg.encode())
+                                print(f"送信: {msg.strip()}")
                                 time.sleep(2)
-
-        except Exception as e:
-            print("デコードエラー:", e)
-
+            except Exception as e:
+                print("デコードエラー:", e)
         time.sleep(0.1)
 
 except KeyboardInterrupt:
