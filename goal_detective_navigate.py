@@ -6,9 +6,19 @@ import RPi.GPIO as GPIO
 from motor import MotorDriver
 from picamera2 import Picamera2
 import numpy as np
+import smbus
+import struct
+from BNO055 import BNO055
 
 #コーン、ボールを一定割合以上検知し、静止している状態からのスタート
 #ARLISSゴール付近のボールは大きさが既知であるため検知割合による距離の計算が可能
+
+#インスタンス作成
+bno = BNO055()
+bno.begin()
+time.sleep(1)
+bno.setExternalCrystalUse(True)      #外部水晶振動子使用(クロック)
+bno.setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
 
 #モータの初期化
 driver = MotorDriver(
@@ -81,12 +91,13 @@ def get_block_number():
         print("❌ 赤色物体が見つかりません")
     return number
 
-def distance(percentage)
+def get_distance(percentage)
     x = (320 * 240 * percentage) / 3.141592
     mother = sqrt(x)
     distance = 824 * 0.20 / mother
     return distance
 
+def 
 """
 number = get_block_number()
 print(number)
@@ -109,14 +120,59 @@ try:
     #次は中心地を求める
     r1 = r2 = r3 = r4 = s1 = s2 = s3 = s4 = none
 
-    #r[m], s[rad]
+    #r[m], s[度]
+    #1個目
     while true:
         driver.changing_left(0, 10)
         driver.changing_left(10, 0)
         number = get_block_number()
             if number == 3:
                 percentage = get percentage()
-                
+                r1 = get_distance(percentage)
+                s1 = bno.get_heading()
+                break
+
+    #2個目
+    while true:
+        driver.changing_left(0, 10)
+        driver.changing_left(10, 0)
+        number = get_block_number()
+            if number == 3:
+                percentage = get percentage()
+                r2 = get_distance(percentage)
+                s2 = bno.get_heading()
+                break
+
+    #3個目
+    while true:
+        driver.changing_left(0, 10)
+        driver.changing_left(10, 0)
+        number = get_block_number()
+            if number == 3:
+                percentage = get percentage()
+                r3 = get_distance(percentage)
+                s3 = bno.get_heading()
+                break
+
+    #4個目
+    while true:
+        driver.changing_left(0, 10)
+        driver.changing_left(10, 0)
+        number = get_block_number()
+            if number == 3:
+                percentage = get percentage()
+                r4 = get_distance(percentage)
+                s4 = bno.get_heading()
+                break
+
+    #radianに直す s⇒s
+    s1 = 2 * 3.141592 * s1 / 360
+    s2 = 2 * 3.141592 * s2 / 360
+    s3 = 2 * 3.141592 * s3 / 360
+    s4 = 2 * 3.141592 * s4 / 360
+
+    
+    
                 
     
    
