@@ -91,17 +91,38 @@ def get_block_number():
         print("❌ 赤色物体が見つかりません")
     return number
 
-def get_distance(percentage)
+def get_distance(percentage):
     x = (320 * 240 * percentage) / 3.141592
     mother = sqrt(x)
     distance = 824 * 0.20 / mother
     return distance
 
-def 
-"""
-number = get_block_number()
-print(number)
-"""
+#極座標から直交座標
+def polar_to_cartesian(r, s):
+    x = r * math.cos(s)
+    y = r * math.sin(s)
+    return x, y
+
+#直交座標から極座標
+def cartesian_to_polar(x, y):
+    r = math.sqpt(x ^ 2 + y ^ 2)
+    s = math.atan2(y, x)
+    return r, s
+
+#正方形の頂点極座標取得    
+def get_square_center(r1, r2, r3, r4, s1, s2, s3, s4):
+    x1, y1 = polar_to_cartesian(r1, s1)
+    x2, y2 = polar_to_cartesian(r2, s2)
+    x3, y3 = polar_to_cartesian(r3, s3)
+    x4, y4 = polar_to_cartesian(r4, s4)
+    xc = (x1 + x2 + x3 + x4) / 4
+    yc = (y1 + y2 + y3 + y4) / 4
+    rc, sc = cartesian_to_polar(xc, yc)
+    return rc, sc
+
+def forward_distance(distance):
+    return none
+    
 try: 
     #まずはゴールの正方形内部に入る！
     for i in range(3):
@@ -170,6 +191,24 @@ try:
     s2 = 2 * 3.141592 * s2 / 360
     s3 = 2 * 3.141592 * s3 / 360
     s4 = 2 * 3.141592 * s4 / 360
+
+    #正方形の頂点極座標取得
+    rc, sc = get_square_center(r1, r2, r3, r4, s1, s2, s3, s4)
+
+    while true:
+        sn = bno.get_heading()
+        delta_s = sn - sc
+        if delta_s < -5:
+            changing_left(0, 5)
+            changing_left(5, 0)
+        elif delta_s > 5:
+            changing_right(0, 5)
+            changing_right(5, 0)
+        else:
+            forward_distance(rc)
+            
+            
+    
 
     
     
