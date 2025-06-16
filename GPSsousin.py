@@ -1,8 +1,8 @@
 import pigpio
 import time
 
-TX_PIN = 17  # IM920SLのRXDに接続
-RX_PIN = 27  # GPSのTXに接続
+TX_PIN = 27  # IM920SLのRXDに接続
+RX_PIN = 17  # GPSのTXに接続
 GPS_BAUD = 9600
 IM920_BAUD = 19200
 
