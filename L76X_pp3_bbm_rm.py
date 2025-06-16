@@ -58,7 +58,7 @@ try:
                                 msg = f'TXDA 0003,{data}\r\n'
                                 im920.write(msg.encode())
                                 print(f"送信: {msg.strip()}")
-    time.sleep(1)
+                                time.sleep(2)
             except Exception as e:
                 print("デコードエラー:", e)
         time.sleep(0.1)
