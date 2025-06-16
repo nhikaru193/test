@@ -109,7 +109,7 @@ def navigate_to_goal():
             print(f"[INFO] 距離: {dist:.2f}m | 目標角: {angle_to_goal:.2f}° | 現在角: {heading:.2f}° | 誤差: {angle_error:.2f}°")
 
             # 誤差に応じて方向調整
-            if angle_error > 5:
+            if math.fabs(angle_error) > 5:
                 if angle_error > 180:
                     print("[TURN] 左回頭")
                     driver.changing_left(0, 25)
