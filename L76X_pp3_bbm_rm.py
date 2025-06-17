@@ -33,7 +33,7 @@ im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 """
 for i in range(10):
     data = f'TEST{i:02}'
-    msg = f'TXDA 0003,{data}\r\n'
+    msg = f'TXDA 0003,{data}\r'
     im920.write(msg.encode())
     print(f"送信: {msg.strip()}")
     time.sleep(1)
@@ -55,7 +55,7 @@ try:
                                 lon = convert_to_decimal(parts[5], parts[6])
                                 #print("緯度と経度 (10進数):", [lat, lon])
                                 data = f'{lat, lon}'
-                                msg = f'TXDA 0003,{data}\r\n'
+                                msg = f'TXDA 0003,{data}\r'
                                 im920.write(msg.encode())
                                 print(f"送信: {msg.strip()}")
                                 time.sleep(2)
