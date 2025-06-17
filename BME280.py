@@ -148,6 +148,18 @@ def bme280_compensate_h(adc_H):
     
     return var_H
 
+def get_pressure():
+    #データ読み込み
+    dat = i2c.read_i2c_block_data(address, 0xF7, 0x08)
+    #データ変換
+    dat_p = (dat[0] << 16 | dat[1] << 8 | dat[2]) >> 4
+    dat_t = (dat[3] << 16 | dat[4] << 8 | dat[5]) >> 4    #t_fineが圧力補正に使われるため必要
+    #補正
+    pres = bme280_compensate_p(dat_p)
+    temp = bme280_compensate_t(dat_t)                     #ここでt_fineが更新
+    
+    return pres
+
 #BME280の初期化
 init_bme280()
 
