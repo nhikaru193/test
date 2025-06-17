@@ -17,8 +17,8 @@ def parse_line(line):
         payload_bytes = bytes(int(x, 16) for x in payload_str.split(','))
 
         # 緯度・経度はバイト2〜5と6〜9の4バイトずつ（ビッグエンディアン符号付き整数）
-        lat_bytes = payload_bytes[2:6]
-        lon_bytes = payload_bytes[6:10]
+        lat_bytes = payload_bytes[2:9]
+        lon_bytes = payload_bytes[10:18]
 
         lat_fixed = struct.unpack(">i", lat_bytes)[0]
         lon_fixed = struct.unpack(">i", lon_bytes)[0]
