@@ -75,11 +75,11 @@ def calculate_heading(current_lat, current_lon, dest_lat, dest_lon):
 def save_image_before_detection(picam2):
     # 画像を撮影
     frame = picam2.capture_array()
+    frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     
     # 撮影した画像を保存
     image_path = "/home/mark1/Pictures/parakaihi_image.jpg"
-    picam2.capture_file(image_path)
-    cv2.imwrite(image_path, frame)                            #メモリ上の画像データをファイルとして保存する
+    cv2.imwrite(image_path, frame_bgr)                            #メモリ上の画像データをファイルとして保存する
     print(f"初期画像保存成功: {image_path}")                   #出力          
     
     return frame
