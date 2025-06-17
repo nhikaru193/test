@@ -60,13 +60,16 @@ def get_current_gps_location():
                             lat = convert_to_decimal(parts[3], parts[4])
                             lon = convert_to_decimal(parts[5], parts[6])
                             return [lat, lon]
-        except Exception as e:
-            print("GPSデコードエラー:", e)
+        except Exception as e
     return None
+            print("GPSデコードエラー:", e)
 
 # === 方位角の計算 ===
 def direction(goal_location):                    #direction(GOAL_LOCATION)
     current = get_current_gps_location()
+     if current is None:
+        print("[ERROR] GPS位置情報が取得できません（direction関数）")
+        return None  # 方向角が取れない
     goal = goal_location
     x1 = math.radians(current[0]) #この辺怪し
     y1 = math.radians(current[1])#この辺怪し
