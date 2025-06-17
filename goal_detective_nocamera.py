@@ -85,7 +85,7 @@ def distance(current, goal_location):
     x2 = math.radians(goal_location[0]) #この辺怪し
     y2 = math.radians(goal_location[1])#この辺怪し
 
-    radius = 6378137.0_
+    radius = 6378137.0
     dist = radius * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
 
     return dist #単位はメートル
