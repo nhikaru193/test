@@ -127,9 +127,9 @@ def navigate_to_goal():
 
             # 距離によって前進
             if dist > 100:
-                move_duration = 5
+                move_duration = 30
             elif dist > 5:
-                move_duration = 1.5
+                move_duration = 5
             else:
                 print("[GOAL] 目標地点に到達しました！")
                 driver.motor_stop_brake()
