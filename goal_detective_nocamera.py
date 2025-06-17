@@ -79,13 +79,13 @@ def direction(goal_location):                    #direction(GOAL_LOCATION)
     return (phi + 360) % 360
 
 # === 距離の計算 ===
-def distance(current, goal):
+def distance(current, goal_location):
     x1 = math.radians(current[0]) #この辺怪し
     y1 = math.radians(current[1])#この辺怪し
     x2 = math.radians(goal_location[0]) #この辺怪し
     y2 = math.radians(goal_location[1])#この辺怪し
 
-    radius = 6378137.0
+    radius = 6378137.0_
     dist = radius * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
 
     return dist #単位はメートル
