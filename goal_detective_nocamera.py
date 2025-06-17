@@ -60,7 +60,7 @@ def get_current_gps_location():
                             lat = convert_to_decimal(parts[3], parts[4])
                             lon = convert_to_decimal(parts[5], parts[6])
                             return [lat, lon]
-        except Exception as e
+        except Exception as e:
     return None
             print("GPSデコードエラー:", e)
 
