@@ -3,20 +3,38 @@ import csv
 
 def parse_line(line):
     try:
-        # 空行や不正行はスキップ
-        if not line.strip():
+        # 空行や":"が含まれない行はスキップ
+        if not line.strip() or ':' not in line:
             return None
 
         header, payload_str = line.strip().split(':')
         parts = header.split(',')
 
-        node = parts[1]           # 送信元ノード番号
-        rssi = int(parts[2], 16)  # RSSI
+        if len(parts) < 3:
+            return None
 
-        # ペイロードの16進数文字列 → バイト列
-        payload_bytes = bytes(int(x, 16) for x in payload_str.split(','))
+        node = parts[1]
+        rssi_hex = parts[2]
+        try:
+            rssi = int(rssi_hex, 16)
+        except ValueError:
+            return None
 
-        # 緯度・経度はバイト2〜5と6〜9の4バイトずつ（ビッグエンディアン符号付き整数）
+        # カンマ区切りされた16進値をバイト列へ
+        hex_values = payload_str.strip().split(',')
+        if len(hex_values) < 10:  # 最低限: ヘッダ1 + 緯度4 + 経度4 + 予備1（最低9バイト必要）
+            return None
+
+        try:
+            payload_bytes = bytes(int(x, 16) for x in hex_values)
+        except ValueError:
+            return None
+
+        # バイト長チェック（少なくとも9バイト必要）
+        if len(payload_bytes) < 9:
+            return None
+
+        # 緯度: バイト2〜5（4バイト） 経度: バイト6〜9（4バイト）
         lat_bytes = payload_bytes[2:9]
         lon_bytes = payload_bytes[10:18]
 
@@ -32,6 +50,7 @@ def parse_line(line):
             'latitude': latitude,
             'longitude': longitude
         }
+
     except Exception as e:
         print(f"解析エラー: {e} 行: {line}")
         return None
@@ -44,6 +63,10 @@ def parse_log_file(input_file, output_file):
             if parsed:
                 results.append(parsed)
 
+    if not results:
+        print("有効なデータが見つかりませんでした。")
+        return
+
     # CSV出力
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = ['node', 'rssi', 'latitude', 'longitude']
@@ -52,9 +75,9 @@ def parse_log_file(input_file, output_file):
         for row in results:
             writer.writerow(row)
 
-    print(f"解析結果を {output_file} に出力しました。")
+    print(f"解析成功: {len(results)} 件を {output_file} に保存しました。")
 
 if __name__ == '__main__':
-    input_log = '/home/mark1/Desktop/im920_log.txt'# 解析したいログファイル名
+    input_log = '/home/mark1/Desktop/im920_log.txt'
     output_csv = '/home/mark1/Desktop/parsed_coords.csv'
     parse_log_file(input_log, output_csv)
