@@ -158,7 +158,7 @@ try:
         driver.changing_forward(0, 80)
         time.sleep(2)
 
-    stop()
+    driver.motor_stop_brake()
 
 except TimeoutError as e:
     print(e)
