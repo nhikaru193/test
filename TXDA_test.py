@@ -2,21 +2,26 @@ import serial
 import struct
 import time
 
-# 座標
-latitude = 35.123456
-longitude = 139.654321
+# ノード宛先設定（送信前に一度だけ）
+def set_node_address(ser, node_id):
+    cmd = f'ASTN {node_id:04d}\r'
+    ser.write(cmd.encode('ascii'))
+    time.sleep(0.1)
 
-# 固定小数点（百万倍して整数化）
-lat_fixed = int(latitude * 1_000_000)     # 35123456
-lon_fixed = int(longitude * 1_000_000)    # 139654321
+# 座標データ送信
+def send_gps_data(ser, latitude, longitude):
+    lat_fixed = int(latitude * 1_000_000)
+    lon_fixed = int(longitude * 1_000_000)
+    data = struct.pack('>Bii', 0x03, lat_fixed, lon_fixed)
+    ser.write(data)
+    print("送信バイナリ:", data.hex())
 
-# バイナリ化（1バイト:ヘッダ + 4バイト:緯度 + 4バイト:経度）
-data = struct.pack('>Bii', 0x03, lat_fixed, lon_fixed)
-# '>Bii' = ビッグエンディアン: 1バイト + 4バイト + 4バイト
-
-# シリアルポート送信
+# 実行部分
 ser = serial.Serial('/dev/serial0', 19200, timeout=1)
 time.sleep(2)
-ser.write(data)
 
-print("送信バイナリ:", data.hex())
+# 宛先設定：0003ノードへ
+set_node_address(ser, 3)
+
+# データ送信
+send_gps_data(ser, 35.123456, 139.654321)
