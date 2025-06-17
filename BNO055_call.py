@@ -20,6 +20,7 @@ while True:
         time.sleep(1)
         for i in range(20):
             print(bno.getVector(BNO055.VECTOR_EULER))
+            print(bno.getVector(BNO055.VECTOR_EULER)[0])
             time.sleep(0.1)
 
 #
