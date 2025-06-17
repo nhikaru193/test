@@ -15,7 +15,7 @@ print("キャリブレーション中... センサをいろんな向きにゆっ
 while True:
     sys, gyro, accel, mag = bno.getCalibration()
     print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
-    if sys == 3 and gyro == 3 and accel == 3 and mag == 3:
+    if gyro == 3 and mag == 3:
 #姿勢
         time.sleep(1)
         for i in range(20):
