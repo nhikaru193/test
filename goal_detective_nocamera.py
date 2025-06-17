@@ -61,13 +61,13 @@ def get_current_gps_location():
                             lon = convert_to_decimal(parts[5], parts[6])
                             return [lat, lon]
         except Exception as e:
-    return None
             print("GPSデコードエラー:", e)
+            return None
 
 # === 方位角の計算 ===
 def direction(goal_location):                    #direction(GOAL_LOCATION)
     current = get_current_gps_location()
-     if current is None:
+    if current is None:
         print("[ERROR] GPS位置情報が取得できません（direction関数）")
         return None  # 方向角が取れない
     goal = goal_location
@@ -107,7 +107,7 @@ def navigate_to_goal():
             angle_to_goal = direction(GOAL_LOCATION)
 
             heading = bno.getVector(BNO055.VECTOR_EULER)[0]  # yaw
-            angle_error = (angle_to_goal + heading + 360) % 360
+            angle_error = (angle_to_goal - heading + 360) % 360
 
             print(f"[INFO] 距離: {dist:.2f}m | 目標角: {angle_to_goal:.2f}° | 現在角: {heading:.2f}° | 誤差: {angle_error:.2f}°")
 
@@ -119,6 +119,7 @@ def navigate_to_goal():
                     time.sleep(0.5)
                     driver.changing_left(25, 0)
                     time.sleep(0.5)
+                    driver.motor_stop_brake()
                 else:
                     print("[TURN] 右回頭")
                     driver.changing_right(0, 25)
