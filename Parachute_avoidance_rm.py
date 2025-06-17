@@ -29,6 +29,9 @@ RX_PIN = 17
 pi = pigpio.pi()
 pi.bb_serial_read_open(RX_PIN, 9600, 8)
 
+destination_lat = 40.47
+destination_lon = 119.42
+
 def convert_to_decimal(coord, direction):
     degrees = int(coord[:2]) if direction in ['N', 'S'] else int(coord[:3])
     minutes = float(coord[2:]) if direction in ['N', 'S'] else float(coord[3:])
