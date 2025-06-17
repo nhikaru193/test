@@ -25,7 +25,7 @@ driver = MotorDriver(
 # -------------------------------
 # GPS (pigpio)
 # -------------------------------
-RX_PIN = 27
+RX_PIN = 17
 pi = pigpio.pi()
 pi.bb_serial_read_open(RX_PIN, 9600, 8)
 
