@@ -16,8 +16,8 @@ driver = MotorDriver(
 GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 
 # === GPSピン設定 ===
-TX_PIN = 17
-RX_PIN = 27
+TX_PIN = 27
+RX_PIN = 17
 BAUD = 9600
 
 pi = pigpio.pi()
