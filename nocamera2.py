@@ -60,10 +60,6 @@ def get_current_gps_location():
                             lat = convert_to_decimal(parts[3], parts[4])
                             lon = convert_to_decimal(parts[5], parts[6])
                             return lat, lon
-        except:
-            continue
-        time.sleep(0.1)
-    raise TimeoutError("GPSデータの取得に失敗しました")
 
 # === 方位角の計算 ===
 def direction(goal_location):
