@@ -55,6 +55,6 @@ def parse_log_file(input_file, output_file):
     print(f"解析結果を {output_file} に出力しました。")
 
 if __name__ == '__main__':
-    input_log = 'im920_log.txt'   # 解析したいログファイル名
-    output_csv = 'parsed_coords.csv'
+    input_log = '/home/Desktop/im920_log.txt'# 解析したいログファイル名
+    output_csv = '/home/Desktop/parsed_coords.csv'
     parse_log_file(input_log, output_csv)
