@@ -108,6 +108,7 @@ def navigate_to_goal():
             # 1. 状態把握
             current_location = 0, 0
             (count, data) = pi.bb_serial_read(RX_PIN)
+            time.sleep(1.5)
             if count and data:
                 try:
                     text = data.decode("ascii", errors="ignore")
