@@ -14,7 +14,7 @@ def parse_line(line):
         rssi = int(parts[2], 16)  # RSSI
 
         # ペイロードの16進数文字列 → バイト列
-        payload_bytes = bytes(int(x, 16) for x in payload_str.split(','))
+        payload_bytes = bytes(int(x) for x in payload_str.split(','))
 
         # 緯度・経度はバイト2〜5と6〜9の4バイトずつ（ビッグエンディアン符号付き整数）
         lat_bytes = payload_bytes[2:6]
