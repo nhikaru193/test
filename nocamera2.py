@@ -1,158 +1,175 @@
 import math
 import time
 import pigpio
-import RPi.GPIO as GPIO
-from motor import MotorDriver 
+from motor import MotorDriver  # ユーザーのMotorDriverクラスを使用
 from BNO055 import BNO055
 
-# === モーター初期化 ===
+# === モーター初期化 (変更なし) ===
 driver = MotorDriver(
-    PWMA=12, AIN1=23, AIN2=18,   # 左モーター
-    PWMB=19, BIN1=16, BIN2=26,   # 右モーター
+    PWMA=12, AIN1=23, AIN2=18,    # 左モーター
+    PWMB=19, BIN1=16, BIN2=26,    # 右モーター
     STBY=21
 )
 
-# === 目標地点設定 ===
+# === 目標地点設定 (変更なし) ===
 GOAL_LOCATION = [35.6586, 139.7454]  # 例：東京タワー
 
-# === GPSピン設定 ===
-TX_PIN = 27
+# === GPSピン設定 (変更なし) ===
 RX_PIN = 17
 BAUD = 9600
 
+# === pigpio 初期化 (変更なし) ===
 pi = pigpio.pi()
 if not pi.connected:
-    print("pigpio デーモンに接続できません。")
+    print("pigpio デーモンに接続できません。sudo pigpiod を実行してください。")
     exit(1)
 
 if pi.bb_serial_read_open(RX_PIN, BAUD, 8) != 0:
-    print("ソフトUARTの初期化に失敗")
+    print("ソフトUARTの初期化に失敗しました。")
     pi.stop()
     exit(1)
 
-# === BNO055 初期化 ===
+# === BNO055 初期化 (変更なし) ===
 bno = BNO055()
 if not bno.begin():
-    print("BNO055の初期化に失敗しました")
+    print("BNO055の初期化に失敗しました。センサーの接続を確認してください。")
     exit(1)
+time.sleep(1)
+print("センサー類の初期化完了。ナビゲーションを開始します。")
 
-# === 度分→10進変換 ===
+
+# === 度分→10進変換関数 (変更なし) ===
 def convert_to_decimal(coord, direction):
-    degrees = int(coord[:2]) if direction in ['N', 'S'] else int(coord[:3])
-    minutes = float(coord[2:]) if direction in ['N', 'S'] else float(coord[3:])
-    decimal = degrees + minutes / 60
+    if direction in ['N', 'S']:
+        degrees = int(coord[:2])
+        minutes = float(coord[2:])
+    else:
+        degrees = int(coord[:3])
+        minutes = float(coord[3:])
+    decimal = degrees + minutes / 60.0
     if direction in ['S', 'W']:
         decimal *= -1
     return decimal
 
-# === GPS位置取得関数 ===
+# === GPS位置取得関数 (修正済み) ===
 def get_current_gps_location():
     (count, data) = pi.bb_serial_read(RX_PIN)
     if count and data:
         try:
             text = data.decode("ascii", errors="ignore")
-            if "$GNRMC" in text:
-                lines = text.split("\n")
-                for line in lines:
-                    if "$GNRMC" in line:
-                        parts = line.strip().split(",")
-                        if len(parts) > 6 and parts[2] == "A":
-                            lat = convert_to_decimal(parts[3], parts[4])
-                            lon = convert_to_decimal(parts[5], parts[6])
-                            return lat, lon
+            lines = text.split("\n")
+            for line in lines:
+                if "$GNRMC" in line:
+                    parts = line.strip().split(",")
+                    if len(parts) > 6 and parts[2] == "A":
+                        lat = convert_to_decimal(parts[3], parts[4])
+                        lon = convert_to_decimal(parts[5], parts[6])
+                        return [lat, lon]
+        except Exception as e:
+            print(f"[ERROR] GPSデコード中にエラー: {e}")
+            return None
+    return None
 
-# === 方位角の計算 ===
-def direction(goal_location):
-    current = get_current_gps_location()
-    if current is None:
-        print("[ERROR] GPS位置情報が取得できません（direction関数）")
+# === 2点間の方位角の計算 (可読性向上) ===
+def get_bearing_to_goal(current, goal):
+    if current is None or goal is None:
         return None
-    x1 = math.radians(current[0])
-    y1 = math.radians(current[1])
-    x2 = math.radians(goal_location[0])
-    y2 = math.radians(goal_location[1])
+    lat1, lon1 = math.radians(current[0]), math.radians(current[1])
+    lat2, lon2 = math.radians(goal[0]), math.radians(goal[1])
+    delta_lon = lon2 - lon1
+    y = math.sin(delta_lon) * math.cos(lat2)
+    x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(delta_lon)
+    bearing_rad = math.atan2(y, x)
+    return (math.degrees(bearing_rad) + 360) % 360
 
-    delta_y = y2 - y1
-    phi = math.atan2(math.sin(delta_y), math.cos(x1)*math.tan(x2) - math.sin(x1)*math.cos(delta_y))
-    phi = math.degrees(phi)
-    return (phi + 360) % 360
-
-# === 距離の計算 ===
-def distance(current, goal_location):
-    x1 = math.radians(current[0])
-    y1 = math.radians(current[1])
-    x2 = math.radians(goal_location[0])
-    y2 = math.radians(goal_location[1])
-
+# === 2点間の距離の計算 (バグ修正済み) ===
+def get_distance_to_goal(current, goal):
+    if current is None or goal is None:
+        return float('inf')
+    lat1, lon1 = math.radians(current[0]), math.radians(current[1])
+    lat2, lon2 = math.radians(goal[0]), math.radians(goal[1])
     radius = 6378137.0
-    dist = radius * math.acos(math.sin(y1) * math.sin(y2) + math.cos(y1) * math.cos(y2) * math.cos(x2 - x1))
-    return dist  # 単位：メートル
+    delta_lon = lon2 - lon1
+    dist = radius * math.acos(math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(delta_lon))
+    return dist
 
-# === ナビゲーション制御 ===
+# === ナビゲーション制御 (ロジック改善済み) ===
 def navigate_to_goal():
     try:
         while True:
+            # 1. 状態把握
             current_location = get_current_gps_location()
             if not current_location:
-                print("[WARN] GPS位置取得に失敗。再試行します...")
+                print("[WARN] GPS位置情報を取得できません。リトライします...")
+                driver.motor_stop_brake()
                 time.sleep(1)
                 continue
 
-            dist = distance(current_location, GOAL_LOCATION)
-            angle_to_goal = direction(GOAL_LOCATION)
-
-            heading_data = bno.getVector(BNO055.VECTOR_EULER)
-            heading = heading_data[0] if heading_data is not None else None
-
-            if angle_to_goal is None or heading is None:
-                print("[WARN] 方位またはヘディングの取得に失敗。再試行します...")
+            heading = bno.getVector(BNO055.VECTOR_EULER)[0]
+            if heading is None:
+                print("[WARN] BNO055から方位角を取得できません。リトライします...")
+                driver.motor_stop_brake()
                 time.sleep(1)
                 continue
 
-            angle_error = (angle_to_goal - heading + 360) % 360
+            # 2. 計算
+            dist_to_goal = get_distance_to_goal(current_location, GOAL_LOCATION)
+            bearing_to_goal = get_bearing_to_goal(current_location, GOAL_LOCATION)
+            angle_error = (bearing_to_goal - heading + 360) % 360
 
-            print(f"[INFO] 距離: {dist:.2f}m | 目標角: {angle_to_goal:.2f}° | 現在角: {heading:.2f}° | 誤差: {angle_error:.2f}°")
-
-            # 誤差に応じて方向調整
-            if math.fabs(angle_error) > 5:
-                if angle_error > 180:
-                    print("[TURN] 左回頭")
-                    driver.changing_left(0, 25)
-                    time.sleep(0.5)
-                    driver.changing_left(25, 0)
-                    time.sleep(0.5)
-                    driver.motor_stop_brake()
-                else:
-                    print("[TURN] 右回頭")
-                    driver.changing_right(0, 25)
-                    time.sleep(0.5)
-                    driver.changing_right(25, 0)
-                    time.sleep(0.5)
-                    driver.motor_stop_brake()
-                continue  # 再評価
-
-            # 距離によって前進
-            if dist > 100:
-                move_duration = 30
-            elif dist > 5:
-                move_duration = 5
-            else:
-                print("[GOAL] 目標地点に到達しました！")
+            # 3. ゴール判定
+            GOAL_THRESHOLD_M = 5.0
+            if dist_to_goal <= GOAL_THRESHOLD_M:
+                print(f"[GOAL] 目標地点に到達しました！ (距離: {dist_to_goal:.2f}m)")
                 driver.motor_stop_brake()
                 break
 
-            print(f"[MOVE] {move_duration:.1f}秒前進")
-            driver.changing_forward(0, 90)
-            time.sleep(move_duration)
-            driver.motor_stop_free()
+            print(f"[INFO] 距離:{dist_to_goal: >6.1f}m | 目標方位:{bearing_to_goal: >5.1f}° | 現在方位:{heading: >5.1f}° | 誤差:{angle_error: >5.1f}°")
+
+            # 4. 方向調整フェーズ
+            ANGLE_THRESHOLD_DEG = 10.0
+            if angle_error > ANGLE_THRESHOLD_DEG and angle_error < (360 - ANGLE_THRESHOLD_DEG):
+                turn_speed = 25 # 回転速度は固定
+                # 誤差の大きさに応じて回転時間を変える
+                turn_duration = 0.1 + (min(angle_error, 360 - angle_error) / 180.0) * 0.5
+
+                if angle_error > 180:
+                    print(f"[TURN] 左に回頭します ({turn_duration:.2f}秒)")
+                    ### 元のモーター定義文を使用 ###
+                    driver.changing_left(0, turn_speed)
+                    time.sleep(turn_duration)
+                else:
+                    print(f"[TURN] 右に回頭します ({turn_duration:.2f}秒)")
+                    ### 元のモーター定義文を使用 ###
+                    driver.changing_right(0, turn_speed)
+                    time.sleep(turn_duration)
+                
+                driver.motor_stop_brake()
+                time.sleep(0.5)
+                continue
+
+            # 5. 前進フェーズ
+            print("[MOVE] 方向OK。1秒間前進します。")
+            move_speed = 40
+            ### 元のモーター定義文を使用 ###
+            driver.changing_forward(0, move_speed)
+            time.sleep(1.0)
+            driver.motor_stop_free() # 元のコードに合わせてブレーキではなくフリーに
+            time.sleep(0.2)
 
     except KeyboardInterrupt:
-        print("[STOP] 手動停止されました")
+        print("\n[STOP] 手動で停止されました。")
+    except Exception as e:
+        print(f"\n[FATAL] 予期せぬエラーが発生しました: {e}")
     finally:
+        print("クリーンアップ処理を実行します。")
+        ### 元のモーター定義文を使用 ###
         driver.cleanup()
         pi.bb_serial_read_close(RX_PIN)
         pi.stop()
+        print("プログラムを終了しました。")
 
-# === 実行 ===
+# === プログラム実行 ===
 if __name__ == "__main__":
     navigate_to_goal()
+```
