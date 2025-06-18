@@ -105,7 +105,24 @@ def navigate_to_goal():
     try:
         while True:
             # 1. 状態把握
-            current_location = get_current_gps_location()
+            current_location = 0, 0
+            (count, data) = pi.bb_serial_read(RX_PIN)
+                if count and data:
+                    try:
+                        text = data.decode("ascii", errors="ignore")
+                        if "$GNRMC" in text:
+                            lines = text.split("\n")
+                            for line in lines:
+                                if "$GNRMC" in line:
+                                parts = line.strip().split(",")
+                                if len(parts) > 6 and parts[2] == "A":
+                                    lat = convert_to_decimal(parts[3], parts[4])
+                                    lon = convert_to_decimal(parts[5], parts[6])
+                                    print("緯度と経度 (10進数):", [lat, lon])
+                                    current_location = lat, lon
+                    except Exception as e:
+                        print("デコードエラー:", e)
+                time.sleep(0.1)
             if not current_location:
                 print("[WARN] GPS位置情報を取得できません。リトライします...")
                 driver.motor_stop_brake()
