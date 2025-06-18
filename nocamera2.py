@@ -172,4 +172,3 @@ def navigate_to_goal():
 # === プログラム実行 ===
 if __name__ == "__main__":
     navigate_to_goal()
-```
