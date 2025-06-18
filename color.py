@@ -11,7 +11,7 @@ def init_camera():
     picam2.configure(config)
     picam2.start()
     time.sleep(1)
-  
+    
 #関数定義(画像取得→画像処理→hsv変換→面積計算→割合計算)　戻り値はpercentage(画像赤色検知割合)
 def get_percentage():
     frame = picam2.capture_array()
@@ -29,7 +29,7 @@ def get_percentage():
     percentage = (red_area / total_area) * 100
     return percentage
 
-#赤色面積の重心がどこにあたるか
+#赤色面積の重心がどこにあたるか(画面を左から5分割:左から1→5)
 def get_block_number():
     number = None
     frame = picam2.capture_array()
