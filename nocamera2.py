@@ -1,6 +1,7 @@
 import math
 import time
 import pigpio
+import RPi.GPIO as GPIO
 from motor import MotorDriver  # ユーザーのMotorDriverクラスを使用
 from BNO055 import BNO055
 
