@@ -59,6 +59,7 @@ def convert_to_decimal(coord, direction):
     return decimal
 
 # === GPS位置取得関数 (修正済み) ===
+"""
 def get_current_gps_location():
     (count, data) = pi.bb_serial_read(RX_PIN)
         if count and data:
@@ -76,7 +77,7 @@ def get_current_gps_location():
             except Exception as e:
                 print("デコードエラー:", e)
         time.sleep(0.1)
-
+"""
 # === 2点間の方位角の計算 (可読性向上) ===
 def get_bearing_to_goal(current, goal):
     if current is None or goal is None:
