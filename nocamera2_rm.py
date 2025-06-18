@@ -108,7 +108,7 @@ def navigate_to_goal():
             # 1. 状態把握
             current_location = 0, 0
             (count, data) = pi.bb_serial_read(RX_PIN)
-            time.sleep(1.5)
+            time.sleep(1.0)
             if count and data:
                 try:
                     text = data.decode("ascii", errors="ignore")
@@ -117,6 +117,7 @@ def navigate_to_goal():
                         for line in lines:
                             if "$GNRMC" in line:
                             parts = line.strip().split(",")
+                            time.sleep(0.5)
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
