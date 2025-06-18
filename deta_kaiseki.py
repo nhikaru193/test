@@ -3,18 +3,21 @@ import csv
 
 def parse_line(line):
     try:
+        # 空行や不正行はスキップ
         if not line.strip():
             return None
 
         header, payload_str = line.strip().split(':')
         parts = header.split(',')
 
-        node = parts[1]
-        rssi = int(parts[2], 16)
+        node = parts[1]           # 送信元ノード番号
+        rssi = int(parts[2], 16)  # RSSI
 
+        # ペイロードの16進数文字列 → バイト列
         payload_bytes = bytes(int(x, 16) for x in payload_str.split(','))
 
-        lat_bytes = payload_bytes[2:5]
+        # 緯度・経度はバイト2〜5と6〜9の4バイトずつ（ビッグエンディアン符号付き整数）
+        lat_bytes = payload_bytes[2:6]
         lon_bytes = payload_bytes[6:10]
 
         lat_fixed = struct.unpack(">i", lat_bytes)[0]
@@ -41,6 +44,7 @@ def parse_log_file(input_file, output_file):
             if parsed:
                 results.append(parsed)
 
+    # CSV出力
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = ['node', 'rssi', 'latitude', 'longitude']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -51,6 +55,6 @@ def parse_log_file(input_file, output_file):
     print(f"解析結果を {output_file} に出力しました。")
 
 if __name__ == '__main__':
-    input_log = '/home/mark1/Desktop/im920_log.txt'
-    output_csv = '/home/mark1/Desktop/parsed_coords.csv'
+    input_log = 'im920_log.txt'   # 解析したいログファイル名
+    output_csv = 'parsed_coords.csv'
     parse_log_file(input_log, output_csv)
