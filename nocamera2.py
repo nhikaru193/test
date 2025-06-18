@@ -32,9 +32,13 @@ if pi.bb_serial_read_open(RX_PIN, BAUD, 8) != 0:
 
 # === BNO055 初期化 (変更なし) ===
 bno = BNO055()
-if not bno.begin():
-    print("BNO055の初期化に失敗しました。センサーの接続を確認してください。")
-    exit(1)
+#if not bno.begin():
+    #print("BNO055の初期化に失敗しました。センサーの接続を確認してください。")
+    #exit(1)
+bno.begin()
+time.sleep(1)
+bno.setExternalCrystalUse(True)      #外部水晶振動子使用(クロック)
+bno.setMode(BNO055.OPERATION_MODE_NDOF)  #NDOFモードに設定
 time.sleep(1)
 print("センサー類の初期化完了。ナビゲーションを開始します。")
 
