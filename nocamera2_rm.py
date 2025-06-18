@@ -116,8 +116,8 @@ def navigate_to_goal():
                         lines = text.split("\n")
                         for line in lines:
                             if "$GNRMC" in line:
-                            parts = line.strip().split(",")
-                            time.sleep(0.5)
+                                parts = line.strip().split(",")
+                                time.sleep(0.5)
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
