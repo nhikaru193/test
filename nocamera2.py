@@ -60,7 +60,7 @@ def convert_to_decimal(coord, direction):
 
 # === GPS位置取得関数 (修正済み) ===
 def get_current_gps_location():
-    　　(count, data) = pi.bb_serial_read(RX_PIN)
+    (count, data) = pi.bb_serial_read(RX_PIN)
         if count and data:
             try:
                 text = data.decode("ascii", errors="ignore")
