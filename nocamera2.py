@@ -4,6 +4,8 @@ import pigpio
 import RPi.GPIO as GPIO
 from motor import MotorDriver  # ユーザーのMotorDriverクラスを使用
 from BNO055 import BNO055
+import smbus
+import struct
 
 # === モーター初期化 (変更なし) ===
 driver = MotorDriver(
