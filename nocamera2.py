@@ -75,7 +75,6 @@ def get_current_gps_location():
         except Exception as e:
             print(f"[ERROR] GPSデコード中にエラー: {e}")
             return None
-    return None
 
 # === 2点間の方位角の計算 (可読性向上) ===
 def get_bearing_to_goal(current, goal):
