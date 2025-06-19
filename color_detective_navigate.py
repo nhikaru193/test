@@ -13,7 +13,7 @@ driver = MotorDriver(
 )
 
 # カメラ初期化と設定
-color.init_camera():
+color.init_camera()
 
 #速度定義
 Va = 0
