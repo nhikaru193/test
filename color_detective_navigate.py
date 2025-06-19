@@ -72,7 +72,6 @@ try:
                    Vb = 50
                    print("遠い")
                    driver.changing_forward(Va, Vb)
-                   driver.motor_stop_brake()
                    Va = Vb
                    break               
                   
