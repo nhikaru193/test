@@ -5,6 +5,10 @@ import time
 # IM920と接続されているシリアルポートと通信設定
 im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 
+# GPIOのピン番号設定
+# 回路図の「GPIO25」はBCMモードの25番ピンを指す
+wireless_PIN = 22
+
 # GPIOのモードをBCMに設定（GPIO番号で指定）
 GPIO.setmode(GPIO.BCM)
 
