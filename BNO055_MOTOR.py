@@ -292,20 +292,22 @@ class BNO055:
 
 if __name__ == '__main__':
 	bno = BNO055()
-        time.sleep(1)
+	time.sleep(1)
 	if bno.begin() is not True:
 		print("Error initializing device")
 		exit()
-	time.sleep(1)
+        time.sleep(1)
 	bno.setExternalCrystalUse(True)
 	time.sleep(1)
+	
 	while True:
             sys, gyro, accel, mag = bno.getCalibration()
             print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
             if gyro == 3:
                 print("\n✅ キャリブレーション完了！")
                 break
-	time.sleep(1)
+		    
+        time.sleep(1)
 	driver.changing_forward(0, 50)
 	time.sleep(1)
 	
