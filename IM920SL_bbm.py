@@ -1,4 +1,5 @@
 import serial
+import RPi.GPIO as GPIO
 import time
 
 # IM920と接続されているシリアルポートと通信設定
