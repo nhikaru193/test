@@ -294,7 +294,7 @@ if __name__ == '__main__':
 	bno = BNO055()
 	time.sleep(1)
 	driver.changing_forward(0, 50)
-	time.sleep(2)
+	time.sleep(1)
 	driver.changing_forward(50, 100)
 	
 	if bno.begin() is not True:
