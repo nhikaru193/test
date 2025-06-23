@@ -8,7 +8,7 @@ NICHROME_PIN = 25
 
 # ニクロム線をオンにしておく時間（秒）
 # !!! 注意: この値は非常に重要です。最初は0.5秒などの短い時間から試してください。
-HEATING_DURATION_SECONDS = 0.5
+HEATING_DURATION_SECONDS = 2.0
 
 # GPIOのモードをBCMに設定（GPIO番号で指定）
 GPIO.setmode(GPIO.BCM)
