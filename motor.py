@@ -56,8 +56,8 @@ class MotorDriver():
 
  #後退
      def motor_retreat(self, speed):
-         GPIO.output(self.A1, GPIO.LOW)
-         GPIO.output(self.A2, GPIO.HIGH)
+         GPIO.output(self.A1, GPIO.HIGH)
+         GPIO.output(self.A2, GPIO.LOW)
          GPIO.output(self.B1, GPIO.LOW)
          GPIO.output(self.B2, GPIO.HIGH)
          self.pwma.ChangeDutyCycle(speed)
@@ -89,8 +89,8 @@ class MotorDriver():
  
     #前進：任意
      def motor_forward(self, speed):
-         GPIO.output(self.A1, GPIO.HIGH)
-         GPIO.output(self.A2, GPIO.LOW)
+         GPIO.output(self.A1, GPIO.LOW)
+         GPIO.output(self.A2, GPIO.HIGH)
          GPIO.output(self.B1, GPIO.HIGH)
          GPIO.output(self.B2, GPIO.LOW)
          self.pwma.ChangeDutyCycle(speed) 
