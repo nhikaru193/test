@@ -1,6 +1,7 @@
 import smbus
 import time
 import struct
+from BNO055 import BNO055
 
 bno = BNO055()
 if bno.begin() is not True:
