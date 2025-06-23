@@ -99,11 +99,11 @@ class MotorDriver():
     #前進：回転数制御(異なる回転数へ変化するときに滑らかに遷移するようにする)
      def changing_forward(self, before, after):
          global speed
-         for i in range(50):
-             delta_speed = (after - before) / 50
+         for i in range(1, 200):
+             delta_speed = (after - before) / 200
              speed = before + i * delta_speed
              self.motor_forward(speed)
-             time.sleep(0.02)
+             time.sleep(0.01)
 
  #右折：回転数制御(基本は停止してから使いましょう)
      def changing_right(self, before, after):
