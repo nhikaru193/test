@@ -20,6 +20,8 @@ def send_unicast(node_id, payload):
     
     # 応答読み取り（オプション）
     while im920.in_waiting:
+        print(f"GPIO{NICHROME_PIN} をHIGHに設定し、ニクロム線をオンにします。")
+        GPIO.output(NICHROME_PIN, GPIO.HIGH)
         res = im920.readline().decode().strip()
         print("Response:", res)
 
