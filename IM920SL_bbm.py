@@ -1,32 +1,19 @@
 import serial
 import time
 
-ser = serial.Serial('/dev/serial0', 19200, timeout=1)
+# IM920と接続されているシリアルポートと通信設定
+im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 
-def send_cmd(cmd, wait=0.5):
-    ser.write((cmd + '\r\n').encode())
-    time.sleep(wait)
-    response = ser.read_all().decode(errors='ignore')
-    print(f"Sent: {cmd} | Response: {response}")
-    return response
+# データを送信する関数
+def send_unicast(node_id, payload):
+    cmd = f'TXDU {node_id},{payload}\r\n'
+    im920.write(cmd.encode())
+    time.sleep(0.5)  # 応答待ち（必要なら調整）
+    
+    # 応答読み取り（オプション）
+    while im920.in_waiting:
+        res = im920.readline().decode().strip()
+        print("Response:", res)
 
-try:
-    # 1. ワイヤレスグラウンドON
-    send_cmd('WGON')
-
-    # 2. 設定保存
-    send_cmd('WRIT')
-
-    # 3. 再起動
-    send_cmd('RESET')
-    time.sleep(3)  # 再起動待ち
-
-    # 4. 子機（例：ノード0003）へユニキャスト送信
-    # 送信コマンド例（モジュールによって異なります）
-    send_cmd('TXDU 0003,Hello World')
-
-    # 5. 送信成功かどうか応答を確認
-    # ここで応答を解析し必要に応じて再送など行う
-
-finally:
-    ser.close()
+# 実行例：ノード0003へ "HELLO" を送信
+send_unicast("0003", "HELLO")
