@@ -194,6 +194,7 @@ def navigate_to_goal():
         driver.cleanup()
         pi.bb_serial_read_close(RX_PIN)
         pi.stop()
+        GPIO.cleanup()
         print("プログラムを終了しました。")
 
 # === プログラム実行 ===
