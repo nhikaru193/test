@@ -158,7 +158,7 @@ def navigate_to_goal():
             if angle_error > ANGLE_THRESHOLD_DEG and angle_error < (360 - ANGLE_THRESHOLD_DEG):
                 turn_speed = 90 # 回転速度は固定
                 # 誤差の大きさに応じて回転時間を変える
-                turn_duration = 0.1 + (min(angle_error, 360 - angle_error) / 180.0) * 0.5
+                turn_duration = 0.05 + (min(angle_error, 360 - angle_error) / 180.0) * 0.05
 
                 if angle_error > 180:
                     print(f"[TURN] 左に回頭します ({turn_duration:.2f}秒)")
@@ -180,7 +180,7 @@ def navigate_to_goal():
             move_speed = 90
             ### 元のモーター定義文を使用 ###
             driver.changing_forward(0, move_speed)
-            time.sleep(1.0)
+            time.sleep(0.2)
             driver.motor_stop_free() # 元のコードに合わせてブレーキではなくフリーに
             time.sleep(0.2)
 
