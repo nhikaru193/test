@@ -303,6 +303,12 @@ if __name__ == '__main__':
 	time.sleep(1)
 	bno.setExternalCrystalUse(True)
 	time.sleep(1)
+	while True:
+            sys, gyro, accel, mag = bno.getCalibration()
+            print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
+            if gyro == 3:
+                print("\n✅ キャリブレーション完了！")
+                break
 	for i in range(200):
             print(bno.getVector(BNO055.VECTOR_EULER))
             #print(bno.getVector(BNO055.VECTOR_MAGNETOMETER))
