@@ -2,28 +2,34 @@ import serial
 import RPi.GPIO as GPIO
 import time
 
-# IM920と接続されているシリアルポートと通信設定
+# シリアル設定
 im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 
-# GPIOのピン番号設定
-# 回路図の「GPIO25」はBCMモードの25番ピンを指す
+# GPIOピン設定（GPIO22をワイヤレスグラウンド制御に使用）
 wireless_PIN = 22
-
-# GPIOのモードをBCMに設定（GPIO番号で指定）
 GPIO.setmode(GPIO.BCM)
+GPIO.setup(wireless_PIN, GPIO.OUT)
 
-# データを送信する関数
+# ユニキャスト送信関数
 def send_unicast(node_id, payload):
+    # ワイヤレスグラウンドON（HIGH）
+    GPIO.output(wireless_PIN, GPIO.HIGH)
+    print(f"GPIO{wireless_PIN} をHIGHに設定（ワイヤレスグラウンドON）")
+    time.sleep(0.2)  # 安定のため少し待つ
+
+    # TXDUコマンド送信
     cmd = f'TXDU {node_id},{payload}\r\n'
     im920.write(cmd.encode())
-    time.sleep(0.5)  # 応答待ち（必要なら調整）
+    print(f"送信: {cmd.strip()}")
     
-    # 応答読み取り（オプション）
+    # 応答確認（オプション）
+    time.sleep(0.5)
     while im920.in_waiting:
-        print(f"GPIO{NICHROME_PIN} をHIGHに設定し、ニクロム線をオンにします。")
-        GPIO.output(NICHROME_PIN, GPIO.HIGH)
         res = im920.readline().decode().strip()
         print("Response:", res)
 
-# 実行例：ノード0003へ "HELLO" を送信
+    # ワイヤレスグラウンドOFF（LOW）に戻す場合は以下を有効に
+    # GPIO.output(wireless_PIN, GPIO.LOW)
+
+# 実行
 send_unicast("0003", "HELLO")
