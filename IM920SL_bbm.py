@@ -5,6 +5,9 @@ import time
 # IM920と接続されているシリアルポートと通信設定
 im920 = serial.Serial('/dev/serial0', 19200, timeout=1)
 
+# GPIOのモードをBCMに設定（GPIO番号で指定）
+GPIO.setmode(GPIO.BCM)
+
 # データを送信する関数
 def send_unicast(node_id, payload):
     cmd = f'TXDU {node_id},{payload}\r\n'
