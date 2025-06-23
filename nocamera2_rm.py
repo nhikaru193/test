@@ -156,7 +156,7 @@ def navigate_to_goal():
             # 4. 方向調整フェーズ
             ANGLE_THRESHOLD_DEG = 10.0
             if angle_error > ANGLE_THRESHOLD_DEG and angle_error < (360 - ANGLE_THRESHOLD_DEG):
-                turn_speed = 25 # 回転速度は固定
+                turn_speed = 90 # 回転速度は固定
                 # 誤差の大きさに応じて回転時間を変える
                 turn_duration = 0.1 + (min(angle_error, 360 - angle_error) / 180.0) * 0.5
 
@@ -177,7 +177,7 @@ def navigate_to_goal():
 
             # 5. 前進フェーズ
             print("[MOVE] 方向OK。1秒間前進します。")
-            move_speed = 40
+            move_speed = 90
             ### 元のモーター定義文を使用 ###
             driver.changing_forward(0, move_speed)
             time.sleep(1.0)
