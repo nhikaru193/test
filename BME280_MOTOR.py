@@ -174,13 +174,13 @@ init_bme280()
 #補正データ読み込み
 read_compensate()
 
-driver.changing_forward(0, 50)
+driver.changing_forward(0, 100)
 #測定データ読み込み 
-for i in range (50):
+for i in range (100):
 	read_data()
 	time.sleep(0.01)  # 0.01秒待機
 
-driver.changing_forward(50, 0)
+driver.changing_forward(100, 0)
 
 GPIO.cleanup()
 print("GPIOのクリーンアップを実行しました。")
