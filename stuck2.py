@@ -89,11 +89,11 @@ try:
             # ▼ 回避動作：バック → 回転 → 再バック
             print("▶ 回避動作：バック→回転→再バック")
             driver.changing_retreat(0, 90)
-            time.sleep(3)
+            time.sleep(4)
             driver.changing_retreat(90, 0)
-            driver.changing_right(0, 25)
-            time.sleep(1)
-            driver.changing_right(25, 0)
+            driver.changing_right(0, 90)
+            time.sleep(3)
+            driver.changing_right(90, 0)
             driver.stop()
 
             in_stack = True
@@ -106,11 +106,11 @@ try:
             print("⚠ 回避後も動きがないため再スタックと判定")
             # 再度回避動作
             driver.changing_retreat(25, 90)
+            time.sleep(4)
+            driver.changing_right(90, 90)
             time.sleep(3)
-            driver.changing_right(0, 25)
-            time.sleep(1)
-            driver.changing_retreat(25, 90)
-            time.sleep(3)
+            driver.changing_retreat(90, 25)
+            time.sleep(4)
             driver.stop()
 
             stack_check_start_time = time.time()  # 再監視開始
