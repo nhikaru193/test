@@ -299,14 +299,16 @@ if __name__ == '__main__':
 	time.sleep(1)
 	bno.setExternalCrystalUse(True)
 	time.sleep(1)
-	
+
+	"""
 	while True:
             sys, gyro, accel, mag = bno.getCalibration()
             print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
             if gyro == 3:
                 print("\n✅ キャリブレーション完了！")
                 break
-		    
+	"""
+	
 	time.sleep(3)
 	driver.changing_forward(0, 50)
 	time.sleep(1)
@@ -315,3 +317,5 @@ if __name__ == '__main__':
 		print(bno.getVector(BNO055.VECTOR_EULER))
 		time.sleep(0.1)
 	driver.changing_forward(50, 0)
+	GPIO.cleanup()
+	print("GPIOのクリーンアップを実行しました。")
