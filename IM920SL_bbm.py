@@ -12,24 +12,24 @@ GPIO.setup(wireless_PIN, GPIO.OUT)
 
 # ユニキャスト送信関数
 def send_unicast(node_id, payload):
-    # ワイヤレスグラウンドON（HIGH）
+    # ワイヤレスグラウンドON
     GPIO.output(wireless_PIN, GPIO.HIGH)
     print(f"GPIO{wireless_PIN} をHIGHに設定（ワイヤレスグラウンドON）")
-    time.sleep(0.2)  # 安定のため少し待つ
+    time.sleep(0.2)
 
-    # TXDUコマンド送信
+    # コマンド送信
     cmd = f'TXDU {node_id},{payload}\r\n'
     im920.write(cmd.encode())
     print(f"送信: {cmd.strip()}")
-    
-    # 応答確認（オプション）
-    time.sleep(0.5)
-    while im920.in_waiting:
-        res = im920.readline().decode().strip()
-        print("Response:", res)
 
-    # ワイヤレスグラウンドOFF（LOW）に戻す場合は以下を有効に
-    # GPIO.output(wireless_PIN, GPIO.LOW)
+    # 1秒以内に返ってくるはずの応答をすべて表示
+    timeout = time.time() + 2
+    while time.time() < timeout:
+        if im920.in_waiting:
+            res = im920.readline().decode(errors="ignore").strip()
+            print("Response:", res)
+        else:
+            time.sleep(0.1)
 
 # 実行
 send_unicast("0003", "HELLO")
