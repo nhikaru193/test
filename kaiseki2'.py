@@ -75,13 +75,14 @@ finally:
     print("終了しました。")
 """
 
-# --- parse_im920_data 関数（修正版 Ver.4） ---
+# --- parse_im920_data 関数（修正版 Ver.5） ---
 def parse_im920_data(data_string):
     """
     IM920から受信したデータ文字列を解析し、緯度と経度の小数点表記を返します。
     データ形式: "00,0001,ID:ペイロードバイト1,ペイロードバイト2,..."
     ペイロードバイト列から緯度と経度の浮動小数点数を再構築することを試みます。
     経度の整数部が '39' の場合に '139' として扱う特殊処理を含みます。
+    不正データパターン（同じ数字の連続）を検出してスキップします。
     """
     try:
         if ':' not in data_string:
@@ -93,10 +94,13 @@ def parse_im920_data(data_string):
 
         decimal_values = [int(val) for val in payload_value_strings]
 
-        # --- 不正データの簡易チェック ---
-        # 全ての数字が同じ（例: 33,33,... や 66,66,...）場合は不正データとみなす
-        if len(decimal_values) > 0 and all(x == decimal_values[0] for x in decimal_values):
-            return f"不正なデータパターン（すべて同じ数字）。データ: {decimal_values}", None, None
+        # --- 不正データの簡易チェック（同じ数字の連続） ---
+        # ペイロードの長さが短い場合はチェックしない（緯度経度データが不十分で既に弾かれるため）
+        # ある程度の長さ（例えば5つ以上）があり、かつ最後の3つ以上の数字が全て同じ場合は不正とみなす
+        if len(decimal_values) >= 5:
+            last_three_values = decimal_values[-3:]
+            if len(last_three_values) == 3 and all(x == last_three_values[0] for x in last_three_values):
+                return f"不正なデータパターン（終端が同じ数字の連続）。データ: {decimal_values}", None, None
         
         # プレアンブル (00,03) をスキップ
         if len(decimal_values) < 2:
@@ -104,33 +108,57 @@ def parse_im920_data(data_string):
         
         data_digits = decimal_values[2:] 
 
-        # 緯度と経度を生成するための十分な数字があるか確認
-        # 緯度 (1整数部 + 4小数部) + 経度 (1整数部 + 4小数部) = 10個の数字の塊を期待
-        if len(data_digits) < 10: 
-            return f"緯度・経度データが不十分です（予想より短い）。データ: {data_digits}", None, None
+        # 緯度を生成するための十分な数字があるか確認（最低5つ）
+        if len(data_digits) < 5: 
+            return f"緯度データが不十分です（予想より短い）。データ: {data_digits}", None, None
 
         # --- 緯度部分の構築 ---
         lat_int_part = str(data_digits[0])
-        # 2桁の小数部を結合 (例: 97, 24, 70, 51)
-        lat_decimal_parts = "".join([f"{d:02d}" for d in data_digits[1:5]]) 
-        latitude_str = f"{lat_int_part}.{lat_decimal_parts}"
+        # 2桁の小数部を結合 (例: 97, 24, 70, 51)。最大4つの小数部を想定。
+        lat_decimal_parts_list = []
+        for d in data_digits[1:5]: # データの存在範囲でループ
+            lat_decimal_parts_list.append(f"{d:02d}")
+        
+        latitude_str = f"{lat_int_part}.{''.join(lat_decimal_parts_list)}"
+
+        # --- 経度部分の開始位置を動的に検索 (39を探す) ---
+        lon_start_index = -1
+        # 緯度データが終わった後から検索を開始
+        search_start_idx = 5 # 緯度データが data_digits[0] から data_digits[4] までと仮定
+
+        for i in range(search_start_idx, len(data_digits)):
+            if data_digits[i] == 39:
+                lon_start_index = i
+                break
+        
+        if lon_start_index == -1:
+            return f"経度開始マーカー '39' が見つかりません。データ: {data_digits}", None, None
+
+        # 経度の数字部分の開始位置を特定
+        lon_digits_raw = data_digits[lon_start_index:]
+
+        # 経度を生成するための十分な数字があるか確認（39自身 + 小数部4つ = 最低5つ）
+        if len(lon_digits_raw) < 5:
+             return f"経度データが不十分です（'39'以降が短い）。データ: {lon_digits_raw}", None, None
 
         # --- 経度部分の構築 ---
-        lon_raw_int_part = data_digits[5] # 経度の整数部分の生の数値
+        lon_raw_int_part = lon_digits_raw[0] # これは39になるはず
         
-        # ユーザーの要求「x1,39,~の形が来たらそこから経度を出力する」を解釈
-        # ここでは「経度の整数部として来た値が39だったら、それを139として扱う」と仮定
-        if lon_raw_int_part == 39: # もし生の整数部が39なら、139に変換
+        # '39' の前に '1' を付けて '139' にする
+        if lon_raw_int_part == 39:
             lon_int_part = '139'
-        elif lon_raw_int_part < 10: # 1桁の数字が来た場合（例: 4 -> 04）
-            lon_int_part = f"{lon_raw_int_part:02d}"
-        else: # その他の場合（例: 166, 133など）
+        else: # 39以外の数字が来た場合は、そのまま使用（通常はここには来ないはず）
             lon_int_part = str(lon_raw_int_part)
-            
-        # 2桁の小数部を結合 (例: 83, 04, 14, 83)
-        # data_digits[6:10] で経度の小数部4つを取得
-        lon_decimal_parts = "".join([f"{d:02d}" for d in data_digits[6:10]]) 
-        longitude_str = f"{lon_int_part}.{lon_decimal_parts}"
+            if lon_raw_int_part < 10: # 1桁の数字が来た場合（例: 4 -> 04）
+                lon_int_part = f"{lon_raw_int_part:02d}"
+
+
+        # 2桁の小数部を結合 (例: 83, 04, 14, 83)。lon_digits_raw[1:5]を使用。
+        lon_decimal_parts_list = []
+        for d in lon_digits_raw[1:5]: # データの存在範囲でループ
+            lon_decimal_parts_list.append(f"{d:02d}")
+        
+        longitude_str = f"{lon_int_part}.{''.join(lon_decimal_parts_list)}"
         
         # 緯度と経度を浮動小数点数に変換
         latitude = float(latitude_str)
@@ -138,12 +166,12 @@ def parse_im920_data(data_string):
 
         # 経度の値が明らかに日本の範囲外（例: 180を超える）場合も不正とみなす
         if not (-180.0 <= longitude <= 180.0):
-             return f"経度が不正な範囲です: {longitude_str}", None, None
+             return f"経度が不正な範囲です: {longitude_str} (範囲外)", None, None
 
         return "解析成功", latitude, longitude
 
     except (ValueError, IndexError, KeyError) as e:
-        return f"緯度または経度の変換エラー: {e}, 解析中のデータ: '{data_string}'", None, None
+        return f"解析エラー: {e}, 解析中のデータ: '{data_string}'", None, None
 
 
 # いただいたTeratermの出力例
