@@ -807,7 +807,7 @@ if parsed_locations:
 
     # 地図をHTMLファイルとして保存
     map_output_filename = "gps_trajectory_map.html"
-    m.save(map_output_filename)
+    m.save(/home/mark1/gps_trajectory_map.html)
     print(f"\n地図が '{map_output_filename}' として保存されました。ウェブブラウザで開いて確認してください。")
 else:
     print("\n解析可能なGPSデータが見つからなかったため、地図は生成されませんでした。")
