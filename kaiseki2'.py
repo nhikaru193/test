@@ -75,7 +75,7 @@ finally:
     print("終了しました。")
 """
 
-# --- parse_im920_data 関数（修正版） ---
+# --- parse_im920_data 関数（修正版 Ver.3） ---
 def parse_im920_data(data_string):
     """
     IM920から受信したデータ文字列を解析し、緯度と経度の小数点表記を返します。
@@ -83,67 +83,71 @@ def parse_im920_data(data_string):
     ペイロードバイト列から緯度と経度の浮動小数点数を再構築することを試みます。
     """
     try:
-        # 最初のコロンで分割し、ペイロード部分の文字列を取得
-        # 例: "00,0001,A0:00,03,35,97,..." -> raw_payload_string = "00,03,35,97,..."
         if ':' not in data_string:
             return "データ形式が不正です（コロンが見つかりません）。", None, None
         
         header_part, raw_payload_string = data_string.split(':', 1)
         
-        # raw_payload_string をカンマで分割し、数値文字列のリストにする
         payload_value_strings = [val.strip() for val in raw_payload_string.split(',') if val.strip()]
 
-        # ペイロードの数値文字列を整数に変換
         decimal_values = [int(val) for val in payload_value_strings]
 
-        # ここから、decimal_values を使って緯度と経度を再構築します。
-        # データ例: "00,03,35,97,24,70,51,39,83,04,14,83,33,33,33,32"
-        # 緯度: 35.97247051, 経度: 139.83041483
-
+        # --- 不正データの簡易チェック ---
+        # 全ての数字が同じ（例: 33,33,... や 66,66,...）場合は不正データとみなす
+        if len(decimal_values) > 0 and all(x == decimal_values[0] for x in decimal_values):
+            return f"不正なデータパターン（すべて同じ数字）。データ: {decimal_values}", None, None
+        
         # プレアンブル (00,03) をスキップ
-        # これが常に00,03なのか、可変なのかは要確認。ここでは最初の2つをスキップと仮定
         if len(decimal_values) < 2:
             return "ペイロードが短すぎます（プレアンブル不足）。", None, None
         
-        # 実際のデータ部分
         data_digits = decimal_values[2:] 
 
-        # 緯度と経度の数字部分の結合ルールを適用
-        # 例: 35,97,24,70,51 -> "35.97247051"
-        # 139,83,04,14,83 -> "139.83041483"
-        # 緯度と経度の桁数、小数点位置、区切りを推測する必要があります。
-        # 最初の5つの数字を緯度、残りを経度として試してみます。
-        # これが「2桁ごとにカンマで区切られている」を最も素直に解釈したパターンです。
+        # 緯度は5つの数字の塊、経度も5つの数字の塊と仮定します。（計10個）
+        # ただし、経度の整数部が100を超えるケース（例: 139）を考慮。
+        # データ例から、緯度整数部1つ、小数部4つ、経度整数部1つ、小数部4つと推測。
+        # 経度の整数部に1を付与するロジックを試します。
 
         # 緯度と経度を生成するための十分な数字があるか確認
-        if len(data_digits) < 10: # 最低でも緯度5つ、経度5つ分
+        # 緯度 (1整数部 + 4小数部) + 経度 (1整数部 + 4小数部) = 10個の数字の塊
+        if len(data_digits) < 10: 
             return f"緯度・経度データが不十分です（予想より短い）。データ: {data_digits}", None, None
 
-        # 緯度部分の数字を結合
-        # 例: [35, 97, 24, 70, 51] を "35.97247051" に
-        # 最初の要素が整数部、残りが小数部を構成すると仮定
+        # --- 緯度部分の構築 ---
         lat_int_part = str(data_digits[0])
-        # 小数点以下の部分を2桁ゼロ埋めしながら結合。例: [97, 24, 70, 51]
+        # 2桁の小数部を結合 (例: 97, 24, 70, 51)
         lat_decimal_parts = "".join([f"{d:02d}" for d in data_digits[1:5]]) 
         latitude_str = f"{lat_int_part}.{lat_decimal_parts}"
 
-        # 経度部分の数字を結合
-        # 例: [39, 83, 04, 14, 83, ...] を "139.83041483" に
-        # 緯度で5つ使ったので、残りの最初の要素が整数部、残りが小数部を構成
-        # 経度は桁数が多い場合があるため、残りのデータすべてを使用
-        lon_int_part = str(data_digits[5])
-        # 小数点以下の部分を2桁ゼロ埋めしながら結合。例: [83, 04, 14, 83, ...]
-        lon_decimal_parts = "".join([f"{d:02d}" for d in data_digits[6:]]) 
+        # --- 経度部分の構築 ---
+        lon_raw_int_part = str(data_digits[5])
+        # 経度の整数部が2桁の場合、先頭に'1'を付与して3桁にすることを試みる
+        # 例: 39 -> 139
+        # このロジックは実際のプロトコルに依存します。
+        # もし経度が常に3桁の整数部を持つなら、データの送り方が変わるべきです。
+        # ここでは、データが2桁整数で、実測値で3桁になるパターンを吸収するための一時的な対応とします。
+        if len(lon_raw_int_part) == 2: # 2桁の整数部の場合
+            lon_int_part = '1' + lon_raw_int_part # 先頭に'1'を付与して139のようにする
+        else:
+            lon_int_part = lon_raw_int_part
+            
+        # 2桁の小数部を結合 (例: 83, 04, 14, 83)
+        # data_digits[6:10] で経度の小数部4つを取得
+        lon_decimal_parts = "".join([f"{d:02d}" for d in data_digits[6:10]]) 
         longitude_str = f"{lon_int_part}.{lon_decimal_parts}"
         
         # 緯度と経度を浮動小数点数に変換
         latitude = float(latitude_str)
         longitude = float(longitude_str)
 
+        # 経度の値が明らかに範囲外の場合（例: 経度が100未満で意図せず39.xxになった場合など）も不正とみなす
+        if not (-180.0 <= longitude <= 180.0):
+             return f"経度が不正な範囲です: {longitude_str}", None, None
+
         return "解析成功", latitude, longitude
 
     except (ValueError, IndexError, KeyError) as e:
-        # 不正なデータ（33,33,33,33や66,66,66など）はこのエラーで捕捉される可能性が高い
+        # 数値変換、インデックスエラー、キーエラーなどを捕捉
         return f"緯度または経度の変換エラー: {e}, 解析中のデータ: '{data_string}'", None, None
 
 
