@@ -27,15 +27,9 @@ STBY = 21  # スタンバイピン (モーターON/OFF)
 GPS_RX_PIN = 17 
 GPS_BAUD = 9600
 
-# IM920SL関連の設定はコメントアウトまたは削除します。
-# IM920_PORT = '/dev/serial0' 
-# IM920_BAUD = 19200
-# WIRELESS_GND_PIN = 22 # ワイヤレスグラウンドのGPIOピン
-
 # グローバルなインスタンスと状態変数
 motor = None
 pi = None # pigpioインスタンス
-# im920 = None # IM920SLシリアルインスタンス (削除)
 current_action = "stop"
 current_speed = 50 # デフォルトの速度 (デューティ比 0-100)
 # スレッド終了のためのイベント
@@ -74,8 +68,6 @@ def gps_reader_thread():
 
     print(f"▶ ソフトUART RX を開始：GPIO={GPS_RX_PIN}, {GPS_BAUD}bps")
 
-    # IM920SLの初期化はここから削除
-
     try:
         while not exit_event.is_set(): # 終了イベントがセットされるまでループ
             (count, data) = pi.bb_serial_read(GPS_RX_PIN)
@@ -92,10 +84,13 @@ def gps_reader_thread():
                                         lat = convert_to_decimal(parts[3], parts[4])
                                         lon = convert_to_decimal(parts[5], parts[6])
                                         print(f"GPSデータ受信: 緯度={lat:.6f}, 経度={lon:.6f}")
-                                        # IM920SLでの送信はここから削除
                                     except ValueError as ve:
                                         print(f"GPS座標の変換エラー: {ve}, ライン: {line.strip()}")
-                                except IndexError:
+                                # ここからインデントを修正
+                                # IndexError の except ブロックは、直前の try ブロックに属する必要がある
+                                # ここでは、GPSデータフォーマットエラーがtryブロックのネストレベルに合うように調整
+                                # 元のコードでは、try-exceptの階層がずれていました
+                                elif len(parts) <= 6: # length check for IndexError
                                     print(f"GPSデータフォーマットエラー (長さ不足): {line.strip()}")
                 except UnicodeDecodeError as ude:
                     print(f"GPSデータデコードエラー: {ude}, データ: {data}")
@@ -107,13 +102,13 @@ def gps_reader_thread():
         print(f"GPSデータ読み取りスレッドでエラーが発生しました: {e}")
     finally:
         print("GPSデータ読み取りスレッドを終了します。クリーンアップ中...")
-        # IM920SLのクリーンアップはここから削除
         if pi and pi.connected:
             pi.bb_serial_read_close(GPS_RX_PIN)
             pi.stop()
             print("pigpioリソースをクリーンアップしました。")
 
 # --- キーボード入力処理 ---
+# on_press, on_release 関数は変更なし (前回のものと同じ)
 def on_press(key):
     global current_action, current_speed, motor
 
@@ -211,6 +206,7 @@ def on_release(key):
 
 # --- メイン処理 ---
 if __name__ == "__main__":
+    GPIO.setwarnings(False) # GPIOの警告を無効にする (開始時に設定)
     print("アプリケーションを開始します...")
 
     # 1. MotorDriverの初期化
@@ -223,7 +219,6 @@ if __name__ == "__main__":
         exit(1)
 
     # 2. GPSデータ読み取りスレッドを開始 (IM920SL送信なし)
-    # IM920SLモジュールの接続がない場合でも、GPSデータの読み取りは試行されます。
     gps_reader_thread = threading.Thread(target=gps_reader_thread, daemon=True)
     gps_reader_thread.start()
 
