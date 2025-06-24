@@ -1,6 +1,6 @@
-import serial
+#import serial
 import time
-import pigpio
+#import pigpio
 import folium # Foliumライブラリをインポート
 import os     # ファイルパス操作のためにosモジュールをインポート
 
