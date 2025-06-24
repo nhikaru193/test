@@ -26,10 +26,10 @@ hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 # 赤色の範囲を指定します
 # H(色相)の値が0-20と95-130の範囲を赤色として検出します
 # 注意: 95-130の範囲は、一般的には青色系の色相です。もし意図と異なる場合は、[160, 30, 30]のように調整してください。
-lower_red1 = np.array([0, 30, 30])
-upper_red1 = np.array([20, 255, 255])
-lower_red2 = np.array([95, 30, 30])
-upper_red2 = np.array([130, 255, 255])
+lower_red1 = np.array([0, 100, 80])
+upper_red1 = np.array([10, 255, 255])
+lower_red2 = np.array([160, 100, 80])
+upper_red2 = np.array([179, 255, 255])
 
 # 指定した範囲に基づいてマスクを作成します
 mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
