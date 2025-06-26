@@ -181,6 +181,6 @@ for i in range (100):
 	time.sleep(0.01)  # 0.01秒待機
 
 driver.changing_forward(100, 0)
-
+time.sleep(5)
 GPIO.cleanup()
 print("GPIOのクリーンアップを実行しました。")
