@@ -2,6 +2,7 @@ import smbus
 import time
 import RPi.GPIO as GPIO
 from motor import MotorDriver
+import pigpio
 
 driver = MotorDriver(
     PWMA=12, AIN1=23, AIN2=18,   # 左モーター用（モータA）
