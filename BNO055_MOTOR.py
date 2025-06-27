@@ -310,12 +310,12 @@ if __name__ == '__main__':
 	"""
 	
 	time.sleep(3)
-	driver.changing_forward(0, 50)
-	time.sleep(20)
+	driver.changing_forward(0, 100)
+	time.sleep(5)
 	
 	for i in range(200):
 		print(bno.getVector(BNO055.VECTOR_EULER))
 		time.sleep(0.1)
-	driver.changing_forward(50, 0)
+	driver.changing_forward(100, 0)
 	GPIO.cleanup()
 	print("GPIOのクリーンアップを実行しました。")
