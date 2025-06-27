@@ -176,11 +176,10 @@ def navigate_to_goal():
                         print("[WARN] BNO055から方位角を取得できません。")
                         break # センサーがエラーならループを抜ける
                     angle_error = (bearing_to_goal - heading + 360) % 360
-
-               print("[TURN] 方向調整完了。")
-               driver.motor_stop_brake()
-               time.sleep(0.5)
-               continue # メインループの先頭に戻って再評価
+                print("[TURN] 方向調整完了。")
+                driver.motor_stop_brake()
+                time.sleep(0.5)
+                continue # メインループの先頭に戻って再評価
 
             # 5. 前進フェーズ
             print("[MOVE] 方向OK。1秒間前進します。")
