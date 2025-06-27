@@ -104,6 +104,16 @@ class MotorDriver():
              speed = before + i * delta_speed
              self.motor_forward(speed)
              time.sleep(0.015)
+             
+     def motor_Lforward(self, before, after):
+         GPIO.output(self.A1, GPIO.LOW)
+         GPIO.output(self.A2, GPIO.HIGH)
+         self.pwma.ChangeDutyCycle(speed) 
+
+     def motor_Rforward(self, before, after):
+         GPIO.output(self.B1, GPIO.HIGH)
+         GPIO.output(self.B2, GPIO.LOW)
+         self.pwmb.ChangeDutyCycle(speed)
 
  #右折：回転数制御(基本は停止してから使いましょう)
      def changing_right(self, before, after):
@@ -147,3 +157,16 @@ class MotorDriver():
              speed = before + i * delta_speed
              self.motor_left(speed)
              time.sleep(0.02)
+          
+     def changing_forwardd(self, before, after, percentage):
+         global speed
+         for i in range(100):
+             a_delta_speed = (after - before) / 100
+             b_delta_speed = percentage * (after - before) / 100
+             a_speed = before + i * a_delta_speed
+             b_speed = before + i * b_delta_speed
+             self.motor_Lforward(b_speed)
+             self.motor_Rforward(a_speed)
+             time.sleep(0.02)
+             
+             
