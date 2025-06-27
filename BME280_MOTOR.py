@@ -175,7 +175,7 @@ init_bme280()
 read_compensate()
 
 driver.changing_forward(0, 50)
-time.sleep(20)
+time.sleep(60)
 #測定データ読み込み 
 for i in range (100):
 	read_data()
