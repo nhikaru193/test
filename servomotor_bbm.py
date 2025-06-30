@@ -1,4 +1,3 @@
-
 import RPi.GPIO as GPIO
 import time
 
@@ -15,22 +14,29 @@ def set_servo_duty(duty):
     pwm.ChangeDutyCycle(duty)
     time.sleep(0.5)
 
+def changing_servo_reverse(before, after):
+    global speed
+    for i in range (1, 100):
+        delta_speed = (after - before) / 100
+        speed = before + i * delta_speed
+        set_servo_duty(speed)
+        time.sleep(0.1)
+    
 try:
     print("サーボ停止")
     set_servo_duty(7.5)
 
     print("正回転（速い）")
-    set_servo_duty(10.0)
-
-    time.sleep(10)
-
+    changing_servo_reverse(7.5, 10)
+    time.sleep(3)
+    
+    """
     print("逆回転（速い）")
     set_servo_duty(5.0)
-
-    time.sleep(10)
+    """
 
     print("停止")
-    set_servo_duty(7.5)
+    changing_servo_reverse(10, 7.5)
 
 finally:
     pwm.stop()
