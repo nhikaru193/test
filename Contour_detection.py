@@ -6,7 +6,7 @@ import numpy as np
 # --- 設定 ---
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
-MIN_BLACK_AREA = 5000 # 検出対象とする黒領域の最小面積
+MIN_BLACK_AREA = 3000 # 検出対象とする黒領域の最小面積
 GRID_COLS = 3 # 画面の分割数
 
 def classify_shape(contour):
