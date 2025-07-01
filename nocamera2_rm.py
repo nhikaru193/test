@@ -190,6 +190,7 @@ def navigate_to_goal():
             ### 元のモーター定義文を使用 ###
             driver.changing_forward(0, move_speed)
             time.sleep(1.0)
+            driver.changing_forward(move_speed, 0)
             driver.motor_stop_free() # 元のコードに合わせてブレーキではなくフリーに
             time.sleep(0.2)
 
