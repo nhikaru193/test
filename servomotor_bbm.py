@@ -35,6 +35,8 @@ try:
     print("逆回転（速い）")
     set_servo_duty(5.0)
     time.sleep(5)
+    set_servo_duty(10)
+    time.sleep(5)
     """
 
     print("停止")
