@@ -124,7 +124,7 @@ def navigate_to_goal():
                         for line in lines:
                             if "$GNRMC" in line:
                                 parts = line.strip().split(",")
-                                time.sleep(0.5)
+                                time.sleep(2.0)
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
@@ -132,7 +132,7 @@ def navigate_to_goal():
                                 current_location = lat, lon
                 except Exception as e:
                     print("デコードエラー:", e)
-            time.sleep(0.1)
+            time.sleep(1.0)
             if not current_location:
                 print("[WARN] GPS位置情報を取得できません。リトライします...")
                 driver.motor_stop_brake()
