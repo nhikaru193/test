@@ -59,7 +59,7 @@ def convert_to_decimal(coord, direction):
     return decimal
 
 while True:
-    sys, gyro, accel, mag = BNO055.getCalibration()
+    sys, gyro, accel, mag = bno.getCalibration()
     print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
     if gyro == 3:
         print("\n キャリブレーション完了！")
