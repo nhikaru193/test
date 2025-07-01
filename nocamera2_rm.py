@@ -58,6 +58,13 @@ def convert_to_decimal(coord, direction):
         decimal *= -1
     return decimal
 
+while True:
+    sys, gyro, accel, mag = BNO055.getCalibration()
+    print(f"Calib → Sys:{sys}, Gyro:{gyro}, Acc:{accel}, Mag:{mag}", end='\r')
+    if gyro == 3
+        print("\n キャリブレーション完了！")
+        break
+
 # === GPS位置取得関数 (修正済み) ===
 """
 def get_current_gps_location():
