@@ -23,6 +23,7 @@ def changing_servo_reverse(before, after):
         time.sleep(0.1)
     
 try:
+    """
     print("サーボ停止")
     set_servo_duty(7.5)
 
@@ -33,10 +34,14 @@ try:
     """
     print("逆回転（速い）")
     set_servo_duty(5.0)
+    time.sleep(5)
     """
 
     print("停止")
     changing_servo_reverse(10, 7.5)
+    """
+
+    set
 
 finally:
     pwm.stop()
