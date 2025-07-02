@@ -28,10 +28,13 @@ if not pi.connected:
     print("pigpio デーモンに接続できません。sudo pigpiod を実行してください。")
     exit(1)
 
-if pi.bb_serial_read_open(RX_PIN, BAUD, 8) != 0:
-    print("ソフトUARTの初期化に失敗しました。")
+err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
+if err != 0:
+    print(f"ソフトUART RX の設定に失敗：GPIO={RX_PIN}, {BAUD}bps")
     pi.stop()
     exit(1)
+
+print(f"▶ ソフトUART RX を開始：GPIO={RX_PIN}, {BAUD}bps")
 
 # === BNO055 初期化 (変更なし) ===
 bno = BNO055()
