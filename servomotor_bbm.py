@@ -33,7 +33,7 @@ try:
     
     """
     print("逆回転（速い）")
-    set_servo_duty(5.0)
+    set_servo_duty(4.0)
     time.sleep(10)
     #set_servo_duty(12.5)
     time.sleep(3)
