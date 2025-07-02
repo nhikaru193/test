@@ -81,7 +81,9 @@ def get_current_gps_location():
                             if len(parts) > 6 and parts[2] == "A":
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
-                                return lat, lon
+                                print(f"現在地のGPS: 緯度 {lat:.7f}, 経度 {lon:.7f}")
+                                current_location = [lat, lon]
+                                break
             except Exception as e:
                 print("デコードエラー:", e)
         time.sleep(0.1)
