@@ -28,23 +28,23 @@ def convert_to_decimal(coord, direction):
 
 def get_GPS():
     while True:
-    ax, ay, az = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
-    squ_a = ax ** 2 + ay ** 2 + az ** 2
-    size_a = math.sqrt(squ_a)
-    print(f"総加速度の大きさ：{size_a}m/s^2")
-    time.sleep(0.2)
-    (count, data) = pi.bb_serial_read(RX_PIN)
-    if count and data:
-        text = data.decode("ascii", errors="ignore")
-        if "$GNRMC" in text:
-            lines = text.split("\n")
-            for line in lines:
-                if "$GNRMC" in line:
-                    parts = line.strip().split(",")
-                    if len(parts) > 6 and parts[2] == "A":
-                        lat = convert_to_decimal(parts[3], parts[4])
-                        lon = convert_to_decimal(parts[5], parts[6])
-                        return lat, lon     
+        ax, ay, az = bno.getVector(BNO055.VECTOR_ACCELEROMETER)
+        squ_a = ax ** 2 + ay ** 2 + az ** 2
+        size_a = math.sqrt(squ_a)
+        print(f"総加速度の大きさ：{size_a}m/s^2")
+        time.sleep(0.2)
+        (count, data) = pi.bb_serial_read(RX_PIN)
+        if count and data:
+            text = data.decode("ascii", errors="ignore")
+            if "$GNRMC" in text:
+                lines = text.split("\n")
+                for line in lines:
+                    if "$GNRMC" in line:
+                        parts = line.strip().split(",")
+                        if len(parts) > 6 and parts[2] == "A":
+                            lat = convert_to_decimal(parts[3], parts[4])
+                            lon = convert_to_decimal(parts[5], parts[6])
+                            return lat, lon     
     time.sleep(0.2)
 
 for i in range(10):
