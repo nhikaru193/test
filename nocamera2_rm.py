@@ -115,6 +115,7 @@ def navigate_to_goal():
         while True:
             # 1. 状態把握
             (count, data) = pi.bb_serial_read(RX_PIN)
+            current_location = None
             time.sleep(1.0)
             if count and data:
                 try:
@@ -129,7 +130,7 @@ def navigate_to_goal():
                                 lat = convert_to_decimal(parts[3], parts[4])
                                 lon = convert_to_decimal(parts[5], parts[6])
                                 print("緯度と経度 (10進数):", [lat, lon])
-                                current_location = lat, lon
+                                current_location = [lat, lon]
                 except Exception as e:
                     print("デコードエラー:", e)
             time.sleep(1.0)
