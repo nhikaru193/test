@@ -110,7 +110,7 @@ def navigate_to_goal():
                         for line in lines:
                             # `$GNRMC`センテンスが見つかったら、その行を解析
                             if "$GNRMC" in line:
-                                parts = line.strip().split(",")** # 'parts'がここで定義される
+                                parts = line.strip().split(",") # 'parts'がここで定義される
                                 # `parts`が定義された後に、その長さと有効性をチェック
                                 if len(parts) > 6 and parts[2] == "A": # データが有効 (A) であることを確認
                                     lat = convert_to_decimal(parts[3], parts[4])
