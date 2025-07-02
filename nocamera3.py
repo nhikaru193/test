@@ -25,7 +25,7 @@ BAUD = 9600
 # === pigpio 初期化 (変更なし) ===
 pi = pigpio.pi()
 if not pi.connected:
-    print("pigpio デーモンに接続できません。sudo pigpiod を実行してください。")
+    print("pigpio デーモンに接続できてないよ。sudo pigpiod を実行してください。")
     exit(1)
 
 err = pi.bb_serial_read_open(RX_PIN, BAUD, 8)
