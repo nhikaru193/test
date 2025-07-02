@@ -16,7 +16,7 @@ driver = MotorDriver(
 )
 
 # === 目標地点設定 (変更なし) ===
-GOAL_LOCATION = [35.9180742, 139.9087919]  # 例：東京タワー
+GOAL_LOCATION = [35.9192420, 139.9082226]  # 12号館前
 
 # === GPSピン設定 (変更なし) ===
 RX_PIN = 17
@@ -156,7 +156,7 @@ def navigate_to_goal():
             ANGLE_THRESHOLD_DEG = 10.0 # 許容する角度誤差（度）
             if angle_error > ANGLE_THRESHOLD_DEG and angle_error < (360 - ANGLE_THRESHOLD_DEG):
                 turn_speed = 40 # 回転速度は固定 (0-100)
-                turn_duration = 0.35 + (min(angle_error, 360 - angle_error) / 180.0) * 0.2 
+                turn_duration = 0.28 + (min(angle_error, 360 - angle_error) / 180.0) * 0.2 
 
                 if angle_error > 180: # 反時計回り（左）に回る方が近い
                     print(f"[TURN] 左に回頭します ({turn_duration:.2f}秒)")
