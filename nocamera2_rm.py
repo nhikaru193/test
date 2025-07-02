@@ -1,5 +1,6 @@
 import math
 import time
+import serial
 import pigpio
 import RPi.GPIO as GPIO
 from motor import MotorDriver  # ユーザーのMotorDriverクラスを使用
@@ -113,7 +114,6 @@ def navigate_to_goal():
     try:
         while True:
             # 1. 状態把握
-            current_location = 0, 0
             (count, data) = pi.bb_serial_read(RX_PIN)
             time.sleep(1.0)
             if count and data:
