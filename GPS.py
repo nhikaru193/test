@@ -1,6 +1,8 @@
 import serial
 import time
 import pigpio
+import math
+import struct
 
 def init_L76X():
     global TX_PIN, RX_PIN, BAUD
@@ -44,3 +46,8 @@ def get_GPS():
                         lon = convert_to_decimal(parts[5], parts[6])
                         return lat, lon     
     time.sleep(0.2)
+
+for i in range(10):
+    init_L76X()
+    gps_lat_lon = get_GPS()
+    print(f"{gps_lat_lon}")
