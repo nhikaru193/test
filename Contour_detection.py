@@ -46,11 +46,7 @@ def classify_shape(contour):
         # 頂点数が多く、凸性が低いものは十字の可能性
         if solidity < 0.75:
             shape_name = "十字"
-    elif vertices > 14:
-        # さらに複雑な形状
-        if solidity < 0.7:
-            shape_name = "Eみたいなやつ"
-
+    
     return shape_name, approx
 
 
