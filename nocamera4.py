@@ -8,21 +8,21 @@ from BNO055 import BNO055
 import smbus
 import struct
 
-# === モーター初期化 (変更なし) ===
+# === モーター初期化 ===
 driver = MotorDriver(
     PWMA=12, AIN1=23, AIN2=18,    # 左モーター
     PWMB=19, BIN1=16, BIN2=26,    # 右モーター
     STBY=21
 )
 
-# === 目標地点設定 (変更なし) ===
+# === 目標地点設定 ===
 GOAL_LOCATION = [35.9238976, 139.9114704]  # 12号館前
 
-# === GPSピン設定 (変更なし) ===
+# === GPSピン設定 ===
 RX_PIN = 17
 BAUD = 9600
 
-# === pigpio 初期化 (変更なし) ===
+# === pigpio 初期化 ===
 pi = pigpio.pi()
 if not pi.connected:
     print("pigpio デーモンに接続できてないよ。sudo pigpiod を実行してください。")
@@ -46,7 +46,7 @@ time.sleep(1)
 print("センサー類の初期化完了。ナビゲーションを開始します。")
 
 
-# === 度分→10進変換関数 (変更なし) ===
+# === 度分→10進変換関数 ===
 def convert_to_decimal(coord, direction):
     if direction in ['N', 'S']:
         degrees = int(coord[:2])
@@ -68,7 +68,7 @@ while True:
         break
     time.sleep(0.5)
 
-# === 2点間の方位角の計算 (可読性向上) ===
+# === 2点間の方位角の計算 ===
 def get_bearing_to_goal(current, goal):
     if current is None or goal is None:
         return None
@@ -80,7 +80,7 @@ def get_bearing_to_goal(current, goal):
     bearing_rad = math.atan2(y, x)
     return (math.degrees(bearing_rad) + 360) % 360
 
-# === 2点間の距離の計算 (バグ修正済み) ===
+# === 2点間の距離の計算 ===
 def get_distance_to_goal(current, goal):
     if current is None or goal is None:
         return float('inf')
@@ -93,7 +93,7 @@ def get_distance_to_goal(current, goal):
     dist = radius * c
     return dist
 
-# === ナビゲーション制御 (ロジック改善済み) ===
+# === ナビゲーション制御 ===
 def navigate_to_goal():
     try:
         while True:
@@ -108,7 +108,6 @@ def navigate_to_goal():
                     if "$GNRMC" in text:
                         lines = text.split("\n")
                         for line in lines:
-                            # `$GNRMC`センテンスが見つかったら、その行を解析
                             if "$GNRMC" in line:
                                 parts = line.strip().split(",") # 'parts'がここで定義される
                                 # `parts`が定義された後に、その長さと有効性をチェック
@@ -153,9 +152,9 @@ def navigate_to_goal():
             print(f"[INFO] 距離:{dist_to_goal: >6.1f}m | 目標方位:{bearing_to_goal: >5.1f}° | 現在方位:{heading: >5.1f}° | 誤差:{angle_error: >5.1f}°")
 
             # 4. 方向調整フェーズ
-            ANGLE_THRESHOLD_DEG = 10.0 # 許容する角度誤差（度）
+            ANGLE_THRESHOLD_DEG = 20.0 # 許容する角度誤差（度）
             if angle_error > ANGLE_THRESHOLD_DEG and angle_error < (360 - ANGLE_THRESHOLD_DEG):
-                turn_speed = 40 # 回転速度は固定 (0-100)
+                turn_speed = 45 # 回転速度は固定 (0-100)
                 turn_duration = 0.28 + (min(angle_error, 360 - angle_error) / 180.0) * 0.2 
 
                 if angle_error > 180: # 反時計回り（左）に回る方が近い
