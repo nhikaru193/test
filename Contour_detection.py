@@ -6,7 +6,7 @@ import numpy as np
 # --- 設定 ---
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
-MIN_BLACK_AREA = 3000 # 検出対象とする黒領域の最小面積
+MIN_BLACK_AREA = 2000 # 検出対象とする黒領域の最小面積
 GRID_COLS = 3 # 画面の分割数
 
 def classify_shape(contour):
@@ -14,7 +14,7 @@ def classify_shape(contour):
     輪郭から頂点数と凸性(Solidity)を用いて図形を判別する
     """
     shape_name = "不明"
-    epsilon = 0.02 * cv2.arcLength(contour, True)
+    epsilon = 0.035 * cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, epsilon, True)
     vertices = len(approx)
 
@@ -35,14 +35,11 @@ def classify_shape(contour):
         # 頂点数が4で、凸性が高い(凹みが少ない)ものは四角形
         if solidity > 0.95:
             shape_name = "長方形"
-        else:
-            # 凸性が低い場合はT字などの可能性
-            shape_name = "T字"
-    elif 5 <= vertices <= 8:
+    elif 5 <= vertices <= 6:
         # 頂点数が5-8で凸性が低いものはT字の可能性が高い
         if solidity < 0.9:
             shape_name = "T字"
-    elif 9 <= vertices <= 14:
+    elif 7 <= vertices <= 8:
         # 頂点数が多く、凸性が低いものは十字の可能性
         if solidity < 0.75:
             shape_name = "十字"
@@ -71,7 +68,7 @@ def main():
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     # 黒色のHSV範囲を調整 (より広い範囲の黒を捉える)
     lower_black = np.array([0, 0, 0])
-    upper_black = np.array([180, 255, 50])
+    upper_black = np.array([180, 255, 60])
     black_mask = cv2.inRange(hsv, lower_black, upper_black)
     
     kernel = np.ones((5,5), np.uint8)
