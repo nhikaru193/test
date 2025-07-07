@@ -14,7 +14,7 @@ def classify_shape(contour):
     輪郭から頂点数と凸性(Solidity)を用いて図形を判別する
     """
     shape_name = "不明"
-    epsilon = 0.035 * cv2.arcLength(contour, True)
+    epsilon = 0.035 * cv2.arcLength(contour, True) #0.035の値を小さくすると輪郭がより詳細になり頂点数が増え、大きくするとより単純化されて頂点数が減る　　
     approx = cv2.approxPolyDP(contour, epsilon, True)
     vertices = len(approx)
 
@@ -68,7 +68,7 @@ def main():
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     # 黒色のHSV範囲を調整 (より広い範囲の黒を捉える)
     lower_black = np.array([0, 0, 0])
-    upper_black = np.array([180, 255, 60])
+    upper_black = np.array([180, 255, 60]) #黒い領域を正しく検出できない場合。60よりあげる。
     black_mask = cv2.inRange(hsv, lower_black, upper_black)
     
     kernel = np.ones((5,5), np.uint8)
@@ -92,7 +92,9 @@ def main():
         # ROI内で図形を探す
         gray_roi = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
         # 閾値処理で白い図形を抽出
-        _, binary_roi = cv2.threshold(gray_roi, 100, 255, cv2.THRESH_BINARY)
+        _, binary_roi = cv2.threshold(gray_roi, 100, 255, cv2.THRESH_BINARY) #100を下げたり、上げてみたい。黒い領域内の白い図形を検出できない場合
+        # cv2.thresholdの行をこちらに置き換える
+        # binary_roi = cv2.adaptiveThreshold(gray_roi, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
         
         contours_in_roi, _ = cv2.findContours(binary_roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
