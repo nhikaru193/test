@@ -8,6 +8,7 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
     """
     カメラから一度だけ画像をキャプチャし、指定されたパスに保存します。
     保存後、その画像に対して赤色検知処理を行い、結果を出力します。
+    キャプチャした画像を反時計回りに90度回転させてから処理します。
 
     Args:
         picam2_instance: Picamera2のインスタンス。
@@ -28,18 +29,28 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
         # RGBからBGRに変換 (OpenCVがBGRを期待するため)
         frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
 
-        # 画像を保存
-        cv2.imwrite(save_path, frame_bgr)
+        # --- ここから回転処理を追加 ---
+        # 時計回りに90度傾いているので、反時計回りに90度（または時計回りに270度）回転させる
+        # cv2.ROTATE_90_COUNTERCLOCKWISE は反時計回りに90度回転
+        # cv2.ROTATE_90_CLOCKWISE は時計回りに90度回転 (これは今回の場合不要)
+        # cv2.ROTATE_180 は180度回転
+        rotated_frame_bgr = cv2.rotate(frame_bgr, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        print("画像を反時計回りに90度回転させました。")
+        # --- 回転処理ここまで ---
+
+        # 回転した画像を保存
+        cv2.imwrite(save_path, rotated_frame_bgr) # 回転後の画像を保存
         print(f"画像を保存しました: {save_path}")
 
-        # --- 保存した画像に対して赤色検知処理を行う ---
+        # --- 保存した画像 (回転後の画像) に対して赤色検知処理を行う ---
         print("保存された画像に対して赤色検知を開始します...")
 
-        height, width, _ = frame_bgr.shape
+        # 回転後のフレームの高さと幅を使用
+        height, width, _ = rotated_frame_bgr.shape
         total_pixels = height * width
 
-        # BGRからHSV色空間に変換
-        hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
+        # BGRからHSV色空間に変換 (回転後の画像を使用)
+        hsv = cv2.cvtColor(rotated_frame_bgr, cv2.COLOR_BGR2HSV)
 
         # 赤色のHSV範囲を定義
         lower_red1 = np.array([0, 100, 100])
@@ -64,9 +75,9 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
             print("総ピクセル数が0のため、赤色の割合を計算できませんでした。")
 
         # 結果をウィンドウ表示（任意）
-        # デバッグ用や視覚確認のため
-        res = cv2.bitwise_and(frame_bgr, frame_bgr, mask=mask)
-        cv2.imshow('Captured Original', frame_bgr)
+        # デバッグ用や視覚確認のため、表示も回転後の画像を使用
+        res = cv2.bitwise_and(rotated_frame_bgr, rotated_frame_bgr, mask=mask)
+        cv2.imshow('Captured Original (Rotated)', rotated_frame_bgr) # 回転後の画像を表示
         cv2.imshow('Red Mask', mask)
         cv2.imshow('Red Detected', res)
         cv2.waitKey(0) # 何かキーが押されるまでウィンドウを開き続ける
@@ -78,7 +89,7 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
 def main():
     picam2 = Picamera2()
     
-    # プレビュー設定 (解像度を下げることでZero 2 Wの負荷を軽減)
+    # プレビュー設定
     camera_config = picam2.create_preview_configuration(main={"size": (640, 480)})
     picam2.configure(camera_config)
     picam2.start() # カメラを起動
