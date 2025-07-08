@@ -1,16 +1,53 @@
 import cv2
 import numpy as np
 from picamera2 import Picamera2
+import os
+import time # ファイル名にタイムスタンプを使用するためにインポート
+
+def save_image_for_debug(picam2_instance, path="/home/mark1/Pictures/akairo.jpg"):
+    """
+    指定されたパスに現在のカメラフレームを保存します。
+    
+    Args:
+        picam2_instance: Picamera2のインスタンス。
+        path (str): 画像を保存するフルパス (例: /home/mark1/Pictures/akairo.jpg)。
+    """
+    try:
+        # パスのディレクトリが存在するか確認し、なければ作成
+        directory = os.path.dirname(path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"ディレクトリを作成しました: {directory}")
+
+        # 画像をキャプチャ
+        frame_to_save = picam2_instance.capture_array()
+        
+        # OpenCVはBGR形式を扱うため、必要であれば変換 (picamera2はデフォルトでBGRのはずですが念のため)
+        # もしPicamera2がRGBでキャプチャする設定になっている場合は、BGRに変換が必要
+        # 例: frame_to_save = cv2.cvtColor(frame_to_save, cv2.COLOR_RGB2BGR)
+
+        # 画像を保存
+        cv2.imwrite(path, frame_to_save)
+        print(f"デバッグ用画像を保存しました: {path}")
+    except Exception as e:
+        print(f"デバッグ用画像の保存中にエラーが発生しました: {e}")
 
 def main():
     picam2 = Picamera2()
     
     # プレビュー設定 (解像度を下げることでZero 2 Wの負荷を軽減)
-    # Zero 2 Wでは320x240などの低い解像度が推奨されます
-    # 解像度を変更した場合は、total_pixelsの計算もそれに合わせる必要があります
     camera_config = picam2.create_preview_configuration(main={"size": (640, 480)})
     picam2.configure(camera_config)
     picam2.start()
+
+    # カメラ起動後、デバッグ用に画像を保存
+    # 注意: ここで一度画像を保存するため、ループに入る前に実行します
+    # 保存するファイル名をタイムスタンプ付きにしたい場合は、以下のパスを調整してください
+    # 例: current_time_str = time.strftime("%Y%m%d_%H%M%S")
+    #     debug_save_path = f"/home/mark1/Pictures/akairo_debug_{current_time_str}.jpg"
+    # save_image_for_debug(picam2, path=debug_save_path)
+    save_image_for_debug(picam2, path="/home/mark1/Pictures/akairo.jpg")
+
 
     print("カメラを起動しました。赤色を検知しています...")
 
@@ -18,7 +55,6 @@ def main():
         while True:
             frame = picam2.capture_array()
             
-            # フレームの高さと幅を取得し、総ピクセル数を計算
             height, width, _ = frame.shape
             total_pixels = height * width
 
@@ -39,7 +75,6 @@ def main():
 
             red_pixels = cv2.countNonZero(mask)
 
-            # 赤色ピクセルの割合を計算
             if total_pixels > 0:
                 red_percentage = (red_pixels / total_pixels) * 100
                 print(f"赤色の割合: {red_percentage:.2f}% (赤色ピクセル数: {red_pixels}, 総ピクセル数: {total_pixels})")
