@@ -56,7 +56,7 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
         lower_red1 = np.array([0, 100, 100])
         upper_red1 = np.array([30, 255, 255])
 
-        lower_red2 = np.array([150, 100, 100])
+        lower_red2 = np.array([170, 100, 100])
         upper_red2 = np.array([180, 255, 255])
 
         # マスクを作成し結合
