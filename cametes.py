@@ -54,7 +54,7 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
 
         # 赤色のHSV範囲を定義
         lower_red1 = np.array([0, 100, 100])
-        upper_red1 = np.array([30, 255, 255])
+        upper_red1 = np.array([10, 255, 255])
 
         lower_red2 = np.array([170, 100, 100])
         upper_red2 = np.array([180, 255, 255])
