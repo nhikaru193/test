@@ -7,7 +7,7 @@ import time
 def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictures/akairo.jpg"):
     """
     カメラから一度だけ画像をキャプチャし、指定されたパスに保存します。
-    保存後、その画像に対して赤色検知処理を行い、結果を出力します。
+    保存後、その画像に対してオレンジ色検知処理を行い、結果を出力します。
     キャプチャした画像を反時計回りに90度回転させてから処理します。
 
     Args:
@@ -31,9 +31,6 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
 
         # --- ここから回転処理を追加 ---
         # 時計回りに90度傾いているので、反時計回りに90度（または時計回りに270度）回転させる
-        # cv2.ROTATE_90_COUNTERCLOCKWISE は反時計回りに90度回転
-        # cv2.ROTATE_90_CLOCKWISE は時計回りに90度回転 (これは今回の場合不要)
-        # cv2.ROTATE_180 は180度回転
         rotated_frame_bgr = cv2.rotate(frame_bgr, cv2.ROTATE_90_COUNTERCLOCKWISE)
         print("画像を反時計回りに90度回転させました。")
         # --- 回転処理ここまで ---
@@ -42,8 +39,8 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
         cv2.imwrite(save_path, rotated_frame_bgr) # 回転後の画像を保存
         print(f"画像を保存しました: {save_path}")
 
-        # --- 保存した画像 (回転後の画像) に対して赤色検知処理を行う ---
-        print("保存された画像に対して赤色検知を開始します...")
+        # --- 保存した画像 (回転後の画像) に対してオレンジ色検知処理を行う ---
+        print("保存された画像に対してオレンジ色検知を開始します...")
 
         # 回転後のフレームの高さと幅を使用
         height, width, _ = rotated_frame_bgr.shape
@@ -52,34 +49,30 @@ def save_and_process_single_image(picam2_instance, save_path="/home/mark1/Pictur
         # BGRからHSV色空間に変換 (回転後の画像を使用)
         hsv = cv2.cvtColor(rotated_frame_bgr, cv2.COLOR_BGR2HSV)
 
-        # 赤色のHSV範囲を定義
-        lower_red1 = np.array([0, 100, 100])
-        upper_red1 = np.array([10, 255, 255])
+        # オレンジ色のHSV範囲を定義 (ここを変更)
+        # 一般的なオレンジ色のHSV範囲の例です。環境によって調整が必要な場合があります。
+        lower_orange = np.array([5, 100, 100])
+        upper_orange = np.array([20, 255, 255])
 
-        lower_red2 = np.array([170, 100, 100])
-        upper_red2 = np.array([180, 255, 255])
+        # マスクを作成
+        mask = cv2.inRange(hsv, lower_orange, upper_orange)
 
-        # マスクを作成し結合
-        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-        mask = cv2.add(mask1, mask2)
+        # オレンジ色領域のピクセル数をカウント
+        orange_pixels = cv2.countNonZero(mask)
 
-        # 赤色領域のピクセル数をカウント
-        red_pixels = cv2.countNonZero(mask)
-
-        # 赤色ピクセルの割合を計算
+        # オレンジ色ピクセルの割合を計算
         if total_pixels > 0:
-            red_percentage = (red_pixels / total_pixels) * 100
-            print(f"最終結果: 赤色の割合は {red_percentage:.2f}% です。")
+            orange_percentage = (orange_pixels / total_pixels) * 100
+            print(f"最終結果: オレンジ色の割合は {orange_percentage:.2f}% です。")
         else:
-            print("総ピクセル数が0のため、赤色の割合を計算できませんでした。")
+            print("総ピクセル数が0のため、オレンジ色の割合を計算できませんでした。")
 
         # 結果をウィンドウ表示（任意）
         # デバッグ用や視覚確認のため、表示も回転後の画像を使用
         res = cv2.bitwise_and(rotated_frame_bgr, rotated_frame_bgr, mask=mask)
         cv2.imshow('Captured Original (Rotated)', rotated_frame_bgr) # 回転後の画像を表示
-        cv2.imshow('Red Mask', mask)
-        cv2.imshow('Red Detected', res)
+        cv2.imshow('Orange Mask', mask) # マスクのウィンドウ名を変更
+        cv2.imshow('Orange Detected', res) # 検出結果のウィンドウ名を変更
         cv2.waitKey(0) # 何かキーが押されるまでウィンドウを開き続ける
         cv2.destroyAllWindows() # ウィンドウを閉じる
 
