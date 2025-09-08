@@ -8,19 +8,8 @@ driver = MotorDriver(
     STBY=21                      # STBYピン
 )
 
-driver.changing_forward(0, 20)
+driver.petit_petit_retreat(6)
 
-driver.changing_forward(20, 30)
-
-driver.changing_forward(30, 40)
-
-driver.changing_forward(50, 70)
-
-print("加速終了")
-
-time.sleep(2)
-
-driver.changing_forward(70, 0)
 
 GPIO.cleanup()
 print("GPIOのクリーンアップを実行しました。")
