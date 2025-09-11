@@ -17,7 +17,7 @@ from collections import deque
 from A_exGPS import GPS
 
 class PA:
-    def __init__(self, bno: BNO055, driver, goal_location: list):
+    def __init__(self, bno: BNO055, driver, pi, goal_location: list):
         self.driver = driver
         """
         self.driver = MotorDriver(
