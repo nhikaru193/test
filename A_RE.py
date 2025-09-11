@@ -25,16 +25,16 @@ class RD:
                 # CSVヘッダーを書き込む
                 writer.writerow(["Time", "Pressure(hPa)", "Acceleration_X(m/s^2)", "Acceleration_Y(m/s^2)", "Acceleration_Z(m/s^2)"])
                 print(f"データロギングを開始します。ファイル名: {filename}")
-                BME280.init_bme280()
-                BME280.read_compensate()
+                A_BME280.init_bme280()
+                A_BME280.read_compensate()
                 time.sleep(0.5)
                 start_time = time.time()
                 max_counter = self.p_counter
                 print(f"!!!!!!圧力閾値:{self.p_threshold} | タイムアウト:{self.timeout} で放出判定を行います!!!!!!")
                 while True:
-                    base_pressure = BME280.get_pressure()
+                    base_pressure = A_BME280.get_pressure()
                     time.sleep(1)
-                    pressure = BME280.get_pressure()
+                    pressure = A_BME280.get_pressure()
                     ax, ay, az = self.bno.getVector(BNO055.VECTOR_ACCELEROMETER)
                     current_time = time.time()
                     e_time = current_time - start_time
