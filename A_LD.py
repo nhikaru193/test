@@ -242,5 +242,6 @@ class LD:
             self.im920.close()
             print("GPSデータ送信シーケンスを終了しました。")
             """
+            GPIO.cleanup()
             self.driver.cleanup()
             self.pi.stop()
