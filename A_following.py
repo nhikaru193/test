@@ -1,7 +1,7 @@
 
 import time
 from A_BNO055 import BNO055
-from A_MD import MotorDriver
+from A_Motor import MotorDriver
 import smbus
 import struct
 import RPi.GPIO as GPIO
