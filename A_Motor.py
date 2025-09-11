@@ -10,6 +10,7 @@ import struct
 class MotorDriver():
     # 初期設定関数の定義
     def __init__(self,
+                 pi,
                  PWMA, AIN1, AIN2,
                  PWMB, BIN1, BIN2, STBY,
                  freq = 1000):
