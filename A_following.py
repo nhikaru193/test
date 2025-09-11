@@ -4,7 +4,7 @@ from A_BNO055 import BNO055
 from A_Motor import MotorDriver
 import smbus
 import struct
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 #100付近にはしないこと。制御ができなくはならないけど、追従が遅くなる。
 def follow_forward(driver, bno, base_speed, duration_time):
