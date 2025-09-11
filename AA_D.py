@@ -57,7 +57,7 @@ while True:
 time.sleep(t)
 
 
-RELEASE = RD(bno, driver)
+RELEASE = RD(bno)
 RELEASE.run()
 
 LAND = LD(bno, driver)
