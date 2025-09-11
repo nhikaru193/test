@@ -5,7 +5,7 @@ import math
 import time
 import serial
 import pigpio
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from A_Motor import MotorDriver      # ユーザーのMotorDriverクラスを使用
 from A_BNO055 import BNO055
 import smbus
