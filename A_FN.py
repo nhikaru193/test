@@ -27,11 +27,14 @@ class FN:
 
         # --- 初期化処理 ---
         self.detector = Flag_B(triangle_tolerance=0.5)
+        self.driver = driver
+        """
         self.driver = MotorDriver(
             PWMA=12, AIN1=23, AIN2=18,      
             PWMB=19, BIN1=16, BIN2=26,      
             STBY=21                       
         )
+        """
         self.screen_area = self.detector.width * self.detector.height
         
         # === BNO055 初期化 ===
