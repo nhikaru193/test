@@ -80,10 +80,52 @@ class MotorDriver():
         self.pi.write(self.A2, 0)
         self.pi.write(self.B1, 0)
         self.pi.write(self.B2, 0)
+    
+    # ガチブレーキ
+    def motor_stop_brake(self):
+        self.pi.set_PWM_dutycycle(self.pwma, 0)
+        self.pi.set_PWM_dutycycle(self.pwmb, 0)
+        self.pi.write(self.A1, 1)
+        self.pi.write(self.A2, 1)
+        self.pi.write(self.B1, 1)
+        self.pi.write(self.B2, 1)
 
-    # A_Motor.py のクラス定義内に追加
-
-# 右折：回転数制御
+    # リソース解放
+    def cleanup(self):
+        self.pi.set_PWM_dutycycle(self.pwma, 0)
+        self.pi.set_PWM_dutycycle(self.pwmb, 0)
+        self.pi.stop()
+    
+    # 前進：任意
+    def motor_forward(self, speed):
+        self.pi.write(self.A1, 0)
+        self.pi.write(self.A2, 1)
+        self.pi.write(self.B1, 1)
+        self.pi.write(self.B2, 0)
+        self.pi.set_PWM_dutycycle(self.pwma, int(speed * 2.55))
+        self.pi.set_PWM_dutycycle(self.pwmb, int(speed * 2.55))
+    
+    def motor_Lforward(self, speed):
+        self.pi.write(self.A1, 0)
+        self.pi.write(self.A2, 1)
+        self.pi.set_PWM_dutycycle(self.pwma, int(speed * 2.55))
+            
+    def motor_Rforward(self, speed):
+        self.pi.write(self.B1, 1)
+        self.pi.write(self.B2, 0)
+        self.pi.set_PWM_dutycycle(self.pwmb, int(speed * 2.55))
+            
+    # 前進：回転数制御
+    def changing_forward(self, before, after):
+        # ... (内部の処理は同様)
+        # ただし、self.motor_forward(speed) は修正後の関数を使う
+        for i in range(1, 100):
+            delta_speed = (after - before) / 100
+            speed = before + i * delta_speed
+            self.motor_forward(speed)
+            time.sleep(0.02)
+    
+    # 右折：回転数制御
     def changing_right(self, before, after):
         for i in range(50):
             delta_speed = (after - before) / 50
@@ -131,52 +173,6 @@ class MotorDriver():
             self.motor_Rforward(speed_R)
             time.sleep(0.02)
     
-    # ガチブレーキ
-    def motor_stop_brake(self):
-        self.pi.set_PWM_dutycycle(self.pwma, 0)
-        self.pi.set_PWM_dutycycle(self.pwmb, 0)
-        self.pi.write(self.A1, 1)
-        self.pi.write(self.A2, 1)
-        self.pi.write(self.B1, 1)
-        self.pi.write(self.B2, 1)
-
-    # リソース解放
-    def cleanup(self):
-        self.pi.set_PWM_dutycycle(self.pwma, 0)
-        self.pi.set_PWM_dutycycle(self.pwmb, 0)
-        self.pi.stop()
-    
-    # 前進：任意
-    def motor_forward(self, speed):
-        self.pi.write(self.A1, 0)
-        self.pi.write(self.A2, 1)
-        self.pi.write(self.B1, 1)
-        self.pi.write(self.B2, 0)
-        self.pi.set_PWM_dutycycle(self.pwma, int(speed * 2.55))
-        self.pi.set_PWM_dutycycle(self.pwmb, int(speed * 2.55))
-    
-    def motor_Lforward(self, speed):
-        self.pi.write(self.A1, 0)
-        self.pi.write(self.A2, 1)
-        self.pi.set_PWM_dutycycle(self.pwma, int(speed * 2.55))
-            
-    def motor_Rforward(self, speed):
-        self.pi.write(self.B1, 1)
-        self.pi.write(self.B2, 0)
-        self.pi.set_PWM_dutycycle(self.pwmb, int(speed * 2.55))
-            
-    # 前進：回転数制御
-    def changing_forward(self, before, after):
-        # ... (内部の処理は同様)
-        # ただし、self.motor_forward(speed) は修正後の関数を使う
-        for i in range(1, 100):
-            delta_speed = (after - before) / 100
-            speed = before + i * delta_speed
-            self.motor_forward(speed)
-            time.sleep(0.02)
-    # ... 他のchanging_* メソッドも同様に修正 ...
-    
-    # petit_* メソッドも同様に修正
     def petit_forward(self, before, after):
         for i in range (1, 5):
             delta_speed = (after - before) / 5
@@ -197,8 +193,6 @@ class MotorDriver():
             speed = before + i * delta_speed
             self.motor_right(speed)
             time.sleep(0.02)
-    
-    # ... 他の petit_* メソッドも同様に修正 ...
             
     def petit_petit(self, count):
         for i in range (1, count):
@@ -206,8 +200,8 @@ class MotorDriver():
             self.petit_forward(90, 0)
             time.sleep(0.2)
 
-    def petit_petit_retreat(self, count):#ほたが追加
-            for i in range (1, count):
-                self.petit_back(0, 90)
-                self.petit_back(90, 0)
-                time.sleep(0.2)
+    def petit_petit_retreat(self, count):
+        for i in range (1, count):
+            self.petit_back(0, 90)
+            self.petit_back(90, 0)
+            time.sleep(0.2)
