@@ -41,7 +41,7 @@ time.sleep(1)
 bno.setExternalCrystalUse(True)
 GPIO.setmode(GPIO.BCM)
 
-PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY = 18, 23, 24, 12, 27, 22, 25
+PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY = 12, 23, 18, 19, 16, 26, 21
 driver = MotorDriver(PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY)
 
 while True:
