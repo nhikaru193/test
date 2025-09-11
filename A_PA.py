@@ -3,7 +3,7 @@ import math
 import time
 import serial
 import pigpio
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from A_Motor import MotorDriver      # ユーザーのMotorDriverクラスを使用
 from A_BNO055 import BNO055
 import smbus
@@ -293,12 +293,21 @@ class PA:
         except KeyboardInterrupt:
             print("回避行動を中断します")
 
+        # 修正後
         finally:
-            self.driver.cleanup()
-            self.picam2.close()
-            self.pi.bb_serial_read_close(self.RX_PIN)
-            self.pi.stop()
-            GPIO.cleanup()
+            try:
+                self.picam2.close()
+            except Exception as e:
+                print(f"カメラのクリーンアップ中にエラーが発生しました: {e}")
+                
+            try:
+                # self.pi.stop()を呼び出すだけでよい
+                self.pi.stop()
+            except Exception as e:
+                print(f"pigpioのクリーンアップ中にエラーが発生しました: {e}")
+
+    # RPi.GPIOは使わないので削除
+    # GPIO.cleanup()
 """
 if __name__ == '__main__':
     # 許容誤差を調整したい場合は、ここで値を設定できます
