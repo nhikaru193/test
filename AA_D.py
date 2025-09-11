@@ -12,21 +12,21 @@ import math
 import pigpio
 
 #作成ファイルのインポート
-import fusing
+import A_fusing
 import BME280
-import following
+import A_following
 from BNO055 import BNO055
 from motor import MotorDriver
 from Flag_B import Flag_B
 
 #ミッション部分
-from C_RELEASE import RD
-from C_Landing_Detective import LD
-from C_PARACHUTE_AVOIDANCE import PA
-from Flag import FN
-import Servo
-from C_excellent_GPS import GPS
-from GDA2 import GDA
+from A_RD import RD
+from A_LD import LD
+from A_PA import PA
+from A_FN import FN
+import A_Servo
+from A_exGPS import GPS
+from A_GDA import GDA
 
 #初期設定
 Flag_location_a = [40.879698, -119.114899]
