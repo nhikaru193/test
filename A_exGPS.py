@@ -41,7 +41,7 @@ class GPS:
         self.WIRELESS_PIN = 22
         self.im920 = serial.Serial('/dev/serial0', 19200, timeout=5)
         self.turn_speed = 95
-        self.pi = pigpio.pi()
+        self.pi = pi
         if not self.pi.connected:
             raise RuntimeError("pigpio デーモンに接続できません。sudo pigpiod を起動してください。")
         try:
@@ -319,7 +319,6 @@ class GPS:
             self.pi.set_mode(self.WIRELESS_PIN, pigpio.INPUT) # ピンを安全のため入力に戻す
             if self.im920.is_open:
                 self.im920.close()
-            self.pi.stop()
             #f.close()
             print("プログラムを終了しました。")
         
