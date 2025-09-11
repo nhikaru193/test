@@ -2,7 +2,7 @@ from A_BNO055 import BNO055
 import A_BME280
 import time
 import A_fusing
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import struct
 from A_Motor import MotorDriver
 import os
@@ -140,10 +140,6 @@ class LD:
                         
                         time.sleep(2) # 次の送信までの間隔
                         
-                    self.pi.bb_serial_read_close(self.RX_PIN)
-                    self.pi.write(self.WIRELESS_PIN, 0)  # 終了時にワイヤレスグラウンドがOFFになるようにする
-                    self.pi.set_mode(self.WIRELESS_PIN, pigpio.INPUT)  # ピンを安全のため入力に戻す
-                    self.im920.close()
                     print("GPSデータ送信シーケンスを終了しました。")
                     
                     #------GPSデータ送信のコード(ARLISSで追加)ここまで------#
@@ -242,6 +238,10 @@ class LD:
             self.im920.close()
             print("GPSデータ送信シーケンスを終了しました。")
             """
-            GPIO.cleanup()
+            #GPIO.cleanup()
+            self.pi.bb_serial_read_close(self.RX_PIN)
+            self.pi.write(self.WIRELESS_PIN, 0)  # 終了時にワイヤレスグラウンドがOFFになるようにする
+            self.pi.set_mode(self.WIRELESS_PIN, pigpio.INPUT)  # ピンを安全のため入力に戻す
+            self.im920.close()
             self.driver.cleanup()
             self.pi.stop()
