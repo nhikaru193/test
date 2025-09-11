@@ -5,7 +5,7 @@ import A_camera
 import smbus
 from picamera2 import Picamera2
 import struct
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import math
 import pigpio
 
@@ -39,7 +39,12 @@ time.sleep(1)
 bno.setMode(BNO055.OPERATION_MODE_NDOF)
 time.sleep(1)
 bno.setExternalCrystalUse(True)
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
+
+pi = pigpio.pi()
+if not pi.connected:
+    print("pigpiodデーモンに接続できません。sudo pigpiodを実行してください。")
+    exit()
 
 PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY = 12, 23, 18, 19, 16, 26, 21
 driver = MotorDriver(PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY)
@@ -57,35 +62,38 @@ while True:
 time.sleep(t)
 
 """
-RELEASE = RD(bno)
+RELEASE = RD(bno, pi=pi)
 RELEASE.run()
-
-LAND = LD(bno, driver)
+"""
+LAND = LD(bno, driver, pi=pi)
 LAND.run()
 
 time.sleep(3)
-"""
+
 print("パラシュート回避を始めます")
 time.sleep(1)
 
-AVOIDANCE = PA(bno, driver, goal_location=Flag_location_a)
+AVOIDANCE = PA(bno, driver, goal_location=Flag_location_a, pi=pi)
 AVOIDANCE.run()
 
-GPS_StoE = GPS(bno, driver, goal_location=Flag_location_a)
+GPS_StoE = GPS(bno, driver, goal_location=Flag_location_a, pi=pi)
 GPS_StoE.run()
 
-GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b)
+GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b, pi=pi)
 GPS_StoF.run()
 
-FLAG = FN(bno, driver, flag_location=Flag_location_b)
+FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
 
 Servo.release()
 
-GPS_FtoG = GPS(bno, driver, goal_location=Goal_location)
+GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
 
-GOAL = GDA(bno, driver, 30)
+GOAL = GDA(bno, driver, 30, pi=pi)
 GOAL.run()
 
+print("Mission Complete")
+# プログラムの最後にリソースを解放
+driver.cleanup()
 print("Mission Complete")
