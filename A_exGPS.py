@@ -6,11 +6,11 @@ import time
 import serial
 import pigpio
 import RPi.GPIO as GPIO
-from motor import MotorDriver      # ユーザーのMotorDriverクラスを使用
-from BNO055 import BNO055
+from A_MD import MotorDriver      # ユーザーのMotorDriverクラスを使用
+from A_BNO055 import BNO055
 import smbus
 import struct
-import following
+import A_following
 from collections import deque
 
 class GPS:
