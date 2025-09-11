@@ -171,8 +171,8 @@ class LD:
                         break
         
             #環境センサの初期設定
-            BME280.init_bme280()
-            BME280.read_compensate()
+            A_BME280.init_bme280()
+            A_BME280.read_compensate()
             print("気圧変化量:第2シーケンス")
             self.start_time = time.time()
             max_counter =self.p_counter
@@ -189,10 +189,10 @@ class LD:
                 while True:
                     current_time = time.time()
                     delta_time = current_time - self.start_time
-                    before_pressure = BME280.get_pressure()
+                    before_pressure = A_BME280.get_pressure()
                     print(f"t = {delta_time}||pressure = {before_pressure}")
                     time.sleep(5)
-                    after_pressure = BME280.get_pressure()
+                    after_pressure = A_BME280.get_pressure()
                     # after_pressureがNoneの場合の考慮も必要ですが、元のコードの意図を尊重しここでは修正しません
                     delta_pressure = abs(after_pressure - before_pressure)
                     writer.writerow([after_pressure, delta_pressure])
