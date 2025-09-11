@@ -298,6 +298,7 @@ class PA:
             self.picam2.close()
             self.pi.bb_serial_read_close(self.RX_PIN)
             self.pi.stop()
+            GPIO.cleanup()
 """
 if __name__ == '__main__':
     # 許容誤差を調整したい場合は、ここで値を設定できます
