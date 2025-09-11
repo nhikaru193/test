@@ -4,17 +4,17 @@ import time
 import serial
 import pigpio
 import RPi.GPIO as GPIO
-from motor import MotorDriver      # ユーザーのMotorDriverクラスを使用
-from BNO055 import BNO055
+from A_MD import MotorDriver      # ユーザーのMotorDriverクラスを使用
+from A_BNO055 import BNO055
 import smbus
 import struct
-import following
+import A_following
 import cv2
 import numpy as np
 from picamera2 import Picamera2
-import camera
+import A_camera
 from collections import deque
-from C_excellent_GPS import GPS
+from A_exGPS import GPS
 
 class PA:
     def __init__(self, bno: BNO055, goal_location: list):
