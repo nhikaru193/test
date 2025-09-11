@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-import camera
+import A_camera
 import smbus
 from picamera2 import Picamera2
 import struct
