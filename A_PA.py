@@ -29,6 +29,7 @@ class PA:
         self.picam2 = Picamera2()
         config = self.picam2.create_still_configuration(main={"size": (320, 480)})
         self.picam2.configure(config)
+        self.pi = pi
         try:
             self.picam2.start()
         except Exception as e:
@@ -295,16 +296,8 @@ class PA:
 
         # 修正後
         finally:
-            try:
-                self.picam2.close()
-            except Exception as e:
-                print(f"カメラのクリーンアップ中にエラーが発生しました: {e}")
-                
-            try:
-                # self.pi.stop()を呼び出すだけでよい
-                self.pi.stop()
-            except Exception as e:
-                print(f"pigpioのクリーンアップ中にエラーが発生しました: {e}")
+            self.picam2.close()
+            self.pi.bb_serial_read_close(self.RX_PIN)
 
     # RPi.GPIOは使わないので削除
     # GPIO.cleanup()
