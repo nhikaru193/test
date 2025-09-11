@@ -1,5 +1,3 @@
-
-
 import cv2
 import numpy as np
 import time
@@ -13,11 +11,11 @@ import pigpio
 
 #作成ファイルのインポート
 import A_fusing
-import BME280
+import A_BME280
 import A_following
-from BNO055 import BNO055
-from motor import MotorDriver
-from Flag_B import Flag_B
+from A_BNO055 import BNO055
+from A_MD import MotorDriver
+from A_Flag_B import Flag_B
 
 #ミッション部分
 from A_RD import RD
