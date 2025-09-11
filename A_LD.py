@@ -17,11 +17,14 @@ import serial
 
 class LD:
     def __init__(self, bno: BNO055, p_counter = 3, h_counter = 3, timeout = 40, p_threshold = 0.50, h_threshold = 0.10):
+        """
         self.driver = MotorDriver(
             PWMA=12, AIN1=23, AIN2=18,    
             PWMB=19, BIN1=16, BIN2=26,    
             STBY=21                     
         )
+        """
+        self.driver = driver
         self.bno = bno
         self.TX_PIN = 27
         self.RX_PIN = 17
