@@ -15,7 +15,7 @@ class MotorDriver():
                  freq = 1000):
         
         # pigpioデーモンに接続
-        self.pi = pigpio.pi()
+        self.pi = pi
         if not self.pi.connected:
             raise RuntimeError("pigpioデーモンに接続できません。sudo pigpiod を実行してください。")
 
