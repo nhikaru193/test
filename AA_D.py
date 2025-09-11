@@ -59,12 +59,12 @@ time.sleep(t)
 """
 RELEASE = RD(bno)
 RELEASE.run()
-
+"""
 LAND = LD(bno, driver)
 LAND.run()
 
 time.sleep(3)
-"""
+
 print("パラシュート回避を始めます")
 time.sleep(1)
 
