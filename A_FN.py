@@ -16,7 +16,7 @@ from collections import deque
 
 class FN:
     # --- クラスの初期化メソッド ---
-    def __init__(self, bno: BNO055, flag_location):
+    def __init__(self, bno: BNO055, driver, flag_location):
         
         # --- 設定値 ---
         self.TARGET_SHAPES = ["三角形", "長方形", "T字", "十字"] #"三角形", "長方形", "T字", "十字"を追加する
