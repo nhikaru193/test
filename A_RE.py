@@ -1,8 +1,8 @@
 
 import smbus
 import time
-from BNO055 import BNO055
-import BME280
+from A_BNO055 import BNO055
+import A_BME280
 import csv
 import os
 
