@@ -1,10 +1,10 @@
-from BNO055 import BNO055
-import BME280
+from A_BNO055 import BNO055
+import A_BME280
 import time
-import fusing
+import A_fusing
 import RPi.GPIO as GPIO
 import struct
-from motor import MotorDriver
+from A_MD import MotorDriver
 import os
 import csv
 import math
