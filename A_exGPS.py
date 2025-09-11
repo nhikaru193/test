@@ -24,11 +24,14 @@ class GPS:
         self.GOAL_LOCATION     = goal_location
         self.GOAL_THRESHOLD_M  = GOAL_THRESHOLD_M
         self.ANGLE_THRESHOLD_DEG   = ANGLE_THRESHOLD_DEG
+        self.driver = driver
+        """
         self.driver = MotorDriver(
             PWMA=12, AIN1=23, AIN2=18,
             PWMB=19, BIN1=16, BIN2=26,
             STBY=21
         )
+        """
         self.bno = bno
         self.TX_PIN = 27
         self.RX_PIN = 17
