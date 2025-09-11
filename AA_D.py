@@ -1,4 +1,5 @@
 
+
 import cv2
 import numpy as np
 import time
@@ -15,17 +16,17 @@ import fusing
 import BME280
 import following
 from BNO055 import BNO055
-from motor2 import MotorDriver
+from motor import MotorDriver
 from Flag_B import Flag_B
 
 #ミッション部分
-from A_RD import RD
-from A_LD import LD
-from A_PA import PA
-from A_FN import FN
-import A_Servo
-from A_exGPS import GPS
-from A_GDA import GDA
+from C_RELEASE import RD
+from C_Landing_Detective import LD
+from C_PARACHUTE_AVOIDANCE import PA
+from Flag import FN
+import Servo
+from C_excellent_GPS import GPS
+from GDA2 import GDA
 
 #初期設定
 Flag_location_a = [40.879698, -119.114899]
@@ -40,17 +41,7 @@ time.sleep(1)
 bno.setMode(BNO055.OPERATION_MODE_NDOF)
 time.sleep(1)
 bno.setExternalCrystalUse(True)
-#GPIO.setmode(GPIO.BCM)
-
-AIN1 = 5
-AIN2 = 6
-PWMA = 13
-BIN1 = 19
-BIN2 = 26
-PWMB = 20
-STBY = 21
-
-pi = pigpio.pi() #変更
+GPIO.setmode(GPIO.BCM)
 
 while True:
     sys, gyro, accel, mag = bno.getCalibration()
@@ -64,21 +55,22 @@ while True:
 #ここのタイムスリープは収納待ちのタイムスリープ
 time.sleep(t)
 
-"""
+
 RELEASE = RD(bno)
 RELEASE.run()
-"""
-LAND = LD(bno, pi, AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, STBY) 
+
+LAND = LD(bno) 
 LAND.run()
 
 
 time.sleep(3)
-"""
+
 print("パラシュート回避を始めます")
 time.sleep(1)
 
 AVOIDANCE = PA(bno, goal_location = Flag_location_a) #ok
 AVOIDANCE.run()
+
 
 GPS_StoE = GPS(bno, goal_location = Flag_location_a)
 GPS_StoE.run()
@@ -96,8 +88,8 @@ Servo.release()
 GPS_FtoG = GPS(bno, goal_location = Goal_location)
 GPS_FtoG.run()
 
+
 GOAL = GDA(bno, 30)
 GOAL.run()
-"""
-pi.stop() #変更
+
 print("Mission Complete")
