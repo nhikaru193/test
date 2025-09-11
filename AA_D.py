@@ -96,4 +96,5 @@ GOAL.run()
 print("Mission Complete")
 # プログラムの最後にリソースを解放
 driver.cleanup()
+pi.stop()
 print("Mission Complete")
