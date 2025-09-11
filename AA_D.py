@@ -18,7 +18,7 @@ from A_MD import MotorDriver
 from A_Flag_B import Flag_B
 
 #ミッション部分
-from A_RD import RD
+from A_RE import RD
 from A_LD import LD
 from A_PA import PA
 from A_FN import FN
