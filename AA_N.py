@@ -6,7 +6,7 @@ import camera
 import smbus
 from picamera2 import Picamera2
 import struct
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import math
 import pigpio
 
@@ -23,7 +23,7 @@ from A_RD import RD
 from A_LD import LD
 from A_PA import PA
 from A_FN import FN
-import Servo
+import A_Servo
 from A_exGPS import GPS
 from A_GDA import GDA
 
