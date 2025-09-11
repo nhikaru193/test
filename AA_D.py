@@ -47,7 +47,7 @@ if not pi.connected:
     exit()
 
 PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY = 12, 23, 18, 19, 16, 26, 21
-driver = MotorDriver(PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY)
+driver = MotorDriver(pi, PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY)
 
 while True:
     sys, gyro, accel, mag = bno.getCalibration()
