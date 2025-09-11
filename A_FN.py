@@ -11,12 +11,12 @@ from picamera2 import Picamera2
 from A_BNO055 import BNO055
 from A_Motor import MotorDriver
 from A_Flag_B import Flag_B
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from collections import deque
 
 class FN:
     # --- クラスの初期化メソッド ---
-    def __init__(self, bno: BNO055, driver, flag_location):
+    def __init__(self, bno: BNO055, driver, flag_location, pi):
         
         # --- 設定値 ---
         self.TARGET_SHAPES = ["三角形", "長方形", "T字", "十字"] #"三角形", "長方形", "T字", "十字"を追加する
@@ -36,7 +36,7 @@ class FN:
         )
         """
         self.screen_area = self.detector.width * self.detector.height
-        
+        self.pi = pi
         # === BNO055 初期化 ===
         self.bno = bno
 
@@ -195,6 +195,5 @@ class FN:
     def cleanup(self):
         """プログラム終了時にリソースを解放します。"""
         print("--- 制御を終了します ---")
-        self.driver.cleanup()
         self.detector.close()
         # GPIO.cleanup()はdriver.cleanup()内で呼ばれることが多いので、重複していれば片方でOK
