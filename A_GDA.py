@@ -16,11 +16,14 @@ import RPi.GPIO as GPIO
 
 class GDA:
     def __init__(self, bno: BNO055, counter_max: int=50):
+        self.driver = driver
+        """
         self.driver = MotorDriver(
             PWMA=12, AIN1=23, AIN2=18,
             PWMB=19, BIN1=16, BIN2=26,
             STBY=21
         )
+        """
         self.bno = bno
         self.picam2 = Picamera2()
         config = self.picam2.create_still_configuration(main={"size": (320, 480)})
