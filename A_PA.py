@@ -58,7 +58,6 @@ class PA:
         
         self.RX_PIN = 17
         self.BAUD = 9600
-        self.pi = pigpio.pi()
         if not self.pi.connected:
             raise RuntimeError("pigpio デーモンに接続できません。sudo pigpiod を起動してください。")
         err = self.pi.bb_serial_read_open(self.RX_PIN, self.BAUD, 8)
