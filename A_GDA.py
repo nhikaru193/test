@@ -12,10 +12,10 @@ from A_BNO055 import BNO055
 import math
 from collections import deque
 import pigpio
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 class GDA:
-    def __init__(self, bno: BNO055, driver, counter_max: int=50):
+    def __init__(self, bno: BNO055, driver, pi, counter_max: int=50):
         self.driver = driver
         """
         self.driver = MotorDriver(
@@ -35,7 +35,7 @@ class GDA:
         self.upper_red1 = np.array([5, 255, 255])
         self.lower_red2 = np.array([175, 150, 120])
         self.upper_red2 = np.array([180, 255, 255])
-        self.pi = pigpio.pi()
+        self.pi = pi
         self.percentage = 0
         if not self.pi.connected:
             raise RuntimeError("pigpioデーモンに接続できません。`sudo pigpiod`を実行して確認してください。")
@@ -528,5 +528,4 @@ class GDA:
                         
         finally:
             self.picam2.close()
-            self.driver.cleanup()
             print("\nプログラムを終了します。")
