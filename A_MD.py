@@ -1,7 +1,7 @@
 
 import RPi.GPIO as GPIO
 import time
-import BNO055
+import A_BNO055
 import smbus
 import struct
 
