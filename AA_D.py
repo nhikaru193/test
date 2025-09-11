@@ -14,7 +14,7 @@ import A_fusing
 import A_BME280
 import A_following
 from A_BNO055 import BNO055
-from A_MD import MotorDriver
+from A_Motor import MotorDriver
 from A_Flag_B import Flag_B
 
 #ミッション部分
