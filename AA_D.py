@@ -64,7 +64,7 @@ time.sleep(t)
 """
 RELEASE = RD(bno, pi=pi)
 RELEASE.run()
-"""
+
 LAND = LD(bno, driver, pi=pi)
 LAND.run()
 
@@ -75,7 +75,7 @@ time.sleep(1)
 
 AVOIDANCE = PA(bno, driver, goal_location=Flag_location_a, pi=pi)
 AVOIDANCE.run()
-
+"""
 GPS_StoE = GPS(bno, driver, goal_location=Flag_location_a, pi=pi)
 GPS_StoE.run()
 
