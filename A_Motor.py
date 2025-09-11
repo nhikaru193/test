@@ -80,6 +80,56 @@ class MotorDriver():
         self.pi.write(self.A2, 0)
         self.pi.write(self.B1, 0)
         self.pi.write(self.B2, 0)
+
+    # A_Motor.py のクラス定義内に追加
+
+# 右折：回転数制御
+    def changing_right(self, before, after):
+        for i in range(50):
+            delta_speed = (after - before) / 50
+            speed = before + i * delta_speed
+            self.motor_right(speed)
+            time.sleep(0.03)
+    
+    # 左折（同様）
+    def changing_left(self, before, after):
+        for i in range(50):
+            delta_speed = (after - before) / 50
+            speed = before + i * delta_speed
+            self.motor_left(speed)
+            time.sleep(0.03)
+    
+    # 後退：回転数制御
+    def changing_retreat(self, before, after):
+        for i in range(50):
+            delta_speed = (after - before) / 50
+            speed = before + i * delta_speed
+            self.motor_retreat(speed)
+            time.sleep(0.03)
+
+    def quick_right(self, before, after):
+        for i in range(10):
+            delta_speed = (after - before) / 10
+            speed = before + i * delta_speed
+            self.motor_right(speed)
+            time.sleep(0.02)
+    
+    def quick_left(self, before, after):
+        for i in range(10):
+            delta_speed = (after - before) / 10
+            speed = before + i * delta_speed
+            self.motor_left(speed)
+            time.sleep(0.02)
+    
+    def changing_moving_forward(self, Lmotor_b, Lmotor_a ,Rmotor_b, Rmotor_a):
+        for i in range(1, 20):
+            delta_speed_L = (Lmotor_a - Lmotor_b) / 20
+            delta_speed_R = (Rmotor_a - Rmotor_b) / 20
+            speed_L = Lmotor_b + i * delta_speed_L
+            speed_R = Rmotor_b + i * delta_speed_R
+            self.motor_Lforward(speed_L)
+            self.motor_Rforward(speed_R)
+            time.sleep(0.02)
     
     # ガチブレーキ
     def motor_stop_brake(self):
