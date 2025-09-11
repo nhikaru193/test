@@ -41,6 +41,9 @@ time.sleep(1)
 bno.setExternalCrystalUse(True)
 GPIO.setmode(GPIO.BCM)
 
+PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY = 18, 23, 24, 12, 27, 22, 25
+driver = MotorDriver(PWMA, AIN1, AIN2, PWMB, BIN1, BIN2, STBY)
+
 while True:
     sys, gyro, accel, mag = bno.getCalibration()
     print(f"gyro:{gyro}, mag:{mag}")
@@ -54,40 +57,35 @@ while True:
 time.sleep(t)
 
 
-RELEASE = RD(bno)
+RELEASE = RD(bno, driver)
 RELEASE.run()
 
-LAND = LD(bno) 
+LAND = LD(bno, driver)
 LAND.run()
-
 
 time.sleep(3)
 
 print("パラシュート回避を始めます")
 time.sleep(1)
 
-AVOIDANCE = PA(bno, goal_location = Flag_location_a) #ok
+AVOIDANCE = PA(bno, driver, goal_location=Flag_location_a)
 AVOIDANCE.run()
 
-
-GPS_StoE = GPS(bno, goal_location = Flag_location_a)
+GPS_StoE = GPS(bno, driver, goal_location=Flag_location_a)
 GPS_StoE.run()
 
-GPS_StoF = GPS(bno, goal_location = Flag_location_b)
+GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b)
 GPS_StoF.run()
 
-
-FLAG = FN(bno, flag_location = Flag_location_b) 
+FLAG = FN(bno, driver, flag_location=Flag_location_b)
 FLAG.run()
 
 Servo.release()
 
-
-GPS_FtoG = GPS(bno, goal_location = Goal_location)
+GPS_FtoG = GPS(bno, driver, goal_location=Goal_location)
 GPS_FtoG.run()
 
-
-GOAL = GDA(bno, 30)
+GOAL = GDA(bno, driver, 30)
 GOAL.run()
 
 print("Mission Complete")
