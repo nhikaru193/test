@@ -17,6 +17,7 @@ class GPS:
     def __init__(
         self,
         bno: BNO055,
+        driver,
         goal_location: list,
         GOAL_THRESHOLD_M: float = 3.0,
         ANGLE_THRESHOLD_DEG: float = 15.0,
