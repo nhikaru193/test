@@ -37,7 +37,7 @@ class LD:
         self.h_threshold = h_threshold
         self.start_time = time.time()
         self.im920 = serial.Serial('/dev/serial0', 19200, timeout=5)
-        self.pi = pigpio.pi()
+        self.pi = pi
         if not self.pi.connected:
             raise RuntimeError("pigpio デーモンに接続できません。sudo pigpiod を起動してください。")
 
@@ -237,7 +237,7 @@ class LD:
             self.pi.set_mode(self.WIRELESS_PIN, pigpio.INPUT)  # ピンを安全のため入力に戻す
             self.im920.close()
             print("GPSデータ送信シーケンスを終了しました。")
-            """
+            
             #GPIO.cleanup()
             self.pi.bb_serial_read_close(self.RX_PIN)
             self.pi.write(self.WIRELESS_PIN, 0)  # 終了時にワイヤレスグラウンドがOFFになるようにする
@@ -245,3 +245,10 @@ class LD:
             self.im920.close()
             self.driver.cleanup()
             self.pi.stop()
+            """
+            try:
+                self.pi.bb_serial_read_close(self.RX_PIN)
+                self.im920.close()
+            except Exception as e:
+                print(f"LDのクリーンアップ中にエラーが発生しました: {e}")
+            
