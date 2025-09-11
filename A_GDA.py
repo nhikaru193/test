@@ -15,7 +15,7 @@ import pigpio
 import RPi.GPIO as GPIO
 
 class GDA:
-    def __init__(self, bno: BNO055, counter_max: int=50):
+    def __init__(self, bno: BNO055, driver, counter_max: int=50):
         self.driver = driver
         """
         self.driver = MotorDriver(
