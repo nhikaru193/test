@@ -8,9 +8,9 @@ import cv2
 import math
 import numpy as np
 from picamera2 import Picamera2
-from BNO055 import BNO055
-from motor import MotorDriver
-from Flag_B import Flag_B
+from A_BNO055 import BNO055
+from A_MD import MotorDriver
+from A_Flag_B import Flag_B
 import RPi.GPIO as GPIO
 from collections import deque
 
