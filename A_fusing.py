@@ -1,5 +1,5 @@
 
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
 import struct
 import pigpio
@@ -40,15 +40,12 @@ def circuit(t_melt = 5):
 
     #2024の先輩コード
     meltPin = 25
-    pi = pigpio.pi()
     pi.write(meltPin, 0)
     time.sleep(1)
     pi.write(meltPin, 1)
     time.sleep(t_melt)
     pi.write(meltPin, 0)
     time.sleep(1)
-
-    pi.stop()
     
 if __name__ == '__main__':
     # 許容誤差を調整したい場合は、ここで値を設定できます
