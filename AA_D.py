@@ -61,7 +61,7 @@ while True:
 #ここのタイムスリープは収納待ちのタイムスリープ
 time.sleep(t)
 
-
+"""
 RELEASE = RD(bno)
 RELEASE.run()
 
@@ -81,7 +81,7 @@ GPS_StoE.run()
 
 GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b, pi=pi)
 GPS_StoF.run()
-
+"""
 FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
 
