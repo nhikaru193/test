@@ -1,9 +1,16 @@
 
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import pigpio
 import time
 
 #------------------------#
 def install(duty=12.5, duration=2.5):
+    pi = pigpio.pi()
+    if not pi.connected:
+        print("pigpiodデーモンに接続できません。sudo pigpiodを実行してください。")
+        return
+
+    SERVO_PIN = 13
     try:
         print("物資を格納するため、サーボモータの起動を行います")
         SERVO_PIN = 13
