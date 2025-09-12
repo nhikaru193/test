@@ -90,7 +90,7 @@ A_Servo.release()
 GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
 
-GOAL = GDA(bno, driver, 30, pi=pi)
+GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
 
 print("Mission Complete")
