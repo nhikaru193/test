@@ -25,6 +25,7 @@ class GDA:
         )
         """
         self.bno = bno
+        self.pi = pi
         self.picam2 = Picamera2()
         config = self.picam2.create_still_configuration(main={"size": (320, 480)})
         self.picam2.configure(config)
@@ -35,7 +36,6 @@ class GDA:
         self.upper_red1 = np.array([5, 255, 255])
         self.lower_red2 = np.array([175, 150, 120])
         self.upper_red2 = np.array([180, 255, 255])
-        self.pi = pi
         self.percentage = 0
         if not self.pi.connected:
             raise RuntimeError("pigpioデーモンに接続できません。`sudo pigpiod`を実行して確認してください。")
@@ -527,5 +527,7 @@ class GDA:
                             
                         
         finally:
-            self.picam2.close()
             print("\nプログラムを終了します。")
+            # picam2.close() はメインスクリプトに任せる
+            if f is not None and not f.closed:
+                f.close()
