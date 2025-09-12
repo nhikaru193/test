@@ -27,8 +27,8 @@ from A_exGPS import GPS
 from A_GDA import GDA
 
 #初期設定
-Flag_location_a = [40.879698, -119.114899]
-Flag_location_b = [40.879774, -119.114969]
+Flag_location_a = [39.5911532, -119.2345316]
+Flag_location_b = [39.5912020, -119.2346309]
 Goal_location = [40.8841111, -119.1182222]
 t = 1
 
