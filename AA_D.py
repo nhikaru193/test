@@ -27,9 +27,9 @@ from A_exGPS import GPS
 from A_GDA import GDA
 
 #初期設定
-Flag_location_a = [39.5911532, -119.2345316]
-Flag_location_b = [39.5912020, -119.2346309]
-Goal_location = [39.5911732, -119.2345812]
+Flag_location_a = [39.5908982, -119.2345484]
+Flag_location_b = [39.5908552, -119.2344582]
+Goal_location = [39.5908452, -119.2344096]
 t = 1
 
 #BNO055の初期設定
@@ -61,7 +61,7 @@ while True:
 #ここのタイムスリープは収納待ちのタイムスリープ
 time.sleep(t)
 
-"""
+
 RELEASE = RD(bno, pi=pi)
 RELEASE.run()
 
@@ -89,7 +89,7 @@ A_Servo.release()
 
 GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
-"""
+
 GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
 
