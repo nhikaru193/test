@@ -313,11 +313,13 @@ class GPS:
             print(f"\n[FATAL] 予期せぬエラーが発生しました: {e}")
         finally:
             print("クリーンアップ処理を実行します。")
-            # このクラス内で開いたim920のシリアル通信を閉じる
+    
+            # ソフトUART通信を閉じる
+            self.pi.bb_serial_read_close(self.RX_PIN)
+            
+            # im920のシリアル通信を閉じる
             if self.im920.is_open:
                 self.im920.close()
             
-            # driver.cleanup() や pi.stop() はメインスクリプトに任せる
-            
-            print("プログラムを終了しました。")
+            print("GPSクラスのクリーンアップが完了しました。")
         
