@@ -75,13 +75,13 @@ time.sleep(1)
 
 AVOIDANCE = PA(bno, driver, goal_location=Flag_location_a, pi=pi)
 AVOIDANCE.run()
-"""
+
 GPS_StoE = GPS(bno, driver, goal_location=Flag_location_a, pi=pi)
 GPS_StoE.run()
 
 GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b, pi=pi)
 GPS_StoF.run()
-
+"""
 FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
 
