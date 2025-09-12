@@ -62,7 +62,7 @@ while True:
 time.sleep(t)
 
 
-RELEASE = RD(bno, pi=pi)
+RELEASE = RD(bno)
 RELEASE.run()
 
 LAND = LD(bno, driver, pi=pi)
