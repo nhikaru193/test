@@ -89,11 +89,13 @@ FLAG.run()
 A_Servo.release()
 time.sleep(5)
 
+"""
 GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
 
 GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
+"""
 
 print("Mission Complete")
 # プログラムの最後にリソースを解放
