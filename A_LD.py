@@ -212,7 +212,7 @@ class LD:
             
             print("着地判定正常終了。テグス溶断シーケンスに入ります")
             time.sleep(3)
-            A_fusing.circuit()
+            A_fusing.circuit(self.pi)
             print("テグス溶断を完了しました。テグス溶断の確認を行います")
             before_heading = self.bno.getVector(BNO055.VECTOR_EULER)[0]
             self.driver.petit_left(0, 90)
@@ -247,8 +247,12 @@ class LD:
             self.pi.stop()
             """
             try:
+                # ソフトUART通信を閉じる
                 self.pi.bb_serial_read_close(self.RX_PIN)
-                self.im920.close()
+                
+                # im920のシリアル通信を閉じる
+                if self.im920.is_open:
+                    self.im920.close()
             except Exception as e:
                 print(f"LDのクリーンアップ中にエラーが発生しました: {e}")
             
