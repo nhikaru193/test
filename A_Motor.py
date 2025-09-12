@@ -63,7 +63,6 @@ class MotorDriver():
         self.pi.write(self.B2, 0)
         self.pi.set_PWM_dutycycle(self.pwma, int(speed * 2.55))
         self.pi.set_PWM_dutycycle(self.pwmb, int(speed * 2.55))
-
     # 後退
     def motor_retreat(self, speed):
         self.pi.write(self.A1, 1)
@@ -193,6 +192,13 @@ class MotorDriver():
             delta_speed = (after - before) / 5
             speed = before + i * delta_speed
             self.motor_right(speed)
+            time.sleep(0.02)
+
+    def petit_back(self, before, after):
+        for i in range (1, 5):
+            delta_speed = (after - before) / 5
+            speed = before + i * delta_speed
+            self.motor_retreat(speed)
             time.sleep(0.02)
             
     def petit_petit(self, count):
