@@ -64,10 +64,10 @@ time.sleep(t)
 """
 RELEASE = RD(bno)
 RELEASE.run()
-
+"""
 LAND = LD(bno, driver, pi=pi)
 LAND.run()
-
+"""
 time.sleep(3)
 
 print("パラシュート回避を始めます")
@@ -81,7 +81,7 @@ GPS_StoE.run()
 
 GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b, pi=pi)
 GPS_StoF.run()
-"""
+
 FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
 
@@ -93,7 +93,7 @@ GPS_FtoG.run()
 
 GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
-
+"""
 print("Mission Complete")
 # プログラムの最後にリソースを解放
 driver.cleanup()
