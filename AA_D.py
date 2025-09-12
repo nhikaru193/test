@@ -29,7 +29,7 @@ from A_GDA import GDA
 #初期設定
 Flag_location_a = [40.8788032, -119.1144639]
 Flag_location_b = [40.8788428, -119.1144947]
-Goal_location = [39.5908452, -119.2344096]
+Goal_location = [40.8841111, -119.1182222]
 t = 1
 
 #BNO055の初期設定
@@ -61,7 +61,7 @@ while True:
 #ここのタイムスリープは収納待ちのタイムスリープ
 time.sleep(t)
 
-"""
+
 RELEASE = RD(bno)
 RELEASE.run()
 
@@ -82,23 +82,22 @@ GPS_StoE.run()
 
 GPS_StoF = GPS(bno, driver, goal_location=Flag_location_b, pi=pi)
 GPS_StoF.run()
-"""
+
 FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
 
 A_Servo.release()
 time.sleep(5)
 
-"""
+
 GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
 
 GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
-"""
+
 
 print("Mission Complete")
 # プログラムの最後にリソースを解放
 driver.cleanup()
 pi.stop()
-print("Mission Complete")
