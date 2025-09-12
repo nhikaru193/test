@@ -84,12 +84,12 @@ GPS_StoF.run()
 
 FLAG = FN(bno, driver, flag_location=Flag_location_b, pi=pi)
 FLAG.run()
-"""
+
 A_Servo.release()
 
 GPS_FtoG = GPS(bno, driver, goal_location=Goal_location, pi=pi)
 GPS_FtoG.run()
-
+"""
 GOAL = GDA(bno, driver, pi=pi, counter_max=30)
 GOAL.run()
 
