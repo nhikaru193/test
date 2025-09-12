@@ -29,7 +29,7 @@ from A_GDA import GDA
 #初期設定
 Flag_location_a = [39.5911532, -119.2345316]
 Flag_location_b = [39.5912020, -119.2346309]
-Goal_location = [40.8841111, -119.1182222]
+Goal_location = [39.5911732, -119.2345812]
 t = 1
 
 #BNO055の初期設定
